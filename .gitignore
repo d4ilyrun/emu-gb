@@ -1,0 +1,37 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+bin
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+emu-gb
+
+# Nix
+/result
+
+# IDE
+.idea
+.vscode
+compile_flags.txt
+
+# Trash files
+.cache
+vgcore.*
+*.swp
