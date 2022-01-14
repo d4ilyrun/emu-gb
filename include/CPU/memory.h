@@ -16,4 +16,8 @@
 #define CPU_HIGH_RAM            0xFFFF
 #define INTERRUPT_ENABLE_FLAGS  0xFFFF
 
-void write_memory(u16 address);
+void write_memory(u16 address, u8 val);
+void write_memory_16bit(u16 address, u16 val);
+
+u8 read_memory(u16 address);
+u16 read_memory_16bit(u16 address);
