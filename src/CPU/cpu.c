@@ -7,7 +7,7 @@ struct gb_cpu cpu;
 void reset_cpu()
 {
     cpu.registers.pc = 0x0100; // Cartridge start vector
-    cpu.registers.pc = 0xFFFE;
+    cpu.registers.sp = 0xFFFE;
 
     // Initialize registers
     write_register_16(REG_AF, 0x01B0);

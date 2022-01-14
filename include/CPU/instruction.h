@@ -10,36 +10,36 @@
 u8 execute_instruction();
 
 typedef enum instruction_name {
-    ERR_IN,
-    NOP,
-    JMP,
-    LD,
-    PUSH,
-    POP,
-    JP,
-    JR,
-    CALL,
-    RET,
-    RETI,
-    RST,
-    HALT,
-    STOP,
-    DI,
-    EI,
-    CCF,
-    SCF,
-    DAA,
-    CPL,
-    ADD,
-    ADC,
-    SUB,
-    SBC,
-    INC,
-    DEC,
-    MUL,
-    AND,
-    OR,
-    XOR,
+    IN_ERR,
+    IN_NOP,
+    IN_JMP,
+    IN_LD,
+    IN_PUSH,
+    IN_POP,
+    IN_JP,
+    IN_JR,
+    IN_CALL,
+    IN_RET,
+    IN_RETI,
+    IN_RST,
+    IN_HALT,
+    IN_STOP,
+    IN_DI,
+    IN_EI,
+    IN_CCF,
+    IN_SCF,
+    IN_DAA,
+    IN_CPL,
+    IN_ADD,
+    IN_ADC,
+    IN_SUB,
+    IN_SBC,
+    IN_INC,
+    IN_DEC,
+    IN_MUL,
+    IN_AND,
+    IN_OR,
+    IN_XOR,
 } in_name;
 
 /*
@@ -86,10 +86,5 @@ struct instruction {
     u16 data;
     u8 cycle_count;
 };
-
-inline u8 fetch_opcode()
-{
-    return read_memory(cpu.registers.pc++);
-}
 
 struct instruction fetch_instruction(u8 opcode);

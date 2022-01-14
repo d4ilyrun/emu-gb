@@ -1,15 +1,19 @@
-#include "CPU/instructions.h"
-
 #include <stdio.h>
 
-char *instruction_names[] = {
+#include "CPU/instruction.h"
+
+static char *instruction_names[] = {
     "???",  "NOP", "JMP",  "LD",   "PUSH", "POP", "JP",  "JR",  "CALL", "RET",
     "RETI", "RST", "HALT", "STOP", "DI",   "EI",  "CCF", "SCF", "DAA",  "CPL",
-    "ADD",  "ADC", "SUB",  "SBC",  "INC",  "DEC", "MUL", "AND", "OR",   "XOR"
+    "ADD",  "ADC", "SUB",  "SBC",  "INC",  "DEC", "MUL", "AND", "OR",   "XOR"};
+
+char *register_names[] = {
+    "A", "F", "B", "C", "D", "E", "H", "L",
+    "PC", "SP", "AF", "BC", "DE", "HL", "???"
 };
 
 // TODO: add nice colors :^)
-void display_instruction(u16 pc, struct instruction in)
+static void display_instruction(u16 pc, struct instruction in)
 {
     // print instruction's name
     printf("[0x%04X] %s    ", pc, instruction_names[in.instruction]);
@@ -30,18 +34,6 @@ void display_instruction(u16 pc, struct instruction in)
            read_register_16(REG_DE), read_register_16(REG_HL));
 }
 
-u8 execute_instruction()
-{
-    u16 pc                = read_register_16(REG_PC);
-    u8 opcode             = fetch_opcode();
-    struct instruction in = fetch_instruction(opcode);
-
-    display_instruction(pc, in);
-
-    // TODO: print instruction's string equivalent
-    return in.cycle_count;
-}
-
 struct in_type {
     in_name name;
     operand_type type;
@@ -56,7 +48,7 @@ struct in_type {
  */
 struct in_type opcodes[] = {
     // First row: 0x0?
-    [0x00] = {NOP, NO_OPERAND},
+    [0x00] = {IN_NOP, NO_OPERAND},
 };
 
 /*
@@ -65,8 +57,9 @@ struct in_type opcodes[] = {
  */
 struct instruction fetch_instruction(u8 opcode)
 {
+    u16 pc                = read_register_16(REG_PC);
     struct in_type type   = opcodes[opcode];
-    struct instruction in = {0, 0, REG_ERR, REG_ERR, 0xdead};
+    struct instruction in = {IN_ERR, ERR_OPERAND, REG_ERR, REG_ERR, 0xdead};
 
     in.instruction = type.name;
     in.type        = type.type;
@@ -76,6 +69,8 @@ struct instruction fetch_instruction(u8 opcode)
     default:
         break;
     }
+
+    display_instruction(pc - 1, in);
 
     return in;
 }

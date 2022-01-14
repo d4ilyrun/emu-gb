@@ -27,10 +27,7 @@ typedef enum {
     REG_ERR,
 } cpu_register_name;
 
-char *register_names[] = {
-    "A", "F", "B", "C", "D", "E", "H", "L",
-    "PC", "SP", "AF", "BC", "DE", "HL", "???"
-};
+extern char *register_names[];
 
 #define IS_16BIT(_reg) ((_reg) >= REG_PC)
 #define IS_PAIRED(_reg) ((_reg) >= REG_AF)

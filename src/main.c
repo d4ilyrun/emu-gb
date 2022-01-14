@@ -2,7 +2,7 @@
 
 #include "cartridge.h"
 #include "CPU/cpu.h"
-#include "CPU/instructions.h"
+#include "CPU/instruction.h"
 
 int main(int argc, char **argv)
 {

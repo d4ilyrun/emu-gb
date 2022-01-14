@@ -73,3 +73,9 @@ void cartridge_info()
     printf("\tRAM Size  : %2.2X\n", header->ram_size);
     printf("\tROM Vers  : %2.2X\n", header->rom_version);
 }
+
+// TODO: follow the cartridge's specifications
+u8 read_cartridge(u16 address)
+{
+    return cartridge.rom[address];
+}
