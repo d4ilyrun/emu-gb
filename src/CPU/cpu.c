@@ -6,8 +6,14 @@ struct gb_cpu cpu;
 
 void reset_cpu()
 {
-    // TODO
-    NOT_IMPLEMENTED("reset_cpu");
+    cpu.registers.pc = 0x0100; // Cartridge start vector
+    cpu.registers.pc = 0xFFFE;
+
+    // Initialize registers
+    write_register_16(REG_AF, 0x01B0);
+    write_register_16(REG_BC, 0x0013);
+    write_register_16(REG_DE, 0x00D8);
+    write_register_16(REG_HL, 0x014D);
 }
 
 void write_register(cpu_register_name reg, u8 val)
