@@ -68,14 +68,14 @@ INSTRUCTION(rst)
 
 INSTRUCTION(ld)
 {
-    if (in.type == R8_R8)
+    if (in.type == R8_R8 || in.type == SP_HL)
         write_register_16(in.reg1, read_register_16(in.reg2));
     else if (IS_DST_REGISTER(in))
         write_register_16(in.reg1, in.data);
-    else if (in.type == HL_REL_R8)
-        write_memory(in.address, in.reg1);
+    else if (in.type == HL_REL_D8)
+        write_memory(in.address, in.data); // load immediate value from operands
     else
-        write_memory(in.address, in.data);
+        write_memory(in.address, read_register_16(in.reg1)); // load value from register source
     return in.cycle_count;
 }
 

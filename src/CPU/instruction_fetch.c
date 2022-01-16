@@ -41,7 +41,7 @@ static cpu_register_name find_register(uint8_t code)
 
     // TODO: assert not reached macro
     if (code == 0x6)
-        errx(1, "Unreachable code reached: %s", __FUNCTION__ );
+        errx(1, "Unreachable code reached: %s", __FUNCTION__);
 
     return REG_B + code;
 }
@@ -97,28 +97,37 @@ static bool read_flag(u8 opcode)
 struct in_type opcodes[] = {
     // First row: 0x0
     [0x00] = {IN_NOP, NO_OPERAND, 1},
+    [0x01] = {IN_LD, R16_D16, 3},
     [0x02] = {IN_LD, R16_REL_A, 2},
     [0x06] = {IN_LD, R8_D8, 2},
+    [0x08] = {IN_LD, D16_REL_SP, 5},
     [0x0E] = {IN_LD, R8_D8, 2},
     [0x0A] = {IN_LD, A_R16_REL, 2},
 
     // 0x1
-    [0x18] = {IN_JR, S8, 3},
+    [0x11] = {IN_LD, R16_D16, 3},
     [0x12] = {IN_LD, R16_REL_A, 2},
     [0x16] = {IN_LD, R8_D8, 2},
+    [0x18] = {IN_JR, S8, 3},
     [0x1E] = {IN_LD, R8_D8, 2},
     [0x1A] = {IN_LD, A_R16_REL, 2},
 
     // 0x2
     [0x20] = {IN_JR, FLAG_S8, 3, 2},
+    [0x21] = {IN_LD, R16_D16, 3},
+    [0x22] = {IN_LD, HLI_A, 2},
     [0x28] = {IN_JR, FLAG_S8, 3, 2},
     [0x26] = {IN_LD, R8_D8, 2},
+    [0x2A] = {IN_LD, A_HLD, 2},
     [0x2E] = {IN_LD, R8_D8, 2},
 
     // 0x3
     [0x30] = {IN_JR, FLAG_S8, 3, 2},
+    [0x31] = {IN_LD, R16_D16, 3},
+    [0x32] = {IN_LD, HLD_A, 2},
     [0x36] = {IN_LD, HL_REL_D8, 3},
     [0x38] = {IN_JR, FLAG_S8, 3, 2},
+    [0x3A] = {IN_LD, A_HLD, 2},
     [0x3E] = {IN_LD, R8_D8, 2},
 
     // 0x4
@@ -225,6 +234,7 @@ struct in_type opcodes[] = {
     // 0xF
     [0xFA] = {IN_LD, A_D16_REL, 4},
     [0xF7] = {IN_RST, RST, 4},
+    [0xF9] = {IN_LD, SP_HL, 2},
     [0xFF] = {IN_RST, RST, 4},
 
 };
@@ -302,7 +312,8 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_R16_REL:
         in.reg1 = REG_A;
-        in.data = read_memory_16bit(read_register_16(find_register_16bit(OPCODE_P(opcode))));
+        in.data = read_memory_16bit(
+            read_register_16(find_register_16bit(OPCODE_P(opcode))));
         break;
 
     case A_D16_REL:
@@ -310,24 +321,63 @@ struct instruction fetch_instruction(u8 opcode)
         in.data = read_memory_16bit(read_16bit_data());
         break;
 
+    case R16_D16:
+        in.reg1 = find_register_16bit(OPCODE_P(opcode));
+        in.data = read_16bit_data();
+        break;
+
+    case SP_HL:
+        in.reg1 = REG_SP;
+        in.reg2 = REG_HL;
+        break;
+
+    case A_HLD:
+        in.reg1 = REG_A;
+        in.data = read_memory(read_register_16(REG_HL));
+        write_register_16(REG_HL, read_register_16(REG_HL) - 1);
+        break;
+
+    case A_HLI:
+        in.reg1 = REG_A;
+        in.data = read_memory(read_register_16(REG_HL));
+        write_register_16(REG_HL, read_register_16(REG_HL) + 1);
+        break;
+
     case HL_REL_R8:
         in.address = read_memory(read_register_16(REG_HL));
-        in.reg1 = find_register(OPCODE_Z(opcode));
+        in.reg1    = find_register(OPCODE_Z(opcode));
         break;
 
     case HL_REL_D8:
         in.address = read_memory(read_register_16(REG_HL));
-        in.data = read_8bit_data();
+        in.data    = read_8bit_data();
         break;
 
     case R16_REL_A:
         in.address = read_register_16(find_register_16bit(OPCODE_P(opcode)));
-        in.reg1 = REG_A;
+        in.reg1    = REG_A;
         break;
 
     case D16_REL_A:
         in.address = read_16bit_data();
-        in.reg1 = REG_A;
+        in.reg1    = REG_A;
+        break;
+
+    case D16_REL_SP:
+        in.address = read_16bit_data();
+        in.reg1    = read_register_16(REG_SP);
+        break;
+
+    case HLD_A:
+        in.reg1    = REG_A;
+        in.address = read_memory(read_register_16(REG_HL));
+        write_register_16(REG_HL, read_register_16(REG_HL) - 1);
+        break;
+
+    case HLI_A:
+        in.reg1    = REG_A;
+        in.address = read_memory(read_register_16(REG_HL));
+        write_register_16(REG_HL, read_register_16(REG_HL) + 1);
         break;
 
     case NO_OPERAND:

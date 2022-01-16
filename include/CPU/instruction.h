@@ -54,6 +54,7 @@ typedef enum instruction_name {
  *
  * Specific register:
  * - HL: HL register
+ * - HLI/HLD: HL register with increment/decrement
  * - A: A register
  * - C: C register
  *
@@ -73,7 +74,7 @@ typedef enum operand_type {
     FLAG,
     RST, // special case: data in opcode
 
-    // Two operands
+    // Two operands with register as destination
     FLAG_A16,
     FLAG_S8,
     R8_R8,
@@ -81,13 +82,22 @@ typedef enum operand_type {
     R8_HL_REL,
     A_R16_REL,
     A_D16_REL,
+    R16_D16,
+    SP_HL,
+    A_HLD,
+    A_HLI,
+
+    // other types with two operands
     HL_REL_R8,
     HL_REL_D8,
     R16_REL_A,
     D16_REL_A,
+    D16_REL_SP,
+    HLD_A,
+    HLI_A,
 } operand_type;
 
-#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_D16_REL)
+#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_HLI)
 
 #define HAS_CONDITION(_in) ((_in).type == FLAG_S8 || (_in).type == FLAG_A16)
 

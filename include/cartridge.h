@@ -71,3 +71,6 @@ void cartridge_info();
 
 u8 read_cartridge(u16 address);
 u16 read_cartridge_16bit(u16 address);
+
+void write_cartridge(u16 address, u8 data);
+void write_cartridge_16bit(u16 address, u16 data);

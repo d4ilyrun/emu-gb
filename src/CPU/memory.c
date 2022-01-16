@@ -6,11 +6,13 @@
 
 // TODO: handle different cases in memory map
 
+// TODO: Actually write in memory lol
 void write_memory(u16 address, u8 val)
 {
     if (address < ROM_BANK_SWITCHABLE)
     {
-
+        write_cartridge(address, val);
+        return;
     }
 
     NOT_IMPLEMENTED(__FUNCTION__ );
@@ -21,7 +23,8 @@ void write_memory_16bit(u16 address, u16 val)
 {
     if (address < ROM_BANK_SWITCHABLE)
     {
-
+        write_cartridge_16bit(address, val);
+        return;
     }
 
     NOT_IMPLEMENTED(__FUNCTION__ );
