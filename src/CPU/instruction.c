@@ -1,18 +1,20 @@
 #include "CPU/instruction.h"
+
+#include <stdlib.h>
+
+#include "CPU/flag.h"
 #include "CPU/interrupt.h"
 #include "CPU/stack.h"
 #include "utils/macro.h"
 
-#include <stdlib.h>
-
-#define INSTRUCTION(_name) \
-    static u8 _name(struct instruction in)
+#define INSTRUCTION(_name) static u8 _name(struct instruction in)
 
 typedef u8 (*in_handler)(struct instruction);
 
 INSTRUCTION(invalid)
 {
-    fprintf(stderr, "\nInvalid instruction. (code: " HEX8 ")\n", read_memory(in.pc));
+    fprintf(stderr, "\nInvalid instruction. (code: " HEX8 ")\n",
+            read_memory(in.pc));
     exit(-1);
 }
 
@@ -25,7 +27,7 @@ INSTRUCTION(jp)
 {
     if (!in.condition)
         return in.cycle_count_false;
-    write_register_16(REG_PC, in.address);
+    write_register_16bit(REG_PC, in.address);
     return in.cycle_count;
 }
 
@@ -33,7 +35,7 @@ INSTRUCTION(jr)
 {
     if (!in.condition)
         return in.cycle_count_false;
-    write_register_16(REG_PC, read_register_16(REG_PC) + (i8)in.data);
+    write_register_16bit(REG_PC, read_register_16bit(REG_PC) + (i8)in.data);
     return in.cycle_count_false;
 }
 
@@ -62,21 +64,30 @@ INSTRUCTION(reti)
 
 INSTRUCTION(rst)
 {
-    stack_push_16bit(read_register_16(REG_PC));
-    write_register_16(REG_PC, in.data);
+    stack_push_16bit(read_register_16bit(REG_PC));
+    write_register_16bit(REG_PC, in.data);
     return in.cycle_count;
 }
 
 INSTRUCTION(ld)
 {
     if (in.type == R8_R8 || in.type == SP_HL)
-        write_register_16(in.reg1, read_register_16(in.reg2));
+        write_register_16bit(in.reg1, read_register_16bit(in.reg2));
     else if (IS_DST_REGISTER(in))
-        write_register_16(in.reg1, in.data);
-    else if (in.type == HL_REL_D8)
-        write_memory(in.address, in.data); // load immediate value from operands
+        write_register_16bit(in.reg1, in.data);
+    else if (in.type == HL_REL_D8) // load immediate value from operands
+        write_memory(in.address, in.data);
+    else // load value from register source
+        write_memory(in.address, read_register_16bit(in.reg1));
+    return in.cycle_count;
+}
+
+INSTRUCTION(ldh)
+{
+    if (IS_DST_REGISTER(in))
+        write_register(in.reg1, in.data);
     else
-        write_memory(in.address, read_register_16(in.reg1)); // load value from register source
+        write_memory(in.address, read_register_16bit(in.data));
     return in.cycle_count;
 }
 
@@ -92,6 +103,51 @@ INSTRUCTION(ei)
     return in.cycle_count;
 }
 
+INSTRUCTION(ccf)
+{
+    set_flag(FLAG_N, false);
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_C, !get_flag(FLAG_C));
+    return in.cycle_count;
+}
+
+INSTRUCTION(scf)
+{
+    set_flag(FLAG_N, false);
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_C, true);
+    return in.cycle_count;
+}
+
+INSTRUCTION(daa)
+{
+    // TODO: DAA
+    NOT_IMPLEMENTED(__FUNCTION__);
+    return in.cycle_count;
+}
+
+INSTRUCTION(cpl)
+{
+    write_register(REG_A, ~read_register(REG_A));
+    set_flag(FLAG_N, true);
+    set_flag(FLAG_H, true);
+    return in.cycle_count;
+}
+
+INSTRUCTION(push)
+{
+    stack_push_16bit(read_register_16bit(in.reg1));
+    return in.cycle_count;
+}
+
+INSTRUCTION(pop)
+{
+    write_register_16bit(in.reg1, stack_pop_16bit());
+    return in.cycle_count;
+}
+
+// clang-format off
+
 static in_handler instruction_handlers[] = {
     [IN_ERR] = invalid,
     [IN_NOP] = nop,
@@ -102,9 +158,18 @@ static in_handler instruction_handlers[] = {
     [IN_RETI] = reti,
     [IN_RST] = rst,
     [IN_LD] = ld,
+    [IN_LDH] = ldh,
     [IN_DI] = di,
     [IN_EI] = ei,
+    [IN_CCF] = ccf,
+    [IN_SCF] = scf,
+    [IN_DAA] = daa,
+    [IN_CPL] = cpl,
+    [IN_PUSH] = push,
+    [IN_POP] = pop,
 };
+
+// clang-format on
 
 static inline u8 fetch_opcode()
 {
@@ -118,4 +183,3 @@ u8 execute_instruction()
 
     return instruction_handlers[in.instruction](in);
 }
-

@@ -14,8 +14,8 @@ struct interrupt interrupt_table[] = {[IV_VBLANK] = {0x01, IV_VBLANK},
     do {                                                                    \
         if (val_ie & val_if & interrupt_table[(_i)].flag) {                 \
             /* jump to the corresponding vector */                          \
-            stack_push_16bit(read_register_16(REG_PC));                     \
-            write_register_16(REG_PC, interrupt_table[(_i)].vector);        \
+            stack_push_16bit(read_register_16bit(REG_PC));                     \
+            write_register_16bit(REG_PC, interrupt_table[(_i)].vector);        \
                                                                             \
             /* clear interrupt flags */                                     \
             write_memory(IF_ADDRESS, val_if & ~interrupt_table[(_i)].flag); \

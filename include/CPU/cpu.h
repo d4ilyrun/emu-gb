@@ -71,8 +71,8 @@ extern struct gb_cpu cpu;
 
 void reset_cpu();
 
-u8 read_register(cpu_register_name register);
-u16 read_register_16(cpu_register_name register);
+u8 read_register(cpu_register_name reg);
+u16 read_register_16bit(cpu_register_name reg);
 
-void write_register(cpu_register_name register, u8 val);
-void write_register_16(cpu_register_name register, u16 val);
+void write_register(cpu_register_name reg, u8 val);
+void write_register_16bit(cpu_register_name reg, u16 val);

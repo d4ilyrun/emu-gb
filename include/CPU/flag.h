@@ -8,19 +8,14 @@
 #define FLAG_H 0x20
 #define FLAG_C 0x10
 
-inline void set_flag(u16 flag)
+inline void set_flag(u16 flag, bool value)
 {
-    cpu.registers.f |= flag;
+    cpu.registers.f |= flag * value;
 }
 
 inline void set_all_flags(bool z, bool n, bool h, bool c)
 {
     cpu.registers.f = (z << 7) | (n << 6) | (h << 5) | (c << 4);
-}
-
-inline void unset_flag(u16 flag)
-{
-    cpu.registers.f &= ~flag;
 }
 
 inline bool get_flag(u16 flag)

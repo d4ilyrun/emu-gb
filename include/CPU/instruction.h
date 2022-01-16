@@ -13,6 +13,7 @@ typedef enum instruction_name {
     IN_ERR,
     IN_NOP,
     IN_LD,
+    IN_LDH,
     IN_PUSH,
     IN_POP,
     IN_JP,
@@ -86,6 +87,8 @@ typedef enum operand_type {
     SP_HL,
     A_HLD,
     A_HLI,
+    A_C_REL,
+    A_D8_REL,
 
     // other types with two operands
     HL_REL_R8,
@@ -95,9 +98,11 @@ typedef enum operand_type {
     D16_REL_SP,
     HLD_A,
     HLI_A,
+    C_REL_A,
+    D8_REL_A,
 } operand_type;
 
-#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_HLI)
+#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_D8_REL)
 
 #define HAS_CONDITION(_in) ((_in).type == FLAG_S8 || (_in).type == FLAG_A16)
 

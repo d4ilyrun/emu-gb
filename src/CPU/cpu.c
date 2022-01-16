@@ -10,10 +10,10 @@ void reset_cpu()
     cpu.registers.sp = 0xFFFE;
 
     // Initialize registers
-    write_register_16(REG_AF, 0x01B0);
-    write_register_16(REG_BC, 0x0013);
-    write_register_16(REG_DE, 0x00D8);
-    write_register_16(REG_HL, 0x014D);
+    write_register_16bit(REG_AF, 0x01B0);
+    write_register_16bit(REG_BC, 0x0013);
+    write_register_16bit(REG_DE, 0x00D8);
+    write_register_16bit(REG_HL, 0x014D);
 
     cpu.halt          = false;
     cpu.ime_scheduled = false;
@@ -35,7 +35,7 @@ void write_register(cpu_register_name reg, u8 val)
         *(((u16 *)REGISTERS) + (reg % REG_AF)) = val;
 }
 
-void write_register_16(cpu_register_name reg, u16 val)
+void write_register_16bit(cpu_register_name reg, u16 val)
 {
     if (!IS_16BIT(reg)) {
         *((u8 *)REGISTERS + reg) = LSB(val);
@@ -62,7 +62,7 @@ u8 read_register(cpu_register_name reg)
         return LSB(*(((u16 *)REGISTERS) + (reg % REG_AF)));
 }
 
-u16 read_register_16(cpu_register_name reg)
+u16 read_register_16bit(cpu_register_name reg)
 {
     if (!IS_16BIT(reg))
         return *((u8 *)REGISTERS + reg);
