@@ -1,3 +1,5 @@
+#include <err.h>
+
 #include "CPU/flag.h"
 #include "CPU/instruction.h"
 #include "CPU/memory.h"
@@ -18,6 +20,47 @@ static u16 read_16bit_data()
 static u8 read_8bit_data()
 {
     return read_memory(cpu.registers.pc++);
+}
+
+/*
+ * Find which 8-bit register an operand points to from the opcode's value.
+ *
+ * Register  Operand
+ *   A        111
+ *   B        000
+ *   C        001
+ *   D        010
+ *   E        011
+ *   H        100
+ *   L        101
+ */
+static cpu_register_name find_register(uint8_t code)
+{
+    if (code == 0x7)
+        return REG_A;
+
+    // TODO: assert not reached macro
+    if (code == 0x6)
+        errx(1, "Unreachable code reached: %s", __FUNCTION__ );
+
+    return REG_B + code;
+}
+
+/*
+ * Find which 16-bit register an operand points to from the opcode's value.
+ *
+ * Register  Operand
+ *   BC        00
+ *   DE        01
+ *   HL        10
+ *   SP        11
+ */
+static cpu_register_name find_register_16bit(uint8_t code)
+{
+    if (code == 0x3)
+        return REG_SP;
+
+    return REG_BC + code;
 }
 
 /*
@@ -54,17 +97,100 @@ static bool read_flag(u8 opcode)
 struct in_type opcodes[] = {
     // First row: 0x0
     [0x00] = {IN_NOP, NO_OPERAND, 1},
+    [0x02] = {IN_LD, R16_REL_A, 2},
+    [0x06] = {IN_LD, R8_D8, 2},
+    [0x0E] = {IN_LD, R8_D8, 2},
+    [0x0A] = {IN_LD, A_R16_REL, 2},
 
     // 0x1
     [0x18] = {IN_JR, S8, 3},
+    [0x12] = {IN_LD, R16_REL_A, 2},
+    [0x16] = {IN_LD, R8_D8, 2},
+    [0x1E] = {IN_LD, R8_D8, 2},
+    [0x1A] = {IN_LD, A_R16_REL, 2},
 
     // 0x2
     [0x20] = {IN_JR, FLAG_S8, 3, 2},
     [0x28] = {IN_JR, FLAG_S8, 3, 2},
+    [0x26] = {IN_LD, R8_D8, 2},
+    [0x2E] = {IN_LD, R8_D8, 2},
 
     // 0x3
     [0x30] = {IN_JR, FLAG_S8, 3, 2},
+    [0x36] = {IN_LD, HL_REL_D8, 3},
     [0x38] = {IN_JR, FLAG_S8, 3, 2},
+    [0x3E] = {IN_LD, R8_D8, 2},
+
+    // 0x4
+    [0x40] = {IN_LD, R8_R8, 1},
+    [0x41] = {IN_LD, R8_R8, 1},
+    [0x42] = {IN_LD, R8_R8, 1},
+    [0x43] = {IN_LD, R8_R8, 1},
+    [0x44] = {IN_LD, R8_R8, 1},
+    [0x45] = {IN_LD, R8_R8, 1},
+    [0x46] = {IN_LD, R8_HL_REL, 2},
+    [0x47] = {IN_LD, R8_R8, 1},
+    [0x48] = {IN_LD, R8_R8, 1},
+    [0x49] = {IN_LD, R8_R8, 1},
+    [0x4A] = {IN_LD, R8_R8, 1},
+    [0x4B] = {IN_LD, R8_R8, 1},
+    [0x4C] = {IN_LD, R8_R8, 1},
+    [0x4D] = {IN_LD, R8_R8, 1},
+    [0x4E] = {IN_LD, R8_HL_REL, 2},
+    [0x4F] = {IN_LD, R8_R8, 1},
+
+    // 0x5
+    [0x50] = {IN_LD, R8_R8, 1},
+    [0x51] = {IN_LD, R8_R8, 1},
+    [0x52] = {IN_LD, R8_R8, 1},
+    [0x53] = {IN_LD, R8_R8, 1},
+    [0x54] = {IN_LD, R8_R8, 1},
+    [0x55] = {IN_LD, R8_R8, 1},
+    [0x56] = {IN_LD, R8_HL_REL, 2},
+    [0x57] = {IN_LD, R8_R8, 1},
+    [0x58] = {IN_LD, R8_R8, 1},
+    [0x59] = {IN_LD, R8_R8, 1},
+    [0x5A] = {IN_LD, R8_R8, 1},
+    [0x5B] = {IN_LD, R8_R8, 1},
+    [0x5C] = {IN_LD, R8_R8, 1},
+    [0x5D] = {IN_LD, R8_R8, 1},
+    [0x5E] = {IN_LD, R8_HL_REL, 2},
+    [0x5F] = {IN_LD, R8_R8, 1},
+
+    // 0x6
+    [0x60] = {IN_LD, R8_R8, 1},
+    [0x61] = {IN_LD, R8_R8, 1},
+    [0x62] = {IN_LD, R8_R8, 1},
+    [0x63] = {IN_LD, R8_R8, 1},
+    [0x64] = {IN_LD, R8_R8, 1},
+    [0x65] = {IN_LD, R8_R8, 1},
+    [0x66] = {IN_LD, R8_HL_REL, 2},
+    [0x67] = {IN_LD, R8_R8, 1},
+    [0x68] = {IN_LD, R8_R8, 1},
+    [0x69] = {IN_LD, R8_R8, 1},
+    [0x6A] = {IN_LD, R8_R8, 1},
+    [0x6B] = {IN_LD, R8_R8, 1},
+    [0x6C] = {IN_LD, R8_R8, 1},
+    [0x6D] = {IN_LD, R8_R8, 1},
+    [0x6E] = {IN_LD, R8_HL_REL, 2},
+    [0x6F] = {IN_LD, R8_R8, 1},
+
+    // 0x7
+    [0x70] = {IN_LD, HL_REL_R8, 2},
+    [0x71] = {IN_LD, HL_REL_R8, 2},
+    [0x72] = {IN_LD, HL_REL_R8, 2},
+    [0x73] = {IN_LD, HL_REL_R8, 2},
+    [0x74] = {IN_LD, HL_REL_R8, 2},
+    [0x75] = {IN_LD, HL_REL_R8, 2},
+    [0x77] = {IN_LD, HL_REL_R8, 2},
+    [0x78] = {IN_LD, R8_R8, 1},
+    [0x79] = {IN_LD, R8_R8, 1},
+    [0x7A] = {IN_LD, R8_R8, 1},
+    [0x7B] = {IN_LD, R8_R8, 1},
+    [0x7C] = {IN_LD, R8_R8, 1},
+    [0x7D] = {IN_LD, R8_R8, 1},
+    [0x7E] = {IN_LD, R8_HL_REL, 2},
+    [0x7F] = {IN_LD, R8_R8, 1},
 
     // 0xC
     [0xC0] = {IN_RET, FLAG, 5, 2},
@@ -91,11 +217,13 @@ struct in_type opcodes[] = {
     [0xDF] = {IN_RST, RST, 4},
 
     // 0xE
+    [0xEA] = {IN_LD, D16_REL_A, 4},
     [0xE7] = {IN_RST, RST, 4},
     [0xE9] = {IN_JP, HL_IMM, 1},
     [0xEF] = {IN_RST, RST, 4},
 
     // 0xF
+    [0xFA] = {IN_LD, A_D16_REL, 4},
     [0xF7] = {IN_RST, RST, 4},
     [0xFF] = {IN_RST, RST, 4},
 
@@ -155,6 +283,51 @@ struct instruction fetch_instruction(u8 opcode)
 
     case RST:
         in.data = OPCODE_Y(opcode);
+        break;
+
+    case R8_R8:
+        in.reg1 = find_register(OPCODE_Y(opcode));
+        in.reg2 = find_register(OPCODE_Z(opcode));
+        break;
+
+    case R8_D8:
+        in.reg1 = find_register(OPCODE_Y(opcode));
+        in.data = read_8bit_data();
+        break;
+
+    case R8_HL_REL:
+        in.reg1 = find_register(OPCODE_Y(opcode));
+        in.data = read_memory(read_register_16(REG_HL));
+        break;
+
+    case A_R16_REL:
+        in.reg1 = REG_A;
+        in.data = read_memory_16bit(read_register_16(find_register_16bit(OPCODE_P(opcode))));
+        break;
+
+    case A_D16_REL:
+        in.reg1 = REG_A;
+        in.data = read_memory_16bit(read_16bit_data());
+        break;
+
+    case HL_REL_R8:
+        in.address = read_memory(read_register_16(REG_HL));
+        in.reg1 = find_register(OPCODE_Z(opcode));
+        break;
+
+    case HL_REL_D8:
+        in.address = read_memory(read_register_16(REG_HL));
+        in.data = read_8bit_data();
+        break;
+
+    case R16_REL_A:
+        in.address = read_register_16(find_register_16bit(OPCODE_P(opcode)));
+        in.reg1 = REG_A;
+        break;
+
+    case D16_REL_A:
+        in.address = read_16bit_data();
+        in.reg1 = REG_A;
         break;
 
     case NO_OPERAND:

@@ -64,6 +64,19 @@ INSTRUCTION(rst)
     return in.cycle_count;
 }
 
+INSTRUCTION(ld)
+{
+    if (in.type == R8_R8)
+        write_register_16(in.reg1, read_register_16(in.reg2));
+    else if (IS_DST_REGISTER(in))
+        write_register_16(in.reg1, in.data);
+    else if (in.type == HL_REL_R8)
+        write_memory(in.address, in.reg1);
+    else
+        write_memory(in.address, in.data);
+    return in.cycle_count;
+}
+
 static in_handler instruction_handlers[] = {
     [IN_ERR] = invalid,
     [IN_NOP] = nop,
@@ -73,6 +86,7 @@ static in_handler instruction_handlers[] = {
     [IN_RET] = ret,
     [IN_RETI] = reti,
     [IN_RST] = rst,
+    [IN_LD] = ld,
 };
 
 static inline u8 fetch_opcode()

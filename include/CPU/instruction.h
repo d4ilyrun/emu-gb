@@ -76,7 +76,18 @@ typedef enum operand_type {
     // Two operands
     FLAG_A16,
     FLAG_S8,
+    R8_R8,
+    R8_D8,
+    R8_HL_REL,
+    A_R16_REL,
+    A_D16_REL,
+    HL_REL_R8,
+    HL_REL_D8,
+    R16_REL_A,
+    D16_REL_A,
 } operand_type;
+
+#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_D16_REL)
 
 #define HAS_CONDITION(_in) ((_in).type == FLAG_S8 || (_in).type == FLAG_A16)
 

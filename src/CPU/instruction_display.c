@@ -12,13 +12,16 @@ char *condition_names[] = {"NZ", "Z", "NC", "C", "???"};
 char *register_names[] = {"A",  "F",  "B",  "C",  "D",  "E",  "H",  "L",
                           "PC", "SP", "AF", "BC", "DE", "HL", "???"};
 
+#define HEX8 "0x%02X"
+#define HEX16 "0x%04X"
+#define HEX HEX16
+
 // TODO: add nice colors :^)
 void display_instruction(struct instruction in)
 {
     // print instruction's name
-    printf("[0x%04X] %s \t", in.pc, instruction_names[in.instruction]);
+    printf("[" HEX "] %s \t", in.pc, instruction_names[in.instruction]);
 
-    // TODO: print operands
     switch (in.type) {
     case R16:
     case R8:
@@ -38,11 +41,51 @@ void display_instruction(struct instruction in)
     case FLAG_A16:
         printf("%s, ", in.condition ? "TRUE" : "FALSE");
     case A16:
-        printf("0x%04X", in.address);
+        printf(HEX, in.address);
         break;
 
     case HL_IMM:
         printf("(HL)");
+        break;
+
+    case RST:
+        printf(HEX, in.data);
+        break;
+
+    case R8_R8:
+        printf("%s, %s", register_names[in.reg1], register_names[in.reg2]);
+        break;
+
+    case R8_D8:
+        printf("%s, " HEX8, register_names[in.reg1], in.data);
+        break;
+
+    case R8_HL_REL:
+        printf("%s, (HL)", register_names[in.reg1]);
+        break;
+
+    case A_R16_REL:
+        printf("A, (%s)", register_names[in.reg1]);
+        break;
+
+    case A_D16_REL:
+        printf("A, (" HEX ")", in.data);
+        break;
+
+    case HL_REL_R8:
+        printf("(HL), %s", register_names[in.reg1]);
+        break;
+
+    case HL_REL_D8:
+        printf("(HL), " HEX8, in.data);
+        break;
+
+    case R16_REL_A:
+        printf("(%s), A", register_names[in.reg1]);
+        break;
+
+    case D16_REL_A:
+        printf("(" HEX "), A", in.data);
         break;
 
     case NO_OPERAND:
@@ -51,6 +94,6 @@ void display_instruction(struct instruction in)
     }
 
     // print content of the registers
-    printf("\tBC=0x%04X DE=0x%04X HL=0x%04X\n", read_register_16(REG_BC),
+    printf("\tBC=" HEX " DE=" HEX " HL=" HEX "\n", read_register_16(REG_BC),
            read_register_16(REG_DE), read_register_16(REG_HL));
 }

@@ -7,7 +7,7 @@ BIN_DIR = bin
 
 CFLAGS = -g -O3
 CPPFLAGS = $(patsubst %,-I%,$(INCLUDE_DIRS))
-LDFLAGS =
+LDFLAGS = 
 
 SRC_FILES = $(wildcard $(SRC_DIR)/*/*.c) $(wildcard $(SRC_DIR)/*.c)
 BIN_FILES = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRC_FILES))

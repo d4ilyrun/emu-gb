@@ -34,9 +34,7 @@ void write_register(cpu_register_name reg, u8 val)
 void write_register_16(cpu_register_name reg, u16 val)
 {
     if (!IS_16BIT(reg)) {
-        // TODO: print context on error
-        fprintf(stderr,
-                "[ERROR]: trying to write 16bits into an 8bit register\n");
+        *((u8 *)REGISTERS + reg) = LSB(val);
     }
 
     if (reg == REG_PC)
@@ -53,21 +51,17 @@ u8 read_register(cpu_register_name reg)
         return *((u8 *)REGISTERS + reg);
 
     if (reg == REG_PC)
-        return cpu.registers.pc & 0xFF;
+        return LSB(cpu.registers.pc);
     else if (reg == REG_SP)
-        return cpu.registers.sp & 0xFF;
+        return LSB(cpu.registers.sp);
     else
-        return *(((u16 *)REGISTERS) + (reg % REG_AF)) & 0xFF;
+        return LSB(*(((u16 *)REGISTERS) + (reg % REG_AF)));
 }
 
 u16 read_register_16(cpu_register_name reg)
 {
-    if (!IS_16BIT(reg)) {
-        // TODO: print context on error
-        fprintf(stderr,
-                "[ERROR]: trying to read 16bits from an 8bit register\n");
-        return 0;
-    }
+    if (!IS_16BIT(reg))
+        return *((u8 *)REGISTERS + reg);
 
     if (reg == REG_PC)
         return cpu.registers.pc;
