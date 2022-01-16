@@ -53,12 +53,21 @@ struct gb_cpu {
 
     // cpu memory
     u8 memory[1 << 16];
+
+    // interrupt related
+    bool halt;
+    bool ime_scheduled;
+
+    bool is_running;
 };
 
-// The actual CPU of the GameBoy
+// The actual CPU of the Game Boy
 extern struct gb_cpu cpu;
 
 #define REGISTERS (&(cpu.registers))
+
+// Number of tiimer ticks in a machine cycle
+#define CYCLE_TICKS 4
 
 void reset_cpu();
 

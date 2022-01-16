@@ -15,7 +15,7 @@ void write_memory(u16 address, u8 val)
         return;
     }
 
-    NOT_IMPLEMENTED(__FUNCTION__ );
+    cpu.memory[address] = val;
 }
 
 
@@ -27,7 +27,9 @@ void write_memory_16bit(u16 address, u16 val)
         return;
     }
 
-    NOT_IMPLEMENTED(__FUNCTION__ );
+    // Inverse byte order
+    cpu.memory[address] = LSB(val);
+    cpu.memory[address + 1] = MSB(val);
 }
 
 u8 read_memory(u16 address)

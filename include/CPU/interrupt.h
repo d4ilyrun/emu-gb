@@ -8,7 +8,7 @@
 // Interrupt vectors
 typedef enum interrupt_vector
 {
-    IV_NONE   = 0,
+    IV_NONE   = 0x0000,
     IV_VBLANK = 0x0040,
     IV_LCD    = 0x0048,
     IV_TIMA   = 0x0050,
@@ -21,13 +21,6 @@ struct interrupt {
     interrupt_vector vector;
 };
 
-struct interrupt interrupt_table[] = {{0x01, IV_VBLANK},
-                                      {0x02, IV_LCD},
-                                      {0x04, IV_TIMA},
-                                      {0x08, IV_SERIAL},
-                                      {0x10, IV_JOYPAD}};
-
-#define NB_INTERRUPTS (sizeof(interrupt_table) / sizeof(interrupt_table[0]))
-
 u8 handle_interrupts();
 void interrupt_set_ime(bool value);
+void interrupt_request(interrupt_vector interrupt);

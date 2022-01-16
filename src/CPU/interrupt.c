@@ -4,6 +4,12 @@
 #include "CPU/memory.h"
 #include "CPU/stack.h"
 
+struct interrupt interrupt_table[] = {[IV_VBLANK] = {0x01, IV_VBLANK},
+                                      [IV_LCD]    = {0x02, IV_LCD},
+                                      [IV_TIMA]   = {0x04, IV_TIMA},
+                                      [IV_SERIAL] = {0x08, IV_SERIAL},
+                                      [IV_JOYPAD] = {0x10, IV_JOYPAD}};
+
 #define CHECK_INTERRUPT(_i)                                                 \
     do {                                                                    \
         if (val_ie & val_if & interrupt_table[(_i)].flag) {                 \
@@ -43,4 +49,10 @@ u8 handle_interrupts()
 void interrupt_set_ime(bool value)
 {
     ime = value;
+}
+
+void interrupt_request(interrupt_vector interrupt)
+{
+    u8 val_if = read_memory(IF_ADDRESS);
+    write_memory(IF_ADDRESS, val_if | interrupt_table[interrupt].flag);
 }

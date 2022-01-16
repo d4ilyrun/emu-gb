@@ -80,6 +80,18 @@ INSTRUCTION(ld)
     return in.cycle_count;
 }
 
+INSTRUCTION(di)
+{
+    interrupt_set_ime(false);
+    return in.cycle_count;
+}
+
+INSTRUCTION(ei)
+{
+    cpu.ime_scheduled = true;
+    return in.cycle_count;
+}
+
 static in_handler instruction_handlers[] = {
     [IN_ERR] = invalid,
     [IN_NOP] = nop,
@@ -90,6 +102,8 @@ static in_handler instruction_handlers[] = {
     [IN_RETI] = reti,
     [IN_RST] = rst,
     [IN_LD] = ld,
+    [IN_DI] = di,
+    [IN_EI] = ei,
 };
 
 static inline u8 fetch_opcode()

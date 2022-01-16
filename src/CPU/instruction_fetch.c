@@ -232,9 +232,11 @@ struct in_type opcodes[] = {
     [0xEF] = {IN_RST, RST, 4},
 
     // 0xF
-    [0xFA] = {IN_LD, A_D16_REL, 4},
+    [0xF3] = {IN_DI, NO_OPERAND, 1},
     [0xF7] = {IN_RST, RST, 4},
     [0xF9] = {IN_LD, SP_HL, 2},
+    [0xFA] = {IN_LD, A_D16_REL, 4},
+    [0xFB] = {IN_EI, NO_OPERAND, 1},
     [0xFF] = {IN_RST, RST, 4},
 
 };

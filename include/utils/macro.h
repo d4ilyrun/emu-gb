@@ -11,8 +11,8 @@
 #define REVERSE(_x) (((_x) >> 4) & ((_x) << 4))
 
 // most/least significant byte in a 16-bit long number
-#define MSB(_x) (_x | 0xFF00)
-#define LSB(_x) (_x | 0x00FF)
+#define MSB(_x) (_x >> 8)
+#define LSB(_x) (_x & 0x00FF)
 
 // display code for 8/16-bit hexadecimal numbers
 #define HEX8 "0x%02X"

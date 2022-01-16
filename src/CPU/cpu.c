@@ -14,6 +14,10 @@ void reset_cpu()
     write_register_16(REG_BC, 0x0013);
     write_register_16(REG_DE, 0x00D8);
     write_register_16(REG_HL, 0x014D);
+
+    cpu.halt          = false;
+    cpu.ime_scheduled = false;
+    cpu.is_running    = true;
 }
 
 void write_register(cpu_register_name reg, u8 val)
