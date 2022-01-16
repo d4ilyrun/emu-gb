@@ -14,3 +14,8 @@
 #define MSB(_x) (_x | 0xFF00)
 #define LSB(_x) (_x | 0x00FF)
 
+// display code for 8/16-bit hexadecimal numbers
+#define HEX8 "0x%02X"
+#define HEX16 "0x%04X"
+#define HEX HEX16
+

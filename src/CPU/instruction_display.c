@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "CPU/instruction.h"
+#include "utils/macro.h"
 
 static char *instruction_names[] = {
     "???", "NOP",  "LD",   "PUSH", "POP", "JP",  "JR",  "CALL", "RET", "RETI",
@@ -11,10 +12,6 @@ char *condition_names[] = {"NZ", "Z", "NC", "C", "???"};
 
 char *register_names[] = {"A",  "F",  "B",  "C",  "D",  "E",  "H",  "L",
                           "PC", "SP", "AF", "BC", "DE", "HL", "???"};
-
-#define HEX8 "0x%02X"
-#define HEX16 "0x%04X"
-#define HEX HEX16
 
 // TODO: add nice colors :^)
 void display_instruction(struct instruction in)

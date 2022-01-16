@@ -1,7 +1,8 @@
 #include "CPU/instruction.h"
 #include "CPU/stack.h"
+#include "utils/macro.h"
 
-#include <err.h>
+#include <stdlib.h>
 
 #define INSTRUCTION(_name) \
     static u8 _name(struct instruction in)
@@ -10,7 +11,8 @@ typedef u8 (*in_handler)(struct instruction);
 
 INSTRUCTION(invalid)
 {
-    errx(-1, "Invalid instruction.");
+    fprintf(stderr, "\nInvalid instruction. (code: " HEX8 ")\n", read_memory(in.pc));
+    exit(-1);
 }
 
 INSTRUCTION(nop)
