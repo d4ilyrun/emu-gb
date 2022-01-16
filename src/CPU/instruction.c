@@ -1,4 +1,5 @@
 #include "CPU/instruction.h"
+#include "CPU/interrupt.h"
 #include "CPU/stack.h"
 #include "utils/macro.h"
 
@@ -55,7 +56,7 @@ INSTRUCTION(ret)
 INSTRUCTION(reti)
 {
     cpu.registers.pc = stack_pop_16bit();
-    // TODO: update IME
+    interrupt_set_ime(true);
     return in.cycle_count;
 }
 
