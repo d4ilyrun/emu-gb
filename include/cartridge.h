@@ -70,3 +70,4 @@ bool load_cartridge(char *path);
 void cartridge_info();
 
 u8 read_cartridge(u16 address);
+u16 read_cartridge_16bit(u16 address);

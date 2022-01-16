@@ -5,7 +5,7 @@ INCLUDE_DIRS = include
 SRC_DIR = src
 BIN_DIR = bin
 
-CFLAGS = -g
+CFLAGS = -g -O3
 CPPFLAGS = $(patsubst %,-I%,$(INCLUDE_DIRS))
 LDFLAGS =
 

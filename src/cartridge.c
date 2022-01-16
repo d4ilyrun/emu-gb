@@ -79,3 +79,8 @@ u8 read_cartridge(u16 address)
 {
     return cartridge.rom[address];
 }
+
+u16 read_cartridge_16bit(u16 address)
+{
+    return cartridge.rom[address] + (cartridge.rom[address + 1] << 8);
+}

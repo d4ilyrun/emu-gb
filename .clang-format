@@ -6,6 +6,7 @@ TabWidth: 4
 UseTab: Never
 
 AlignConsecutiveAssignments: Consecutive
+AlignOperands: AlignAfterOperator
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
 AlwaysBreakBeforeMultilineStrings: false
