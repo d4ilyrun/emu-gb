@@ -25,7 +25,14 @@ int main(int argc, char **argv)
 
     while (cpu.is_running)
     {
-        cycles = execute_instruction();
+        if (cpu.halt)
+        {
+            cycles = 1;
+        }
+        else
+        {
+            cycles = execute_instruction();
+        }
 
         timer_ticks(cycles * CYCLE_TICKS);
 

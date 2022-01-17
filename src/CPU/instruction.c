@@ -146,6 +146,12 @@ INSTRUCTION(pop)
     return in.cycle_count;
 }
 
+INSTRUCTION(halt)
+{
+    cpu.halt = true;
+    return in.cycle_count;
+}
+
 // clang-format off
 
 static in_handler instruction_handlers[] = {

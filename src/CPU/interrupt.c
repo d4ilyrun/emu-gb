@@ -4,21 +4,28 @@
 #include "CPU/memory.h"
 #include "CPU/stack.h"
 
-struct interrupt interrupt_table[] = {[IV_VBLANK] = {0x01, IV_VBLANK},
-                                      [IV_LCD]    = {0x02, IV_LCD},
-                                      [IV_TIMA]   = {0x04, IV_TIMA},
-                                      [IV_SERIAL] = {0x08, IV_SERIAL},
-                                      [IV_JOYPAD] = {0x10, IV_JOYPAD}};
+// clang-format off
+
+struct interrupt interrupt_table[] = {
+    [IV_VBLANK] = {0x01, IV_VBLANK},
+    [IV_LCD]    = {0x02, IV_LCD},
+    [IV_TIMA]   = {0x04, IV_TIMA},
+    [IV_SERIAL] = {0x08, IV_SERIAL},
+    [IV_JOYPAD] = {0x10, IV_JOYPAD}
+};
+
+// clang-format on
 
 #define CHECK_INTERRUPT(_i)                                                 \
     do {                                                                    \
         if (val_ie & val_if & interrupt_table[(_i)].flag) {                 \
             /* jump to the corresponding vector */                          \
-            stack_push_16bit(read_register_16bit(REG_PC));                     \
-            write_register_16bit(REG_PC, interrupt_table[(_i)].vector);        \
+            stack_push_16bit(read_register_16bit(REG_PC));                  \
+            write_register_16bit(REG_PC, interrupt_table[(_i)].vector);     \
                                                                             \
-            /* clear interrupt flags */                                     \
+            /* clear interrupt flags and deactivate halt mode */            \
             write_memory(IF_ADDRESS, val_if & ~interrupt_table[(_i)].flag); \
+            cpu.halt = false;                                               \
                                                                             \
             return 5;                                                       \
         }                                                                   \
@@ -26,7 +33,6 @@ struct interrupt interrupt_table[] = {[IV_VBLANK] = {0x01, IV_VBLANK},
 
 static bool ime = true;
 
-// TODO: HALT mode interrupt
 // TODO: verify clock cycles
 u8 handle_interrupts()
 {
@@ -37,11 +43,11 @@ u8 handle_interrupts()
     u8 val_if = read_memory(IF_ADDRESS);
 
     // Faster to unroll the for loop by hand than going through it
-    CHECK_INTERRUPT(0);
-    CHECK_INTERRUPT(1);
-    CHECK_INTERRUPT(2);
-    CHECK_INTERRUPT(3);
-    CHECK_INTERRUPT(4);
+    CHECK_INTERRUPT(IV_VBLANK);
+    CHECK_INTERRUPT(IV_LCD);
+    CHECK_INTERRUPT(IV_TIMA);
+    CHECK_INTERRUPT(IV_SERIAL);
+    CHECK_INTERRUPT(IV_JOYPAD);
 
     return 0;
 }
