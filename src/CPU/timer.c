@@ -56,33 +56,35 @@ u8 read_timer(u16 address)
 }
 
 // The frequency at which we update TMA depends on the 2 lower bits of TAC
-static u16 freq_divider[] = {8, 16, 64, 256};
+static u16 freq_divider[] = {1024, 16, 64, 256};
 
-void timer_ticks(u8 nb_cycle)
+void timer_ticks(u8 ticks)
 {
     u16 div = read_memory_16bit(TIMER_DIV - 1);
     u8 tac  = read_timer(TIMER_TAC);
 
     // update DIV's 16bit value
-    write_memory_16bit(TIMER_DIV - 1, div + nb_cycle);
+    write_memory_16bit(TIMER_DIV - 1, div + ticks);
 
     // We only update the timer's value at certain frequencies
     // The frequency depends on the 2 lower bits of TAC and is stored in
     // freq_divider
     u16 freq         = freq_divider[tac & 0x03];
-    bool update_tima = false;
-    while (!update_tima && nb_cycle > 0)
-        update_tima = ((div + nb_cycle--) % freq) == 0;
+    u8 increase_tima = 0;
+    while (ticks > 0) {
+        increase_tima +=
+            (div + ticks--) & (freq >> 1) && !((div + ticks) & (freq >> 1));
+    }
 
     // If bit 2 of TAC is set to 0 then the timer is disabled
-    if (update_tima && tac & 0x4) {
+    if (increase_tima && tac & 0x4) {
         u8 tima = read_timer(TIMER_TIMA);
 
         if (tima == 0xFF) { // overflow
             write_timer(TIMER_TIMA, read_timer(TIMER_TMA));
             interrupt_request(IV_TIMA);
         } else {
-            write_timer(TIMER_TIMA, tima + nb_cycle / freq);
+            write_timer(TIMER_TIMA, tima + increase_tima);
         }
     }
 }

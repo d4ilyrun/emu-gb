@@ -21,4 +21,4 @@ void reset_timer();
 void write_timer(u16 address, u8 data);
 u8 read_timer(u16 address);
 
-void timer_ticks(u8 nb_cycle);
+void timer_ticks(u8 ticks);
