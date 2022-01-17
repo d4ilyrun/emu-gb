@@ -23,54 +23,64 @@ void reset_cpu()
 void write_register(cpu_register_name reg, u8 val)
 {
     if (!IS_16BIT(reg)) {
-        *((u8 *)REGISTERS + reg) = val;
+        *(REGISTERS + reg) = val;
         return;
     }
 
-    if (reg == REG_PC)
+    if (reg == REG_PC) {
         cpu.registers.pc = val;
-    else if (reg == REG_SP)
+        return;
+    } else if (reg == REG_SP) {
         cpu.registers.sp = val;
-    else
-        *(((u16 *)REGISTERS) + (reg % REG_AF)) = val;
+        return;
+    }
+
+    *((REGISTERS) + 2 * (reg % REG_AF) + 1) = val;
 }
 
 void write_register_16bit(cpu_register_name reg, u16 val)
 {
     if (!IS_16BIT(reg)) {
-        *((u8 *)REGISTERS + reg) = LSB(val);
+
+        *(REGISTERS + reg) = LSB(val);
+        return;
     }
 
-    if (reg == REG_PC)
+    if (reg == REG_PC) {
         cpu.registers.pc = val;
-    else if (reg == REG_SP)
+        return;
+    } else if (reg == REG_SP) {
         cpu.registers.sp = val;
-    else
-        *(((u16 *)REGISTERS) + (reg % REG_AF)) = val;
+        return;
+    }
+
+    *(REGISTERS + 2 * (reg % REG_AF))     = MSB(val);
+    *(REGISTERS + 2 * (reg % REG_AF) + 1) = LSB(val);
 }
 
 u8 read_register(cpu_register_name reg)
 {
     if (!IS_16BIT(reg))
-        return *((u8 *)REGISTERS + reg);
+        return *(REGISTERS + reg);
 
     if (reg == REG_PC)
         return LSB(cpu.registers.pc);
-    else if (reg == REG_SP)
+    if (reg == REG_SP)
         return LSB(cpu.registers.sp);
     else
-        return LSB(*(((u16 *)REGISTERS) + (reg % REG_AF)));
+        return *(REGISTERS + 2 * (reg % REG_AF) + 1); // LSB
 }
 
 u16 read_register_16bit(cpu_register_name reg)
 {
     if (!IS_16BIT(reg))
-        return *((u8 *)REGISTERS + reg);
+        return *(REGISTERS + reg);
 
     if (reg == REG_PC)
         return cpu.registers.pc;
     else if (reg == REG_SP)
         return cpu.registers.sp;
-    else
-        return *(((u16 *)REGISTERS) + (reg % REG_AF));
+
+    return (*(REGISTERS + 2 * (reg % REG_AF)) << 8) +
+         *(REGISTERS + 2 * (reg % REG_AF) + 1);
 }

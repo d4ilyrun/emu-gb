@@ -64,9 +64,9 @@ struct gb_cpu {
 // The actual CPU of the Game Boy
 extern struct gb_cpu cpu;
 
-#define REGISTERS (&(cpu.registers))
+#define REGISTERS ((u8 *)&(cpu.registers))
 
-// Number of tiimer ticks in a machine cycle
+// Number of timer ticks in a machine cycle
 #define CYCLE_TICKS 4
 
 void reset_cpu();
