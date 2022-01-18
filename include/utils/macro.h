@@ -19,3 +19,5 @@
 #define HEX16 "0x%04X"
 #define HEX HEX16
 
+// force GCC to compile inline functions even without optmization
+#define ALWAYS_INLINE inline __attribute__((always_inline))

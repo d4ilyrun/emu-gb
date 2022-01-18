@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#define _GNU_SOURCE // needed for asprintf
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,9 +7,11 @@
 #include "utils/macro.h"
 
 static char *instruction_names[] = {
-    "???", "NOP",  "LD", "LDH", "PUSH", "POP", "JP",  "JR",  "CALL", "RET", "RETI",
-    "RST", "HALT", "STOP", "DI",   "EI",  "CCF", "SCF", "DAA",  "CPL", "ADD",
-    "ADC", "SUB",  "SBC",  "INC",  "DEC", "MUL", "AND", "OR",   "XOR"};
+    "ADC",  "ADD", "AND", "CALL", "CCF",  "CP",   "CPL", "DAA",  "DEC",
+    "DI",   "EI",  "ERR", "HALT", "INC",  "JP",   "JR",  "LD",   "LDH",
+    "NOP",  "OR",  "POP", "PUSH", "RET",  "RETI", "RLA", "RLCA", "RRA",
+    "RRCA", "RST", "SBC", "SCF",  "STOP", "SUB",  "XOR",
+};
 
 char *condition_names[] = {"NZ", "Z", "NC", "C", "???"};
 
@@ -17,6 +19,7 @@ char *register_names[] = {"A",  "F",  "B",  "C",  "D",  "E",  "H",  "L",
                           "PC", "SP", "AF", "BC", "DE", "HL", "???"};
 
 // TODO: add nice colors :^)
+// TODO: rethink format (address value instead of address ?, show flags)
 void display_instruction(struct instruction in)
 {
     char *operands = NULL;
@@ -35,13 +38,19 @@ void display_instruction(struct instruction in)
         break;
 
     case FLAG_S8:
-        asprintf(&operands, "%s, ", in.condition ? "TRUE" : "FALSE");
+        asprintf(&operands, "%s, %i", in.condition ? "TRUE" : "FALSE",
+                 (i8)in.data);
+        break;
+
     case S8:
         asprintf(&operands, "%i", (i8)in.data);
         break;
 
     case FLAG_A16:
-        asprintf(&operands, "%s, ", in.condition ? "TRUE" : "FALSE");
+        asprintf(&operands, "%s, " HEX, in.condition ? "TRUE" : "FALSE",
+                 in.address);
+        break;
+
     case A16:
         asprintf(&operands, HEX, in.address);
         break;
@@ -140,7 +149,7 @@ void display_instruction(struct instruction in)
         break;
 
     case A_D8:
-        asprintf(&operands, "A, " HEX , in.data);
+        asprintf(&operands, "A, " HEX, in.data);
         break;
 
     case A_HL_REL:

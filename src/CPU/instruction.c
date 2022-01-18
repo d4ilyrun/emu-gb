@@ -212,10 +212,10 @@ static u16 static_sub(u16 val, u16 subbed, bool bit16)
 
 INSTRUCTION(add)
 {
-    u16 val      = read_register_16bit(in.reg1);
-    u16 added    = (in.type == A_HL_REL || in.type == A_D8)
-                     ? in.data
-                     : read_register_16bit(in.reg2);
+    u16 val   = read_register_16bit(in.reg1);
+    u16 added = (in.type == A_HL_REL || in.type == A_D8)
+                  ? in.data
+                  : read_register_16bit(in.reg2);
 
     write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
     return in.cycle_count;
@@ -223,10 +223,10 @@ INSTRUCTION(add)
 
 INSTRUCTION(adc)
 {
-    u16 val      = read_register_16bit(in.reg1);
-    u16 added    = (in.type == A_HL_REL || in.type == A_D8)
-                     ? in.data
-                     : read_register_16bit(in.reg2);
+    u16 val   = read_register_16bit(in.reg1);
+    u16 added = (in.type == A_HL_REL || in.type == A_D8)
+                  ? in.data
+                  : read_register_16bit(in.reg2);
 
     added += get_flag(FLAG_C);
     write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
@@ -235,8 +235,8 @@ INSTRUCTION(adc)
 
 INSTRUCTION(sub)
 {
-    u16 val      = read_register_16bit(in.reg1);
-    u16 subbed   = (in.type == HL_REL || in.type == D8)
+    u16 val    = read_register_16bit(in.reg1);
+    u16 subbed = (in.type == HL_REL || in.type == D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
 
@@ -246,8 +246,8 @@ INSTRUCTION(sub)
 
 INSTRUCTION(sbc)
 {
-    u16 val      = read_register_16bit(in.reg1);
-    u16 subbed   = (in.type == A_HL_REL || in.type == A_D8)
+    u16 val    = read_register_16bit(in.reg1);
+    u16 subbed = (in.type == A_HL_REL || in.type == A_D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
 
@@ -308,6 +308,58 @@ INSTRUCTION(cp)
     return in.cycle_count;
 }
 
+INSTRUCTION(rla)
+{
+    u8 a = read_register(REG_A);
+    u8 c = get_flag(FLAG_C);
+    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
+    write_register(REG_A, (a << 1) + c);
+
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_N, false);
+    return in.cycle_count;
+}
+
+INSTRUCTION(rlca)
+{
+    u8 a = read_register(REG_A);
+    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
+    write_register(REG_A, (a << 1) + get_flag(FLAG_C));
+
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_N, false);
+    return in.cycle_count;
+}
+
+INSTRUCTION(rra)
+{
+    u8 a = read_register(REG_A);
+    u8 c = get_flag(FLAG_C);
+    set_flag(FLAG_C, BIT(a, 0));
+    write_register(REG_A, (a >> 1) + (c << 7));
+
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_N, false);
+    return in.cycle_count;
+}
+
+INSTRUCTION(rrca)
+{
+    u8 a = read_register(REG_A);
+    set_flag(FLAG_C, BIT(a, 0));
+    write_register(REG_A, (a >> 1) + (get_flag(FLAG_C) << 7));
+
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_N, false);
+    return in.cycle_count;
+}
+
+INSTRUCTION(stop)
+{
+    NOT_IMPLEMENTED(__FUNCTION__ );
+    return in.cycle_count;
+}
+
 // clang-format off
 
 static in_handler instruction_handlers[] = {
@@ -339,6 +391,12 @@ static in_handler instruction_handlers[] = {
     [IN_OR] = or,
     [IN_XOR] = xor,
     [IN_CP] = cp,
+    [IN_RLA] = rla,
+    [IN_RLCA] = rlca,
+    [IN_RRA] = rra,
+    [IN_RRCA] = rrca,
+    [IN_STOP] = stop,
+    [IN_HALT] = halt,
 };
 
 // clang-format on

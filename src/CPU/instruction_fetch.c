@@ -104,6 +104,7 @@ struct in_type opcodes[] = {
     [0x04] = {IN_INC, R8, 2},
     [0x05] = {IN_DEC, R8, 2},
     [0x06] = {IN_LD, R8_D8, 2},
+    [0x07] = {IN_RLCA, NO_OPERAND, 1},
     [0x08] = {IN_LD, D16_REL_SP, 5},
     [0x09] = {IN_ADD, HL_R16, 2},
     [0x0A] = {IN_LD, A_R16_REL, 2},
@@ -111,6 +112,7 @@ struct in_type opcodes[] = {
     [0x0C] = {IN_INC, R8, 2},
     [0x0D] = {IN_DEC, R8, 2},
     [0x0E] = {IN_LD, R8_D8, 2},
+    [0x0F] = {IN_RRCA, NO_OPERAND, 1},
 
     // 0x1
     [0x11] = {IN_LD, R16_D16, 3},
@@ -119,6 +121,7 @@ struct in_type opcodes[] = {
     [0x14] = {IN_INC, R8, 2},
     [0x15] = {IN_DEC, R8, 2},
     [0x16] = {IN_LD, R8_D8, 2},
+    [0x17] = {IN_RLA, NO_OPERAND, 1},
     [0x18] = {IN_JR, S8, 3},
     [0x19] = {IN_ADD, HL_R16, 2},
     [0x1A] = {IN_LD, A_R16_REL, 2},
@@ -126,6 +129,7 @@ struct in_type opcodes[] = {
     [0x1C] = {IN_INC, R8, 2},
     [0x1D] = {IN_DEC, R8, 2},
     [0x1E] = {IN_LD, R8_D8, 2},
+    [0x1F] = {IN_RRA, NO_OPERAND, 1},
 
     // 0x2
     [0x20] = {IN_JR, FLAG_S8, 3, 2},

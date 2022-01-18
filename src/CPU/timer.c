@@ -46,6 +46,7 @@ u8 read_timer(u16 address)
     case TIMER_TIMA:
         return read_memory(address);
     // TODO: error printing macro
+    default:
     case TIMER_UNKNOWN:
         fprintf(stderr,
                 ">> Timer: trying to read into an unknown register "
