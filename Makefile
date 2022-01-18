@@ -5,7 +5,7 @@ INCLUDE_DIRS = include
 SRC_DIR = src
 BIN_DIR = bin
 
-CFLAGS = -g -O3
+CFLAGS = -g -O3 -Wno-unused-result
 CPPFLAGS = $(patsubst %,-I%,$(INCLUDE_DIRS))
 LDFLAGS = 
 
@@ -23,6 +23,6 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean:
-	$(RM) -r $(BIN_DIR)
+	$(RM) -r $(BIN_DIR) $(EXE)
 
 .PHONY: all build clean

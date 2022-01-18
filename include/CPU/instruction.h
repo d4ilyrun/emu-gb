@@ -36,10 +36,10 @@ typedef enum instruction_name {
     IN_SBC,
     IN_INC,
     IN_DEC,
-    IN_MUL,
     IN_AND,
     IN_OR,
     IN_XOR,
+    IN_CP,
 } in_name;
 
 /*
@@ -70,10 +70,11 @@ typedef enum operand_type {
     R8,
     R16,
     A16,
-    HL_IMM,
+    HL_REL,
     S8,
     FLAG,
     RST, // special case: data in opcode
+    D8,
 
     // Two operands with register as destination
     FLAG_A16,
@@ -85,10 +86,15 @@ typedef enum operand_type {
     A_D16_REL,
     R16_D16,
     SP_HL,
+    SP_S8,
     A_HLD,
     A_HLI,
     A_C_REL,
     A_D8_REL,
+    A_R8,
+    A_D8,
+    A_HL_REL,
+    HL_R16,
 
     // other types with two operands
     HL_REL_R8,
@@ -102,7 +108,8 @@ typedef enum operand_type {
     D8_REL_A,
 } operand_type;
 
-#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type <= A_D8_REL)
+#define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type < HL_REL_R8)
+#define IS_ONE_OPERAND(_in) (in.type < FLAG_A16)
 
 #define HAS_CONDITION(_in) ((_in).type == FLAG_S8 || (_in).type == FLAG_A16)
 
@@ -142,19 +149,11 @@ struct instruction {
 * q = y modulo 2 (i.e. bit 3)
 */
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-    #define OPCODE_X(_opcode) ((_opcode) >> 6)
-    #define OPCODE_Y(_opcode) (((_opcode) >> 3) & 0x07)
-    #define OPCODE_Z(_opcode) ((_opcode) & 0x07)
-    #define OPCODE_Q(_opcode) (((_opcode) >> 3) & 0x01)
-    #define OPCODE_P(_opcode) (((_opcode) >> 4) & 0x03)
-#else
-    #define OPCODE_X(_opcode) ((_opcode) & 0x03)
-    #define OPCODE_Y(_opcode) (((_opcode) >> 2) & 0x07)
-    #define OPCODE_Z(_opcode) ((_opcode) >> 5)
-    #define OPCODE_Q(_opcode) (((_opcode) >> 4) & 0x01)
-    #define OPCODE_P(_opcode) (((_opcode) >> 2) & 0x03)
-#endif // __BIG_ENDIAN__
+#define OPCODE_X(_opcode) ((_opcode) >> 6)
+#define OPCODE_Y(_opcode) (((_opcode) >> 3) & 0x07)
+#define OPCODE_Z(_opcode) ((_opcode) & 0x07)
+#define OPCODE_Q(_opcode) (((_opcode) >> 3) & 0x01)
+#define OPCODE_P(_opcode) (((_opcode) >> 4) & 0x03)
 
 struct instruction fetch_instruction(u8 opcode);
 void display_instruction(struct instruction in);

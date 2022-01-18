@@ -1,3 +1,6 @@
+emu-gb
+*.S
+
 # Prerequisites
 *.d
 
@@ -21,7 +24,7 @@ bin
 *.i*86
 *.x86_64
 *.hex
-emu-gb
+*.gb
 
 # Nix
 /result

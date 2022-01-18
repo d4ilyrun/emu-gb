@@ -46,7 +46,7 @@ void display_instruction(struct instruction in)
         asprintf(&operands, HEX, in.address);
         break;
 
-    case HL_IMM:
+    case HL_REL:
         asprintf(&operands, "(HL)");
         break;
 
@@ -133,6 +133,18 @@ void display_instruction(struct instruction in)
 
     case D8_REL_A:
         asprintf(&operands, "(" HEX "), A", in.address);
+        break;
+
+    case A_R8:
+        asprintf(&operands, "A, %s", register_names[in.reg2]);
+        break;
+
+    case A_D8:
+        asprintf(&operands, "A, " HEX , in.data);
+        break;
+
+    case A_HL_REL:
+        asprintf(&operands, "A, (HL)");
         break;
 
     case NO_OPERAND:
