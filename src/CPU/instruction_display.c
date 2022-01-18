@@ -6,6 +6,10 @@
 #include "CPU/instruction.h"
 #include "utils/macro.h"
 
+#ifdef TEST_ROM
+#include "test_rom.h"
+#endif
+
 static char *instruction_names[] = {
     "ADC",  "ADD", "AND", "CALL", "CCF",  "CP",   "CPL", "DAA",  "DEC",
     "DI",   "EI",  "ERR", "HALT", "INC",  "JP",   "JR",  "LD",   "LDH",
@@ -167,7 +171,13 @@ void display_instruction(struct instruction in)
     free(operands);
 
     // print content of the registers
-    printf("AF=" HEX " BC=" HEX " DE=" HEX " HL=" HEX "\n",
+    printf("AF=" HEX " BC=" HEX " DE=" HEX " HL=" HEX,
            read_register_16bit(REG_AF), read_register_16bit(REG_BC),
            read_register_16bit(REG_DE), read_register_16bit(REG_HL));
+
+#ifdef TEST_ROM
+    printf(" " HEX "=" HEX8, TEST_CHECK, read_memory(TEST_CHECK));
+#endif
+
+    putchar('\n');
 }

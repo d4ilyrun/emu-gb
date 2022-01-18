@@ -5,6 +5,7 @@
 #include "CPU/interrupt.h"
 #include "CPU/timer.h"
 #include "cartridge.h"
+#include "test_rom.h"
 #include "utils/macro.h"
 
 int main(int argc, char **argv)
@@ -38,6 +39,11 @@ int main(int argc, char **argv)
             cpu.ime_scheduled = false;
             timer_ticks(CYCLE_TICKS);
         }
+
+#ifdef TEST_ROM
+        test_rom_update();
+        test_rom_print();
+#endif
     }
 
     return 0;

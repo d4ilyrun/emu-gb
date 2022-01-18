@@ -25,6 +25,9 @@ build: $(BIN_FILES)
 debug: CFLAGS += $(DEBUG_FLAGS)
 debug: clean $(EXE)
 
+test: CPPFLAGS += -DTEST_ROM
+test: clean $(EXE)
+
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@[ -d `dirname $@` ] || mkdir -p `dirname $@`
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
