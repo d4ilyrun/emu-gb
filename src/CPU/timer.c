@@ -62,7 +62,7 @@ static u16 freq_divider[] = {1024, 16, 64, 256};
 void timer_ticks(u8 ticks)
 {
     u16 div = read_memory_16bit(TIMER_DIV - 1);
-    u8 tac  = read_timer(TIMER_TAC);
+    u8 tac = read_timer(TIMER_TAC);
 
     // update DIV's 16bit value
     write_memory_16bit(TIMER_DIV - 1, div + ticks);
@@ -70,7 +70,7 @@ void timer_ticks(u8 ticks)
     // We only update the timer's value at certain frequencies
     // The frequency depends on the 2 lower bits of TAC and is stored in
     // freq_divider
-    u16 freq         = freq_divider[tac & 0x03];
+    u16 freq = freq_divider[tac & 0x03];
     u8 increase_tima = 0;
     while (ticks > 0) {
         increase_tima +=

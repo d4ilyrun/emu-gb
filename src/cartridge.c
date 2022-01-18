@@ -11,7 +11,7 @@ struct cartridge cartridge;
 static bool verify_header_checksum(struct cartridge cart)
 {
     unsigned char sum = 0;
-    int i             = 0x0134;
+    int i = 0x0134;
 
     while (i <= 0x014C)
         sum -= cart.rom[i++] - 1;
@@ -33,7 +33,7 @@ bool load_cartridge(char *path)
     // Get rom_size and allocate enough space to store the cartridge's rom
     fseek(rom, 0, SEEK_END);
     cartridge.rom_size = ftell(rom);
-    cartridge.rom      = malloc(cartridge.rom_size);
+    cartridge.rom = malloc(cartridge.rom_size);
 
     rewind(rom);
     fread(cartridge.rom, 1, cartridge.rom_size, rom);
@@ -53,7 +53,7 @@ static void print_nintendo_logo()
         for (int x = 0; x < 12; ++x, i += 2) {
             const uint8_t n =
                 (y % 2) ? (nintendo_logo[i] & 0xF) : (nintendo_logo[i] >> 4);
-            for (int b = 4; b--; )
+            for (int b = 4; b--;)
                 putchar(((n >> b) & 1) ? '*' : ' ');
         }
         putchar('\n');

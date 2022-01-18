@@ -15,9 +15,9 @@ void reset_cpu()
     write_register_16bit(REG_DE, 0x00D8);
     write_register_16bit(REG_HL, 0x014D);
 
-    cpu.halt          = false;
+    cpu.halt = false;
     cpu.ime_scheduled = false;
-    cpu.is_running    = true;
+    cpu.is_running = true;
 }
 
 void write_register(cpu_register_name reg, u8 val)
@@ -54,7 +54,7 @@ void write_register_16bit(cpu_register_name reg, u16 val)
         return;
     }
 
-    *(REGISTERS + 2 * (reg % REG_AF))     = MSB(val);
+    *(REGISTERS + 2 * (reg % REG_AF)) = MSB(val);
     *(REGISTERS + 2 * (reg % REG_AF) + 1) = LSB(val);
 }
 

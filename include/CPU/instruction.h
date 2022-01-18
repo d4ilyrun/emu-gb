@@ -1,15 +1,16 @@
 #pragma once
 
 #include "cpu.h"
-#include "utils/types.h"
 #include "memory.h"
+#include "utils/types.h"
 
 /*
  * Run the next instruction at PC
  */
 u8 execute_instruction();
 
-typedef enum instruction_name {
+typedef enum instruction_name
+{
     IN_ADC,
     IN_ADD,
     IN_AND,
@@ -66,7 +67,8 @@ typedef enum instruction_name {
  * Prefixes:
  * - REL: relative addressing
  */
-typedef enum operand_type {
+typedef enum operand_type
+{
     ERR_OPERAND,
     NO_OPERAND,
 
@@ -145,17 +147,17 @@ struct instruction {
 };
 
 /*
-* (MSB -> LSB)
-* x = the opcode's 1st octal digit (i.e. bits 7-6)
-* y = the opcode's 2nd octal digit (i.e. bits 5-3)
-* z = the opcode's 3rd octal digit (i.e. bits 2-0)
-* p = y rightshifted one position (i.e. bits 5-4)
-* q = y modulo 2 (i.e. bit 3)
-*/
+ * (MSB -> LSB)
+ * x = the opcode's 1st octal digit (i.e. bits 7-6)
+ * y = the opcode's 2nd octal digit (i.e. bits 5-3)
+ * z = the opcode's 3rd octal digit (i.e. bits 2-0)
+ * p = y rightshifted one position (i.e. bits 5-4)
+ * q = y modulo 2 (i.e. bit 3)
+ */
 
 #define OPCODE_X(_opcode) ((_opcode) >> 6)
 #define OPCODE_Y(_opcode) (((_opcode) >> 3) & 0x07)
-#define OPCODE_Z(_opcode) ((_opcode) & 0x07)
+#define OPCODE_Z(_opcode) ((_opcode)&0x07)
 #define OPCODE_Q(_opcode) (((_opcode) >> 3) & 0x01)
 #define OPCODE_P(_opcode) (((_opcode) >> 4) & 0x03)
 

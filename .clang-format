@@ -5,7 +5,6 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 
-AlignConsecutiveAssignments: Consecutive
 AlignOperands: AlignAfterOperator
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
@@ -24,7 +23,6 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInParentheses: false
 
-SortIncludes: CaseInsensitive
 IncludeBlocks: Regroup
 IncludeCategories:
     - Regex: '<.*>'

@@ -7,7 +7,7 @@ BIN_DIR = bin
 
 CFLAGS = -Wall -Wextra -Wno-unused-result -Wno-missing-field-initializers -Wno-unknown-pragmas
 CPPFLAGS = $(patsubst %,-I%,$(INCLUDE_DIRS))
-LDFLAGS = 
+LDFLAGS =
 
 DEBUG_FLAGS = -DNDEBUG -Og -g
 OPTI_FLAGS = -O3
@@ -32,4 +32,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	$(RM) -r $(BIN_DIR) $(EXE)
 
-.PHONY: all build clean debug
+clang-format:
+	@find . -type f -name '*.[ch]' -exec clang-format --style=file -i {} ';'
+
+.PHONY: all build clean debug clang-format

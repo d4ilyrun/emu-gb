@@ -377,15 +377,15 @@ struct in_type opcodes[] = {
  */
 struct instruction fetch_instruction(u8 opcode)
 {
-    u16 pc                = read_register_16bit(REG_PC);
-    struct in_type type   = opcodes[opcode];
+    u16 pc = read_register_16bit(REG_PC);
+    struct in_type type = opcodes[opcode];
     struct instruction in = {IN_ERR, ERR_OPERAND, REG_ERR, REG_ERR, 0xdead};
 
-    in.instruction       = type.name;
-    in.type              = type.type;
-    in.pc                = pc - 1;
-    in.condition         = true;
-    in.cycle_count       = type.cycle_count;
+    in.instruction = type.name;
+    in.type = type.type;
+    in.pc = pc - 1;
+    in.condition = true;
+    in.cycle_count = type.cycle_count;
     in.cycle_count_false = type.cycle_count_false;
 
     switch (in.type) {
@@ -410,7 +410,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case FLAG_A16:
         in.condition = read_flag(opcode);
-        in.address   = read_16bit_data();
+        in.address = read_16bit_data();
         break;
 
     case S8:
@@ -419,7 +419,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case FLAG_S8:
         in.condition = read_flag(opcode);
-        in.data      = read_8bit_data();
+        in.data = read_8bit_data();
         break;
 
     case FLAG:
@@ -527,38 +527,38 @@ struct instruction fetch_instruction(u8 opcode)
 
     case HL_REL_R8:
         in.address = read_memory(read_register_16bit(REG_HL));
-        in.reg1    = find_register(OPCODE_Z(opcode));
+        in.reg1 = find_register(OPCODE_Z(opcode));
         break;
 
     case HL_REL_D8:
         in.address = read_memory(read_register_16bit(REG_HL));
-        in.data    = read_8bit_data();
+        in.data = read_8bit_data();
         break;
 
     case R16_REL_A:
         in.address = read_register_16bit(find_register_16bit(OPCODE_P(opcode)));
-        in.reg1    = REG_A;
+        in.reg1 = REG_A;
         break;
 
     case D16_REL_A:
         in.address = read_16bit_data();
-        in.reg1    = REG_A;
+        in.reg1 = REG_A;
         break;
 
     case D16_REL_SP:
         in.address = read_16bit_data();
-        in.reg1    = read_register_16bit(REG_SP);
+        in.reg1 = read_register_16bit(REG_SP);
         break;
 
     case HLD_A:
         in.address = read_memory(read_register_16bit(REG_HL));
-        in.reg1    = REG_A;
+        in.reg1 = REG_A;
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) - 1);
         break;
 
     case HLI_A:
         in.address = read_memory(read_register_16bit(REG_HL));
-        in.reg1    = REG_A;
+        in.reg1 = REG_A;
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) + 1);
         break;
 

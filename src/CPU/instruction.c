@@ -212,7 +212,7 @@ static u16 static_sub(u16 val, u16 subbed, bool bit16)
 
 INSTRUCTION(add)
 {
-    u16 val   = read_register_16bit(in.reg1);
+    u16 val = read_register_16bit(in.reg1);
     u16 added = (in.type == A_HL_REL || in.type == A_D8)
                   ? in.data
                   : read_register_16bit(in.reg2);
@@ -223,7 +223,7 @@ INSTRUCTION(add)
 
 INSTRUCTION(adc)
 {
-    u16 val   = read_register_16bit(in.reg1);
+    u16 val = read_register_16bit(in.reg1);
     u16 added = (in.type == A_HL_REL || in.type == A_D8)
                   ? in.data
                   : read_register_16bit(in.reg2);
@@ -235,7 +235,7 @@ INSTRUCTION(adc)
 
 INSTRUCTION(sub)
 {
-    u16 val    = read_register_16bit(in.reg1);
+    u16 val = read_register_16bit(in.reg1);
     u16 subbed = (in.type == HL_REL || in.type == D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
@@ -246,7 +246,7 @@ INSTRUCTION(sub)
 
 INSTRUCTION(sbc)
 {
-    u16 val    = read_register_16bit(in.reg1);
+    u16 val = read_register_16bit(in.reg1);
     u16 subbed = (in.type == A_HL_REL || in.type == A_D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
@@ -356,7 +356,7 @@ INSTRUCTION(rrca)
 
 INSTRUCTION(stop)
 {
-    NOT_IMPLEMENTED(__FUNCTION__ );
+    NOT_IMPLEMENTED(__FUNCTION__);
     return in.cycle_count;
 }
 
@@ -408,7 +408,7 @@ static inline u8 fetch_opcode()
 
 u8 execute_instruction()
 {
-    u8 opcode             = fetch_opcode();
+    u8 opcode = fetch_opcode();
     struct instruction in = fetch_instruction(opcode);
 
     return instruction_handlers[in.instruction](in);

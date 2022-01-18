@@ -1,16 +1,15 @@
 #include <stdio.h>
 
-#include "cartridge.h"
 #include "CPU/cpu.h"
-#include "CPU/timer.h"
 #include "CPU/instruction.h"
 #include "CPU/interrupt.h"
+#include "CPU/timer.h"
+#include "cartridge.h"
 #include "utils/macro.h"
 
 int main(int argc, char **argv)
 {
-    if (argc < 1)
-    {
+    if (argc < 1) {
         fputs("No cartridge provided.", stderr);
         return 1;
     }
@@ -23,14 +22,10 @@ int main(int argc, char **argv)
 
     u8 cycles;
 
-    while (cpu.is_running)
-    {
-        if (cpu.halt)
-        {
+    while (cpu.is_running) {
+        if (cpu.halt) {
             cycles = 1;
-        }
-        else
-        {
+        } else {
             cycles = execute_instruction();
         }
 
@@ -38,8 +33,7 @@ int main(int argc, char **argv)
 
         handle_interrupts();
 
-        if (cpu.ime_scheduled)
-        {
+        if (cpu.ime_scheduled) {
             interrupt_set_ime(true);
             cpu.ime_scheduled = false;
             timer_ticks(CYCLE_TICKS);

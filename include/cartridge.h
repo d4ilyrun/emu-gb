@@ -53,12 +53,12 @@ struct cartridge {
 typedef enum cartridge_type
 {
     ROM_ONLY = 0x0,
-    MBC1     = 0x03,
-    MBC2     = 0x06,
-    MBC3     = 0x13,
-    MBC5     = 0x1E,
-    MBC6     = 0x20,
-    MBC7     = 0x22,
+    MBC1 = 0x03,
+    MBC2 = 0x06,
+    MBC3 = 0x13,
+    MBC5 = 0x1E,
+    MBC6 = 0x20,
+    MBC7 = 0x22,
 } cartridge_type;
 
 extern struct cartridge cartridge;
