@@ -43,6 +43,7 @@ typedef enum instruction_name
     IN_SBC,
     IN_SCF,
     IN_STOP,
+    IN_CB,
     IN_SUB,
     IN_XOR,
 } in_name;

@@ -142,7 +142,7 @@ struct in_type opcodes[] = {
     [0x27] = {IN_DAA, NO_OPERAND, 1},
     [0x28] = {IN_JR, FLAG_S8, 3, 2},
     [0x29] = {IN_ADD, HL_R16, 2},
-    [0x2A] = {IN_LD, A_HLD, 2},
+    [0x2A] = {IN_LD, A_HLI, 2},
     [0x2B] = {IN_DEC, R16, 2},
     [0x2C] = {IN_INC, R8, 2},
     [0x2D] = {IN_DEC, R8, 2},
@@ -322,6 +322,7 @@ struct in_type opcodes[] = {
     [0xC8] = {IN_RET, FLAG, 5, 2},
     [0xC9] = {IN_RET, NO_OPERAND, 4},
     [0xCA] = {IN_JP, FLAG_A16, 4, 3},
+    [0xCB] = {IN_CB, NO_OPERAND, 1},
     [0xCC] = {IN_CALL, FLAG_A16, 6, 3},
     [0xCD] = {IN_CALL, A16, 6},
     [0xCE] = {IN_ADC, A_D8, 2},
@@ -418,12 +419,12 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case FLAG_S8:
-        in.condition = read_flag(opcode);
+        in.condition = read_flag(OPCODE_P(opcode));
         in.data = read_8bit_data();
         break;
 
     case FLAG:
-        in.condition = read_flag(opcode);
+        in.condition = read_flag(OPCODE_P(opcode));
         break;
 
     case RST:

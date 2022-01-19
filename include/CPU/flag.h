@@ -11,7 +11,10 @@
 
 ALWAYS_INLINE void set_flag(u16 flag, bool value)
 {
-    cpu.registers.f |= flag * value;
+    if (value)
+        cpu.registers.f |= flag;
+    else
+        cpu.registers.f &= ~flag;
 }
 
 ALWAYS_INLINE void set_all_flags(bool z, bool n, bool h, bool c)

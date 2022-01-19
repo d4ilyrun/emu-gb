@@ -23,10 +23,12 @@ build:	CFLAGS += $(OPTI_FLAGS)
 build: $(BIN_FILES)
 
 debug: CFLAGS += $(DEBUG_FLAGS)
-debug: clean $(EXE)
+debug: clean $(BIN_FILES)
+	$(CC) $(BIN_FILES) $(LDFLAGS) -o $(EXE)
 
 test: CPPFLAGS += -DTEST_ROM
-test: clean $(EXE)
+test: clean $(BIN_FILES)
+	$(CC) $(BIN_FILES) $(LDFLAGS) -o $(EXE)
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@[ -d `dirname $@` ] || mkdir -p `dirname $@`

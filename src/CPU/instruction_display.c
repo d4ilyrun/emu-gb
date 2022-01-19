@@ -77,11 +77,13 @@ void display_instruction(struct instruction in)
         break;
 
     case R8_HL_REL:
-        asprintf(&operands, "%s, (HL)", register_names[in.reg1]);
+        asprintf(&operands, "%s, (HL) (=" HEX8 ")", register_names[in.reg1],
+                 in.data);
         break;
 
     case A_R16_REL:
-        asprintf(&operands, "A, (%s)", register_names[in.reg1]);
+        asprintf(&operands, "A, (%s) (=" HEX8 ")", register_names[in.reg1],
+                 in.data);
         break;
 
     case A_D16_REL:
@@ -97,7 +99,7 @@ void display_instruction(struct instruction in)
         break;
 
     case R16_REL_A:
-        asprintf(&operands, "(%s), A", register_names[in.reg1]);
+        asprintf(&operands, HEX ", A", in.address);
         break;
 
     case D16_REL_A:
@@ -169,6 +171,10 @@ void display_instruction(struct instruction in)
     // print operands
     printf("%-15.32s", operands);
     free(operands);
+
+    // print 3 bytes at pc address: opcode + operands
+    printf("(%02X %02X %02X) ", read_memory(in.pc), read_memory(in.pc + 1),
+           read_memory(in.pc + 2));
 
     // print content of the registers
     printf("AF=" HEX " BC=" HEX " DE=" HEX " HL=" HEX,

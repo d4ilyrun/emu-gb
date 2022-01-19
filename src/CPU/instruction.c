@@ -154,19 +154,48 @@ INSTRUCTION(halt)
 
 INSTRUCTION(inc)
 {
+    u8 added = 1;
+    u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
+                                       : read_register_16bit(in.reg1);
+
     if (in.type == HL_REL)
         write_memory(in.address, read_memory(in.address) + 1);
     else
         write_register_16bit(in.reg1, read_register_16bit(in.reg1) + 1);
+
+    set_flag(FLAG_N, false);
+
+    if (in.type == R16) {
+        set_flag(FLAG_H, ((base_val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
+        set_flag(FLAG_Z, (base_val + 1) == 0);
+    } else {
+        set_flag(FLAG_Z, (base_val & 0xFF) == 0xFF);
+        set_flag(FLAG_H, ((base_val & 0xF) + (added & 0xF)) > 0xF);
+    }
+
     return in.cycle_count;
 }
 
+// Available addressing mode: R16, R8, HL_REL
 INSTRUCTION(dec)
 {
+    u8 subbed = 1;
+    u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
+                                       : read_register_16bit(in.reg1);
+
     if (in.type == HL_REL)
         write_memory(in.address, read_memory(in.address) - 1);
     else
         write_register_16bit(in.reg1, read_register_16bit(in.reg1) - 1);
+
+    set_flag(FLAG_Z, (base_val - 1) == 0);
+    set_flag(FLAG_N, 1);
+    if (in.type == R16) { // 16-bit subtraction
+        set_flag(FLAG_H, ((base_val - 1) & 0x0FFF) == 0x0FFF);
+    } else {
+        set_flag(FLAG_H, ((base_val - 1) & 0x0F) == 0x0F);
+    }
+
     return in.cycle_count;
 }
 
@@ -178,15 +207,16 @@ static u16 static_add(u16 val, u16 added, bool bit16)
 
     val += added;
 
-    set_flag(FLAG_Z, !val);
     set_flag(FLAG_N, 0);
     if (bit16) { // 16-bit addition
         u32 carry = base_val + added;
         set_flag(FLAG_C, carry > 0xFFFF);
-        set_flag(FLAG_H, (base_val & 0xFFF) + (added & 0xFFF) > 0xFFF);
+        set_flag(FLAG_H, ((base_val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
+        set_flag(FLAG_Z, val == 0);
     } else {
-        set_flag(FLAG_C, (base_val & 0xFF) + (added & 0xFF) > 0xFF);
-        set_flag(FLAG_H, (base_val & 0xF) + (added & 0xF) > 0xF);
+        set_flag(FLAG_C, ((base_val & 0xFF) + (added & 0xFF)) > 0xFF);
+        set_flag(FLAG_H, ((base_val & 0xF) + (added & 0xF)) > 0xF);
+        set_flag(FLAG_Z, (base_val & 0xFF) == 0);
     }
 
     return val;
@@ -360,6 +390,12 @@ INSTRUCTION(stop)
     return in.cycle_count;
 }
 
+INSTRUCTION(cb)
+{
+    NOT_IMPLEMENTED(__PRETTY_FUNCTION__);
+    return in.cycle_count;
+}
+
 // clang-format off
 
 static in_handler instruction_handlers[] = {
@@ -397,6 +433,7 @@ static in_handler instruction_handlers[] = {
     [IN_RRCA] = rrca,
     [IN_STOP] = stop,
     [IN_HALT] = halt,
+    [IN_CB] = cb,
 };
 
 // clang-format on
