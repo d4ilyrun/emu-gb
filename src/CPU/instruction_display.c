@@ -103,7 +103,7 @@ void display_instruction(struct instruction in)
         break;
 
     case D16_REL_A:
-        asprintf(&operands, "(" HEX "), A", in.data);
+        asprintf(&operands, "(" HEX "), A", in.address);
         break;
 
     case R16_D16:

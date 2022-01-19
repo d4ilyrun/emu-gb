@@ -161,6 +161,7 @@ struct instruction {
 #define OPCODE_Z(_opcode) ((_opcode)&0x07)
 #define OPCODE_Q(_opcode) (((_opcode) >> 3) & 0x01)
 #define OPCODE_P(_opcode) (((_opcode) >> 4) & 0x03)
+#define OPCODE_FLAG(_opcode) (((_opcode) >> 3) && 0x03)
 
 struct instruction fetch_instruction(u8 opcode);
 void display_instruction(struct instruction in);

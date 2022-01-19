@@ -14,8 +14,9 @@ struct in_type {
 
 static u16 read_16bit_data()
 {
-    cpu.registers.pc += 2;
-    return read_memory_16bit(cpu.registers.pc - 2);
+    u16 data = read_memory_16bit(read_register_16bit(REG_PC));
+    write_register_16bit(REG_PC, read_register_16bit(REG_PC) + 2);
+    return data;
 }
 
 static u8 read_8bit_data()
@@ -59,7 +60,7 @@ static cpu_register_name find_register(uint8_t code)
 static cpu_register_name find_register_16bit(uint8_t code)
 {
     if (code == 0x3)
-        return REG_SP;
+        return REG_AF;
 
     return REG_BC + code;
 }
@@ -69,8 +70,8 @@ static cpu_register_name find_register_16bit(uint8_t code)
  *
  * 000 = NZ
  * 001 = Z
- * 010 = N3
- * 011 = C
+ * 010 = 3
+ * 011 = NC
  */
 static bool read_flag(u8 opcode)
 {
@@ -410,7 +411,7 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case FLAG_A16:
-        in.condition = read_flag(opcode);
+        in.condition = read_flag(OPCODE_FLAG(opcode));
         in.address = read_16bit_data();
         break;
 
@@ -419,12 +420,12 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case FLAG_S8:
-        in.condition = read_flag(OPCODE_P(opcode));
+        in.condition = read_flag(OPCODE_FLAG(opcode));
         in.data = read_8bit_data();
         break;
 
     case FLAG:
-        in.condition = read_flag(OPCODE_P(opcode));
+        in.condition = read_flag(OPCODE_FLAG(opcode));
         break;
 
     case RST:

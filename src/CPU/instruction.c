@@ -43,7 +43,8 @@ INSTRUCTION(call)
 {
     if (!in.condition)
         return in.cycle_count_false;
-    stack_push_16bit(in.address);
+    stack_push_16bit(read_register_16bit(REG_PC));
+    write_register_16bit(REG_PC, in.address);
     return in.cycle_count;
 }
 
@@ -51,7 +52,7 @@ INSTRUCTION(ret)
 {
     if (!in.condition)
         return in.cycle_count_false;
-    cpu.registers.pc = stack_pop_16bit();
+    write_register_16bit(REG_PC, stack_pop_16bit());
     return in.cycle_count;
 }
 
