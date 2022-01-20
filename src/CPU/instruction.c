@@ -7,23 +7,23 @@
 #include "CPU/stack.h"
 #include "utils/macro.h"
 
-#define INSTRUCTION(_name) static u8 _name(struct instruction in)
+#define CB_INSTRUCTION(_name) static u8 _name(struct instruction in)
 
 typedef u8 (*in_handler)(struct instruction);
 
-INSTRUCTION(invalid)
+CB_INSTRUCTION(invalid)
 {
     fprintf(stderr, "\nInvalid instruction. (code: " HEX8 ")\n",
             read_memory(in.pc));
     exit(-1);
 }
 
-INSTRUCTION(nop)
+CB_INSTRUCTION(nop)
 {
     return in.cycle_count;
 }
 
-INSTRUCTION(jp)
+CB_INSTRUCTION(jp)
 {
     if (!in.condition)
         return in.cycle_count_false;
@@ -31,7 +31,7 @@ INSTRUCTION(jp)
     return in.cycle_count;
 }
 
-INSTRUCTION(jr)
+CB_INSTRUCTION(jr)
 {
     if (!in.condition)
         return in.cycle_count_false;
@@ -39,7 +39,7 @@ INSTRUCTION(jr)
     return in.cycle_count_false;
 }
 
-INSTRUCTION(call)
+CB_INSTRUCTION(call)
 {
     if (!in.condition)
         return in.cycle_count_false;
@@ -48,7 +48,7 @@ INSTRUCTION(call)
     return in.cycle_count;
 }
 
-INSTRUCTION(ret)
+CB_INSTRUCTION(ret)
 {
     if (!in.condition)
         return in.cycle_count_false;
@@ -56,21 +56,21 @@ INSTRUCTION(ret)
     return in.cycle_count;
 }
 
-INSTRUCTION(reti)
+CB_INSTRUCTION(reti)
 {
     cpu.registers.pc = stack_pop_16bit();
     interrupt_set_ime(true);
     return in.cycle_count;
 }
 
-INSTRUCTION(rst)
+CB_INSTRUCTION(rst)
 {
     stack_push_16bit(read_register_16bit(REG_PC));
     write_register_16bit(REG_PC, in.data);
     return in.cycle_count;
 }
 
-INSTRUCTION(ld)
+CB_INSTRUCTION(ld)
 {
     if (in.type == R8_R8 || in.type == SP_HL)
         write_register_16bit(in.reg1, read_register_16bit(in.reg2));
@@ -83,7 +83,7 @@ INSTRUCTION(ld)
     return in.cycle_count;
 }
 
-INSTRUCTION(ldh)
+CB_INSTRUCTION(ldh)
 {
     if (IS_DST_REGISTER(in))
         write_register(in.reg1, in.data);
@@ -92,19 +92,19 @@ INSTRUCTION(ldh)
     return in.cycle_count;
 }
 
-INSTRUCTION(di)
+CB_INSTRUCTION(di)
 {
     interrupt_set_ime(false);
     return in.cycle_count;
 }
 
-INSTRUCTION(ei)
+CB_INSTRUCTION(ei)
 {
     cpu.ime_scheduled = true;
     return in.cycle_count;
 }
 
-INSTRUCTION(ccf)
+CB_INSTRUCTION(ccf)
 {
     set_flag(FLAG_N, false);
     set_flag(FLAG_H, false);
@@ -112,7 +112,7 @@ INSTRUCTION(ccf)
     return in.cycle_count;
 }
 
-INSTRUCTION(scf)
+CB_INSTRUCTION(scf)
 {
     set_flag(FLAG_N, false);
     set_flag(FLAG_H, false);
@@ -120,14 +120,14 @@ INSTRUCTION(scf)
     return in.cycle_count;
 }
 
-INSTRUCTION(daa)
+CB_INSTRUCTION(daa)
 {
     // TODO: DAA
     NOT_IMPLEMENTED(__FUNCTION__);
     return in.cycle_count;
 }
 
-INSTRUCTION(cpl)
+CB_INSTRUCTION(cpl)
 {
     write_register(REG_A, ~read_register(REG_A));
     set_flag(FLAG_N, true);
@@ -135,25 +135,25 @@ INSTRUCTION(cpl)
     return in.cycle_count;
 }
 
-INSTRUCTION(push)
+CB_INSTRUCTION(push)
 {
     stack_push_16bit(read_register_16bit(in.reg1));
     return in.cycle_count;
 }
 
-INSTRUCTION(pop)
+CB_INSTRUCTION(pop)
 {
     write_register_16bit(in.reg1, stack_pop_16bit());
     return in.cycle_count;
 }
 
-INSTRUCTION(halt)
+CB_INSTRUCTION(halt)
 {
     cpu.halt = true;
     return in.cycle_count;
 }
 
-INSTRUCTION(inc)
+CB_INSTRUCTION(inc)
 {
     u8 added = 1;
     u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
@@ -178,9 +178,8 @@ INSTRUCTION(inc)
 }
 
 // Available addressing mode: R16, R8, HL_REL
-INSTRUCTION(dec)
+CB_INSTRUCTION(dec)
 {
-    u8 subbed = 1;
     u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
                                        : read_register_16bit(in.reg1);
 
@@ -241,7 +240,7 @@ static u16 static_sub(u16 val, u16 subbed, bool bit16)
     return val;
 }
 
-INSTRUCTION(add)
+CB_INSTRUCTION(add)
 {
     u16 val = read_register_16bit(in.reg1);
     u16 added = (in.type == A_HL_REL || in.type == A_D8)
@@ -252,7 +251,7 @@ INSTRUCTION(add)
     return in.cycle_count;
 }
 
-INSTRUCTION(adc)
+CB_INSTRUCTION(adc)
 {
     u16 val = read_register_16bit(in.reg1);
     u16 added = (in.type == A_HL_REL || in.type == A_D8)
@@ -264,7 +263,7 @@ INSTRUCTION(adc)
     return in.cycle_count;
 }
 
-INSTRUCTION(sub)
+CB_INSTRUCTION(sub)
 {
     u16 val = read_register_16bit(in.reg1);
     u16 subbed = (in.type == HL_REL || in.type == D8)
@@ -275,7 +274,7 @@ INSTRUCTION(sub)
     return in.cycle_count;
 }
 
-INSTRUCTION(sbc)
+CB_INSTRUCTION(sbc)
 {
     u16 val = read_register_16bit(in.reg1);
     u16 subbed = (in.type == A_HL_REL || in.type == A_D8)
@@ -289,7 +288,7 @@ INSTRUCTION(sbc)
 
 #pragma endregion add_sub
 
-INSTRUCTION(and)
+CB_INSTRUCTION(and)
 {
     u8 a = read_register(REG_A);
 
@@ -301,7 +300,7 @@ INSTRUCTION(and)
     return in.cycle_count;
 }
 
-INSTRUCTION(or)
+CB_INSTRUCTION(or)
 {
     u8 a = read_register(REG_A);
 
@@ -313,7 +312,7 @@ INSTRUCTION(or)
     return in.cycle_count;
 }
 
-INSTRUCTION(xor)
+CB_INSTRUCTION(xor)
 {
     u8 a = read_register(REG_A);
 
@@ -325,7 +324,7 @@ INSTRUCTION(xor)
     return in.cycle_count;
 }
 
-INSTRUCTION(cp)
+CB_INSTRUCTION(cp)
 {
     u8 a = read_register(REG_A);
     if (in.type == A_R8)
@@ -339,7 +338,7 @@ INSTRUCTION(cp)
     return in.cycle_count;
 }
 
-INSTRUCTION(rla)
+CB_INSTRUCTION(rla)
 {
     u8 a = read_register(REG_A);
     u8 c = get_flag(FLAG_C);
@@ -351,7 +350,7 @@ INSTRUCTION(rla)
     return in.cycle_count;
 }
 
-INSTRUCTION(rlca)
+CB_INSTRUCTION(rlca)
 {
     u8 a = read_register(REG_A);
     set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
@@ -362,7 +361,7 @@ INSTRUCTION(rlca)
     return in.cycle_count;
 }
 
-INSTRUCTION(rra)
+CB_INSTRUCTION(rra)
 {
     u8 a = read_register(REG_A);
     u8 c = get_flag(FLAG_C);
@@ -374,7 +373,7 @@ INSTRUCTION(rra)
     return in.cycle_count;
 }
 
-INSTRUCTION(rrca)
+CB_INSTRUCTION(rrca)
 {
     u8 a = read_register(REG_A);
     set_flag(FLAG_C, BIT(a, 0));
@@ -385,16 +384,18 @@ INSTRUCTION(rrca)
     return in.cycle_count;
 }
 
-INSTRUCTION(stop)
+CB_INSTRUCTION(stop)
 {
     NOT_IMPLEMENTED(__FUNCTION__);
     return in.cycle_count;
 }
 
-INSTRUCTION(cb)
+#pragma region cb_instructions
+#pragma endregion cb_instructions
+
+static u8 cb(__attribute__((unused)) struct instruction in)
 {
-    NOT_IMPLEMENTED(__PRETTY_FUNCTION__);
-    return in.cycle_count;
+    return cb_execute_instruction();
 }
 
 // clang-format off
@@ -438,11 +439,6 @@ static in_handler instruction_handlers[] = {
 };
 
 // clang-format on
-
-static inline u8 fetch_opcode()
-{
-    return read_memory(cpu.registers.pc++);
-}
 
 u8 execute_instruction()
 {

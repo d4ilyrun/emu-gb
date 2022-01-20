@@ -26,7 +26,7 @@ debug: CFLAGS += $(DEBUG_FLAGS)
 debug: clean $(BIN_FILES)
 	$(CC) $(BIN_FILES) $(LDFLAGS) -o $(EXE)
 
-test: CPPFLAGS += -DTEST_ROM
+test: CPPFLAGS += -DTEST_ROM -g
 test: clean $(BIN_FILES)
 	$(CC) $(BIN_FILES) $(LDFLAGS) -o $(EXE)
 

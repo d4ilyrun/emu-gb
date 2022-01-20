@@ -1,13 +1,19 @@
 #pragma once
 
-#include "cpu.h"
+#include "CPU/cpu.h"
 #include "memory.h"
+#include "utils/macro.h"
 #include "utils/types.h"
 
 /*
  * Run the next instruction at PC
  */
 u8 execute_instruction();
+
+static ALWAYS_INLINE u8 fetch_opcode()
+{
+    return read_memory(cpu.registers.pc++);
+}
 
 typedef enum instruction_name
 {
@@ -165,3 +171,33 @@ struct instruction {
 
 struct instruction fetch_instruction(u8 opcode);
 void display_instruction(struct instruction in);
+
+/*
+ * The following part of the file is centered around the CB prefixed
+ * instructions. CB prefixed instructions are instructions with a 2 bytes long
+ * opcode starting with CB.
+ */
+
+typedef enum
+{
+    CB_ROT,
+    CB_TEST,
+    CB_RES,
+    CB_SET,
+} cb_instruction_type;
+
+struct cb_instruction {
+    cb_instruction_type type;
+
+    union {
+        u8 bit;
+        u8 rot_type;
+    };
+
+    u8 data;
+    u16 address;
+    bool is_address;
+    cpu_register_name reg;
+};
+
+u8 cb_execute_instruction();
