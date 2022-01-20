@@ -68,14 +68,14 @@ static cpu_register_name find_register_16bit(uint8_t code)
 /*
  * Read condition from operand:
  *
- * 000 = NZ
- * 001 = Z
- * 010 = 3
- * 011 = NC
+ *  00 = NZ
+ *  01 = Z
+ *  10 = 3
+ *  11 = NC
  */
-static bool read_flag(u8 opcode)
+static bool read_flag(u8 flag_code)
 {
-    switch (OPCODE_Y(opcode)) {
+    switch (flag_code) {
     case 0x0:
         return !get_flag(FLAG_Z);
     case 0x1:
@@ -505,7 +505,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_D8:
         in.reg1 = REG_A;
-        in.reg2 = read_8bit_data();
+        in.data = read_8bit_data();
         break;
 
     case A_HL_REL:
