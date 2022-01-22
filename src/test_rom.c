@@ -13,8 +13,6 @@ void test_rom_update()
     if (read_memory(TEST_CHECK) == CHECK_TRUE) {
         output[ouput_size++] = (char)read_memory(TEST_VALUE);
         write_memory(TEST_CHECK, 0);
-    } else if (read_memory(TEST_CHECK)) {
-        printf(HEX "=" HEX "\n", TEST_CHECK, read_memory(TEST_CHECK));
     }
 }
 

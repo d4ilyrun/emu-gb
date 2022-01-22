@@ -11,10 +11,10 @@
 #endif
 
 static char *instruction_names[] = {
-    "ADC",  "ADD", "AND", "CALL", "CCF",  "CP",   "CPL", "DAA",  "DEC",
-    "DI",   "EI",  "ERR", "HALT", "INC",  "JP",   "JR",  "LD",   "LDH",
-    "NOP",  "OR",  "POP", "PUSH", "RET",  "RETI", "RLA", "RLCA", "RRA",
-    "RRCA", "RST", "SBC", "SCF",  "STOP", "SUB",  "XOR",
+    "ADC", "ADD",  "AND", "CALL", "CB",   "CCF",  "CP",   "CPL", "DAA",
+    "DEC", "DI",   "EI",  "ERR",  "HALT", "INC",  "JP",   "JR",  "LD",
+    "LDH", "NOP",  "OR",  "POP",  "PUSH", "RET",  "RETI", "RLA", "RLCA",
+    "RRA", "RRCA", "RST", "SBC",  "SCF",  "STOP", "SUB",  "XOR",
 };
 
 char *condition_names[] = {"NZ", "Z", "NC", "C", "???"};
@@ -82,8 +82,7 @@ void display_instruction(struct instruction in)
         break;
 
     case A_R16_REL:
-        asprintf(&operands, "A, (%s) (=" HEX8 ")", register_names[in.reg1],
-                 in.data);
+        asprintf(&operands, "A, " HEX8, in.data);
         break;
 
     case A_D16_REL:

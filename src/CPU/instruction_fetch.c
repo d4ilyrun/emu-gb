@@ -60,6 +60,18 @@ static cpu_register_name find_register(uint8_t code)
 static cpu_register_name find_register_16bit(uint8_t code)
 {
     if (code == 0x3)
+        return REG_SP;
+
+    return REG_BC + code;
+}
+
+/*
+ * Same as `find_register_16bit` but 11 is equivalent to AF instead of SP in
+ * PUSH/POP opcodes
+ */
+static cpu_register_name find_register_16bit_push_pop(uint8_t code)
+{
+    if (code == 0x3)
         return REG_AF;
 
     return REG_BC + code;
@@ -399,7 +411,10 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case R16:
-        in.reg1 = find_register_16bit(OPCODE_P(opcode));
+        if (in.instruction == IN_POP || in.instruction == IN_PUSH)
+            in.reg1 = find_register_16bit_push_pop(OPCODE_P(opcode));
+        else
+            in.reg1 = find_register_16bit(OPCODE_P(opcode));
         break;
 
     case A16:
@@ -528,12 +543,12 @@ struct instruction fetch_instruction(u8 opcode)
 #pragma region two_operand_dst_address
 
     case HL_REL_R8:
-        in.address = read_memory(read_register_16bit(REG_HL));
+        in.address = read_register_16bit(REG_HL);
         in.reg1 = find_register(OPCODE_Z(opcode));
         break;
 
     case HL_REL_D8:
-        in.address = read_memory(read_register_16bit(REG_HL));
+        in.address = read_register_16bit(REG_HL);
         in.data = read_8bit_data();
         break;
 
@@ -553,13 +568,13 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case HLD_A:
-        in.address = read_memory(read_register_16bit(REG_HL));
+        in.address = read_register_16bit(REG_HL);
         in.reg1 = REG_A;
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) - 1);
         break;
 
     case HLI_A:
-        in.address = read_memory(read_register_16bit(REG_HL));
+        in.address = read_register_16bit(REG_HL);
         in.reg1 = REG_A;
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) + 1);
         break;
