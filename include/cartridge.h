@@ -1,9 +1,14 @@
 #pragma once
 
+/**
+ * \file cartridge.cc
+ * \author Léo DUBOIN
+ * \brief load, read and write to a gameboy cartridge.
+ */
+
 #include "utils/types.h"
 
 /*
- *
  * 0x0104 - 0x0133 - Nintendo logo
  *
  * This 48 bytes represent the Nintendo logo that is shown when the Game Boy is
@@ -23,10 +28,18 @@ struct game_info {
     u8 cbg_flag;
 };
 
-/*
+/*!
+ * \struct cartridge_header
+ *
  * The Cartridge Header (0x0100 - 0x014F)
  *
- * The area at 0100h-014Fh of the ROM is reserved for some special information
+ * The area at 0100h-014Fh of the ROM is reserved for some special information.
+ * It holds information about:
+ * - the cartridge's starting protocol
+ * - the cartridge's type
+ * - the cartridge's rom/ram size
+ * - the game's version and ditributor
+ * - some intergrity checks
  */
 struct cartridge_header {
     u8 start_vector[4];
@@ -50,6 +63,12 @@ struct cartridge {
     u8 *rom;
 };
 
+/*!
+ * \Brief the different types of cartridge
+ *
+ * The enum values correspond to the cartridge's 'rom_version' header value.
+ * For example, all rom versions below MBC1 will be considered of type MBC1.
+ */
 typedef enum cartridge_type
 {
     ROM_ONLY = 0x0,
@@ -61,12 +80,26 @@ typedef enum cartridge_type
     MBC7 = 0x22,
 } cartridge_type;
 
+/// The game cartridge loaded with the emulator
 extern struct cartridge cartridge;
 
+/// Find the cartridge's header and cast to the correct type
 #define HEADER(_cart) ((struct cartridge_header *)((_cart).rom + 0x100))
 
+/*!
+ * \Brief load a cartridge in memory.
+ *
+ * The cartridge will be loaded in the global cartridge variable.
+ *
+ * \see cartridge
+ *
+ * \return wether the cartridge has been loaded sucessfully.
+ */
 bool load_cartridge(char *path);
 
+/*!
+ * \Brief prin the cartridge's information.
+ */
 void cartridge_info();
 
 u8 read_cartridge(u16 address);
