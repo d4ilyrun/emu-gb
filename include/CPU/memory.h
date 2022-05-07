@@ -35,7 +35,7 @@
 #define INTERRUPT_ENABLE_FLAGS 0xFFFF
 
 /**
- * \Brief write an 8bit value into memory.
+ * \brief write an 8bit value into memory.
  *
  * \param address 16bit memory address
  * \param val 8bit value
@@ -43,7 +43,7 @@
 void write_memory(u16 address, u8 val);
 
 /**
- * \Brief write a 16bit value into memory.
+ * \brief write a 16bit value into memory.
  *
  * The original GB stored values using the little endian notation.
  * This functions ensures that the bill will be correctly ordered.
@@ -54,7 +54,7 @@ void write_memory(u16 address, u8 val);
 void write_memory_16bit(u16 address, u16 val);
 
 /**
- * \Brief read an 8bit value from memory.
+ * \brief read an 8bit value from memory.
  *
  * \param address 16bit memory address
  * \return the 8bit value at the address
@@ -62,7 +62,7 @@ void write_memory_16bit(u16 address, u16 val);
 u8 read_memory(u16 address);
 
 /**
- * \Brief read an 16bit value from memory.
+ * \brief read an 16bit value from memory.
  *
  * The original GB stored values using the little endian notation.
  * This functions ensures that the bits will be correctly ordered.

@@ -37,5 +37,8 @@ add_subdirectory(src/)
 # TESTS
 
 # PROJECT EXECUTABLE
-add_executable(emu-gb src/main.c src/cartridge.c src/test_rom.c)
-target_link_libraries(emu-gb PRIVATE cpu)
+add_executable(emu-gb src/main.c src/test_rom.c)
+target_link_libraries(emu-gb PRIVATE cpu cartridge)
+
+# DOCUMENTATION
+add_subdirectory(doc)
