@@ -1,7 +1,7 @@
 #include "CPU/memory.h"
 
 #include "CPU/cpu.h"
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 #include "utils/macro.h"
 
 bool ram_access = false;

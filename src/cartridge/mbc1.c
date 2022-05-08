@@ -74,22 +74,28 @@ WRITE_16_FUNCTION(mbc1)
  */
 static unsigned compute_physical_addresss(u16 address)
 {
+    // In case the chip is MBC1M, the BANK1 register is actually 4 bit long
+    u8 bank_size = cartridge.multicart ? 4 : 5;
     u8 bank = 0b0000000;
 
     /* Trying to write into RAM.
      *
-     * In this case the physical address is a combination of the 13 lower bits
-     * of the requested address and BANK2, if mode is set, 0b00 else.
+     * In this case the physical address is a combination of the 13 lower
+     * bits of the requested address and BANK2, if mode is set, 0b00 else.
      */
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
-        bank = mode ? chip_registers.bank_2 : 0b00;
+        bank = chip_registers.mode ? chip_registers.bank_2 : 0b00;
         return (address & 0x1FFF) + (bank << 13);
     }
 
-    if (address < 0x4000 && chip_registers.mode) {
-        bank = chip_registers.bank_2 << 5;
+    if (address < 0x4000) {
+        if (chip_registers.mode)
+            bank = chip_registers.bank_2 << bank_size;
     } else if (address < 0x8000) {
-        bank = (chip_registers.bank_2 << 5) + chip_registers.bank_1;
+        bank = chip_registers.bank_2 << bank_size;
+        bank += cartridge.multicart
+                  ? chip_registers.bank_1 & 0xF // Only 4 first bits
+                  : chip_registers.bank_1;
     } else {
         // TODO: error trying to access invalid address
         assert(false && "MBC1: Reading an out of bounds address.");
@@ -100,10 +106,10 @@ static unsigned compute_physical_addresss(u16 address)
 
 READ_FUNCTION(mbc1)
 {
-    unsigned physical_address = compute_physical_addresss(address);
-
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
         return 0xFF; // Undefined value
+
+    unsigned physical_address = compute_physical_addresss(address);
 
     // TODO: gracefully throw an error
     assert(physical_address < cartridge.rom_size);
@@ -113,10 +119,10 @@ READ_FUNCTION(mbc1)
 
 READ_16_FUNCTION(mbc1)
 {
-    unsigned physical_address = compute_physical_addresss(address);
-
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
         return 0xFFFF; // Undefined value
+
+    unsigned physical_address = compute_physical_addresss(address);
 
     // TODO: gracefully throw an error
     assert(physical_address < cartridge.rom_size);

@@ -1,6 +1,6 @@
 #include "CPU/memory.h"
 
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 

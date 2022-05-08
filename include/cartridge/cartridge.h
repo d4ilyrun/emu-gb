@@ -80,9 +80,36 @@ struct cartridge_header {
     u16 global_checksum; ///< Not verified in the Game Boy
 };
 
+/**
+ * \struct cartridge
+ * \brief Information about the cartridge.
+ *
+ * The cartridge ROM is loaded during startup and should never be modified. \n
+ * Use the memory API to interact with it instead.
+ *
+ * \see write_memory read_memory
+ */
 struct cartridge {
-    char filename[1024];
+    char filename[1024]; ///< Path to the rom file.
+
+    /**
+     * Some cartridges include more than one game.\n
+     * Those cartriges have a slightly different banking mechanism.
+     *
+     * \see read_mbc1
+     */
+    bool multicart;
+
+    /**
+     * Actual size of the game's ROM. \n
+     * Should be equivalent to 32 < \c rom_size header.
+     */
     u32 rom_size;
+
+    /**
+     * The actual content of the game's ROM. \n
+     * \warning ROM stands for Read-Only memory, it should NEVER be modified.
+     */
     u8 *rom;
 };
 
@@ -145,13 +172,3 @@ void write_cartridge(u16 address, u8 data);
  * \copydoc write_memory_16bit
  */
 void write_cartridge_16bit(u16 address, u16 data);
-
-/**
- * \brief MODE register
- *
- * Determines how the ROM_BANK2 register value is used during access
- *
- * 1 = ROM_BANK2 affects accesses to 0x0000-0x3FFF, 0x4000-0x7FFF, 0xA000-0xBFFF
- * 0 = ROM_BANK2 affects only accesses to 0x4000-0x7FFF
- */
-extern bool mode;

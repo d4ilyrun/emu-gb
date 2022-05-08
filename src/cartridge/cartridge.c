@@ -1,9 +1,10 @@
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "cartridge/memory.h"
 #include "utils/macro.h"
 
 struct cartridge cartridge;
@@ -17,6 +18,51 @@ static bool verify_header_checksum(struct cartridge cart)
         sum -= cart.rom[i++] - 1;
 
     return sum == 0;
+}
+
+/* Checking if an MBC1 cartridge contains multiple games.
+ *
+ * This is done by checking if multiple nintendo logos are present within the
+ * rom.
+ */
+static bool check_multicart()
+{
+    int nb_games = 4;
+
+    // ALl known multicart cartridges use 8M of ROM
+    if (HEADER(cartridge)->rom_size < 8) {
+        cartridge.multicart = false;
+        return false;
+    }
+
+    // First assume that it is a multicart
+    cartridge.multicart = true;
+
+    // Set BANK1 to zero
+    u8 bank2 = chip_registers.bank_2;
+    chip_registers.bank_1 = 0;
+    chip_registers.mode = true;
+
+    // Loop through all four possiblbbe BANK2 values
+    for (chip_registers.bank_2 = 0b00; chip_registers.bank_2 <= 0b11;
+         ++chip_registers.bank_2) {
+        // Look for the nintendo logo
+        printf("NEW BANK: %d\n", chip_registers.bank_2);
+        for (size_t i = 0; i < sizeof(nintendo_logo); ++i) {
+            printf("%x = %x, ", read_cartridge(0x0104 + i), nintendo_logo[i]);
+            if (read_cartridge(0x0104 + i) != nintendo_logo[i]) {
+                nb_games -= 1;
+                break;
+            }
+        }
+        printf("\n");
+    }
+
+    printf("%d\n", nb_games);
+    cartridge.multicart = nb_games;
+    chip_registers.bank_2 = bank2;
+    chip_registers.mode = false; // Always initialized at false
+    return cartridge.multicart;
 }
 
 bool load_cartridge(char *path)
@@ -35,6 +81,7 @@ bool load_cartridge(char *path)
     fseek(rom, 0, SEEK_END);
     cartridge.rom_size = ftell(rom);
     cartridge.rom = malloc(cartridge.rom_size);
+    cartridge.multicart = false;
 
     rewind(rom);
     fread(cartridge.rom, 1, cartridge.rom_size, rom);
@@ -43,6 +90,10 @@ bool load_cartridge(char *path)
         fputs("Failed to load cartridge: Invalid checksum.", stderr);
         return false;
     }
+
+    cartridge_type type = HEADER(cartridge)->type;
+    if (type != ROM_ONLY && type <= MBC1) // If of type MBC1
+        check_multicart();
 
     return true;
 }
@@ -73,5 +124,6 @@ void cartridge_info()
     printf("\tROM Size  : %d KB\n", 32 << header->rom_size);
     printf("\tRAM Size  : %2.2X\n", header->ram_size);
     printf("\tROM Vers  : %2.2X\n", header->rom_version);
+    printf("\tMulticart : %s\n", cartridge.multicart ? "YES" : "NO");
     putchar('\n');
 }
