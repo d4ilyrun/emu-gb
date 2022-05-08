@@ -4,7 +4,7 @@
 #include "CPU/instruction.h"
 #include "CPU/interrupt.h"
 #include "CPU/timer.h"
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 #include "test_rom.h"
 #include "utils/macro.h"
 

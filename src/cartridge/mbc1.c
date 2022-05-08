@@ -132,5 +132,21 @@ READ_16_FUNCTION(mbc1)
 
 DUMP_FUNCTION(mbc1)
 {
-    NOT_IMPLEMENTED("MBC1 ROM dumping");
+    u8 num_banks = 2 << (HEADER(cartridge)->rom_size + 1);
+    u16 bank_start;
+    unsigned buf = 0;
+
+    write_mbc1(0x6000, 0x01);
+    for (u8 bank = 0; bank < num_banks; ++bank) {
+        write_mbc1(0x2000, bank);
+        if (cartridge.multicart) {
+            write_mbc1(0x4000, bank >> 4);
+            bank_start = (bank & 0x0F) ? 0x4000 : 0x0000;
+        } else {
+            write_mbc1(0x4000, bank >> 5);
+            bank_start = (bank & 0x1F) ? 0x4000 : 0x0000;
+        }
+        for (u16 addr = bank_start; addr < bank_start + 0x4000; ++addr)
+            buf += read_mbc1(addr);
+    }
 }
