@@ -3,15 +3,15 @@
 /**
  * \file cartridge.cc
  * \author Léo DUBOIN
- * \brief load, read and write to a gameboy cartridge.
+ * \brief Load, read and write to a gameboy cartridge.
  */
 
 #include "utils/types.h"
 
-/*
- * 0x0104 - 0x0133 - Nintendo logo
+/**
+ * \brief 0x0104 - 0x0133 - Nintendo logo
  *
- * This 48 bytes represent the Nintendo logo that is shown when the Game Boy is
+ * These 48 bytes represent the Nintendo logo that is shown when the Game Boy is
  * powered on (the ones that appear corrupted if the cartridge is not inserted
  * correctly, for example).
  */
@@ -22,9 +22,15 @@ static u8 nintendo_logo[] = {
     0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
 };
 
+/**
+ * \struct game_info
+ * \brief Game information
+ */
 struct game_info {
     char game_title[11];
-    char manufacturer_code[4];
+    char manufacturer_code[4]; ///< 4 character uppercase code
+
+    /// Flag used to enable GBC functions in CGB/AGB/AGS
     u8 cbg_flag;
 };
 
@@ -42,19 +48,36 @@ struct game_info {
  * - some intergrity checks
  */
 struct cartridge_header {
-    u8 start_vector[4]; /*! The cartridge's starting protocol. */
+    /**
+     * The cartridge starting protocol. Executed when lauching the game.\n
+     * Usually a \c nop follow by a <tt>jp 150h</tt>.
+     */
+    u8 start_vector[4];
+
     u8 nintendo_logo[sizeof(nintendo_logo)];
-    struct game_info game_info;
+    struct game_info game_info; ///< \see game_info
+
+    /**
+     * Indicates the publisher. 2 character uppercase.
+     * Only used by games released after the SGB, set to 0x014B by default;
+     */
     u16 new_license_code;
-    u8 sgb_flag;
-    u8 type;
-    u8 rom_size;
-    u8 ram_size;
-    u8 dst_code;
+
+    u8 sgb_flag; ///< Indicates wether the game supports SGB functions
+    u8 type;     ///< The type of the cartridge. \see cartridge_type
+    u8 rom_size; ///< ROM size: 32 << \c value
+    u8 ram_size; ///< Specifies RAM size if any.
+    u8 dst_code; ///< Set to 0x00 if sold to Japan, else set to 0x01
+
+    /**
+     * Indicates the publishing company.
+     * If set to 0x33, use the \c new_license_code header instead.
+     */
     u8 old_license_code;
-    u8 rom_version;
-    u8 header_checksum;
-    u16 global_checksum; // Not verified in the Game Boy
+
+    u8 rom_version; ///< In case multiple versions of the game were released.
+    u8 header_checksum;  ///< Checksum to ensure the intergrity of the ROM.
+    u16 global_checksum; ///< Not verified in the Game Boy
 };
 
 struct cartridge {
@@ -64,10 +87,11 @@ struct cartridge {
 };
 
 /**
- * \brief the different types of cartridge
+ * \brief The different types of cartridge
  *
  * The enum values correspond to the cartridge's \c type header value.
- * For example, all rom versions below MBC1 will be considered of type MBC1.
+ * For example, all rom versions lesser or equal to MBC1 will be considered of
+ * type MBC1.
  */
 typedef enum cartridge_type
 {
@@ -98,12 +122,26 @@ extern struct cartridge cartridge;
 bool load_cartridge(char *path);
 
 /**
- * \brief prin the cartridge's information.
+ * \brief Print the cartridge's information.
  */
 void cartridge_info();
 
+/**
+ * \copydoc read_memory
+ */
 u8 read_cartridge(u16 address);
+
+/**
+ * \copydoc read_memory_16bit
+ */
 u16 read_cartridge_16bit(u16 address);
 
+/**
+ * \copydoc write_memory
+ */
 void write_cartridge(u16 address, u8 data);
+
+/**
+ * \copydoc write_memory_16bit
+ */
 void write_cartridge_16bit(u16 address, u16 data);

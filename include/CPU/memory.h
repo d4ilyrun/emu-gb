@@ -71,3 +71,18 @@ u8 read_memory(u16 address);
  * \return the 16bit value at the address
  */
 u16 read_memory_16bit(u16 address);
+
+/**
+ * \brief Restrict access the memory in the RAM area (0xA000-0xBFFF).
+ *
+ * The access is restricted by default but can be activated by writing to the
+ * RAMG area of the MBC1, MBC2 cartridges.
+ * If writing a value with the bit patten \c 0b1010 in the lower nibble,
+ * access will be granted. Any other value will disable the acess to the RAM.
+ *
+ * When access is disabled, all writes to the external RAM are ignored and reads
+ * return undefined values.
+ *
+ * \see write_cartridge write_cartridge_16bit
+ */
+extern bool ram_access;

@@ -4,6 +4,8 @@
 #include "cartridge.h"
 #include "utils/macro.h"
 
+bool ram_access = false;
+
 void write_memory(u16 address, u8 val)
 {
     if (address < ROM_BANK_SWITCHABLE) {
