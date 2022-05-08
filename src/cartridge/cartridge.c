@@ -28,6 +28,7 @@ bool load_cartridge(char *path)
         return false;
     }
 
+    // TODO: check if filename is too long !!!
     strcpy(cartridge.filename, path);
 
     // Get rom_size and allocate enough space to store the cartridge's rom
