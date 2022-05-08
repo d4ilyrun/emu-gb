@@ -10,6 +10,7 @@
 #include "CPU/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "utils/macro.h"
 
 WRITE_FUNCTION(mbc1)
 {
@@ -35,6 +36,16 @@ WRITE_FUNCTION(mbc1)
     cartridge.rom[address] = data;
 }
 
+WRITE_16_FUNCTION(mbc1)
+{
+    // TODO: check for actual implementation
+
+    // Write the lower bytes after so that we keep the correct lower bits for
+    // when we update the registers
+    write_mbc1(address + 1, MSB(data));
+    write_mbc1(address, LSB(data));
+}
+
 /**
  * Calculate the actual physical address within the ROM from teh value inside
  * the MODE and BANK registers.
@@ -56,7 +67,7 @@ WRITE_FUNCTION(mbc1)
  *  ----------------------
  *
  */
-READ_FUNCTION(mbc1)
+static unsigned compute_physical_addresss(u16 address)
 {
     u8 bank = 0b0000000;
 
@@ -69,10 +80,25 @@ READ_FUNCTION(mbc1)
         assert(false && "MBC1: Reading an out of bounds address.");
     }
 
-    unsigned int physical_address = (address & 0x1FFF) + (bank << 13);
+    return (address & 0x1FFF) + (bank << 13);
+}
+
+READ_FUNCTION(mbc1)
+{
+    unsigned physical_address = compute_physical_addresss(address);
 
     // TODO: gracefully throw an error
     assert(physical_address < cartridge.rom_size);
 
     return cartridge.rom[physical_address];
+}
+
+READ_16_FUNCTION(mbc1)
+{
+    unsigned physical_address = compute_physical_addresss(address);
+
+    // TODO: gracefully throw an error
+    assert(physical_address < cartridge.rom_size);
+
+    return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
 }
