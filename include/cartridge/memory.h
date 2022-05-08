@@ -25,6 +25,8 @@
  * access.
  */
 extern struct chip_registers_t {
+    // MBC1 registers
+
     u8 ram_g;
     u8 bank_1;
     u8 bank_2;
@@ -38,12 +40,17 @@ extern struct chip_registers_t {
      */
     bool mode;
 
+    // MBC2 registers
+
+    u8 rom_b; // Set to 1 by default
+
 } chip_registers;
 
 // Cartridge register addresses
 #define RAM_GATE 0x2000
-#define ROM_BANK2 0x5FFF
-#define ROM_BANK_SWITCHABLE 0x8000 // from CPU/memory.
+#define ROM_BANK 0x4000 ///< \see CPU/memory
+#define ROM_BANK2 0x6000
+#define ROM_BANK_SWITCHABLE 0x8000 ///< \see CPU/memory.
 
 // MEMORY ACCESS API DECLARATION
 
@@ -66,3 +73,4 @@ extern struct chip_registers_t {
 
 // Currently available cartridge types are declared here:
 DECLARE_CARTRIDGE_TYPE(mbc1)
+DECLARE_CARTRIDGE_TYPE(mbc2)

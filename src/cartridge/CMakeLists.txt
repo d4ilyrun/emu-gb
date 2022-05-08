@@ -3,4 +3,5 @@ add_library(
     cartridge.c
     memory.c
     mbc1.c
+    mbc2.c
 )
