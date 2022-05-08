@@ -14,6 +14,8 @@
 
 WRITE_FUNCTION(mbc1)
 {
+    // READ_ONLY AREA
+    // Only update registers values when writing
     if (address < RAM_GATE) {
         // bits 7-4 are ignored during write
         chip_registers.ram_g = data & 0xF;
@@ -32,8 +34,10 @@ WRITE_FUNCTION(mbc1)
         chip_registers.mode = data & 0x1;
     }
 
-    // FIXME: write inside ROM or heap ?
-    cartridge.rom[address] = data;
+    // READ/WRITE AREA
+    else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
+        cpu.memory[address] = data;
+    }
 }
 
 WRITE_16_FUNCTION(mbc1)
@@ -51,7 +55,7 @@ WRITE_16_FUNCTION(mbc1)
  * the MODE and BANK registers.
  *
  * The pysical address is a combination of 7 bits formed from the value within
- * the registers (BANK) and the 13 lower bits of the requested address.
+ * the registers (BANK) and the 14 lower bits of the requested address.
  *
  * IF address in 0x0000 - 0x3FFF:
  *  IF MODE = 0 -> BANK = 0
@@ -66,10 +70,21 @@ WRITE_16_FUNCTION(mbc1)
  *  |  BANK   |  A<13:0> |
  *  ----------------------
  *
+ * For more explanations please refer to the given documentation.
  */
 static unsigned compute_physical_addresss(u16 address)
 {
     u8 bank = 0b0000000;
+
+    /* Trying to write into RAM.
+     *
+     * In this case the physical address is a combination of the 13 lower bits
+     * of the requested address and BANK2, if mode is set, 0b00 else.
+     */
+    if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
+        bank = mode ? chip_registers.bank_2 : 0b00;
+        return (address & 0x1FFF) + (bank << 13);
+    }
 
     if (address < 0x4000 && chip_registers.mode) {
         bank = chip_registers.bank_2 << 5;
@@ -80,12 +95,15 @@ static unsigned compute_physical_addresss(u16 address)
         assert(false && "MBC1: Reading an out of bounds address.");
     }
 
-    return (address & 0x1FFF) + (bank << 13);
+    return (address & 0x3FFF) + (bank << 14);
 }
 
 READ_FUNCTION(mbc1)
 {
     unsigned physical_address = compute_physical_addresss(address);
+
+    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
+        return 0xFF; // Undefined value
 
     // TODO: gracefully throw an error
     assert(physical_address < cartridge.rom_size);
@@ -97,8 +115,16 @@ READ_16_FUNCTION(mbc1)
 {
     unsigned physical_address = compute_physical_addresss(address);
 
+    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
+        return 0xFFFF; // Undefined value
+
     // TODO: gracefully throw an error
     assert(physical_address < cartridge.rom_size);
 
     return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
+}
+
+DUMP_FUNCTION(mbc1)
+{
+    NOT_IMPLEMENTED("MBC1 ROM dumping");
 }

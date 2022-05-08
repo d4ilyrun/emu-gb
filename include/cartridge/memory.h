@@ -54,12 +54,15 @@ extern struct chip_registers_t {
 #define READ_FUNCTION(_type) u8 read_##_type(u16 address)
 #define READ_16_FUNCTION(_type) u16 read_##_type##_16bit(u16 address)
 
+#define DUMP_FUNCTION(_type) void dump_##_type()
+
 /// Declare the necessary functions to access memory for a given cartridge type
 #define DECLARE_CARTRIDGE_TYPE(_type) \
     WRITE_FUNCTION(_type);            \
     WRITE_16_FUNCTION(_type);         \
     READ_FUNCTION(_type);             \
-    READ_16_FUNCTION(_type);
+    READ_16_FUNCTION(_type);          \
+    DUMP_FUNCTION(_type);
 
 // Currently available cartridge types are declared here:
 DECLARE_CARTRIDGE_TYPE(mbc1)
