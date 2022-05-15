@@ -4,4 +4,5 @@ add_library(
     memory.c
     mbc1.c
     mbc2.c
+    mbc3.c
 )
