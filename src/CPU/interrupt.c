@@ -6,6 +6,11 @@
 
 // clang-format off
 
+struct interrupt {
+    u8 flag;
+    interrupt_vector vector;
+};
+
 struct interrupt interrupt_table[] = {
     [IV_VBLANK] = {0x01, IV_VBLANK},
     [IV_LCD]    = {0x02, IV_LCD},
