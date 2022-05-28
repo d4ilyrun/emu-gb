@@ -40,10 +40,8 @@ int main(int argc, char **argv)
             timer_ticks(CYCLE_TICKS);
         }
 
-#ifdef TEST_ROM
         test_rom_update();
         test_rom_print();
-#endif
     }
 
     return 0;

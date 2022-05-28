@@ -76,3 +76,4 @@ extern struct chip_registers_t {
 // Currently available cartridge types are declared here:
 DECLARE_CARTRIDGE_TYPE(mbc1)
 DECLARE_CARTRIDGE_TYPE(mbc2)
+DECLARE_CARTRIDGE_TYPE(mbc3)

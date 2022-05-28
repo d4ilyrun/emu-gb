@@ -81,7 +81,7 @@ READ_FUNCTION(mbc2)
 READ_16_FUNCTION(mbc2)
 {
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
-        return 0xFF; // Undefined value
+        return 0xFFFF; // Undefined value
 
     unsigned physical_address = compute_physical_adress(address);
 

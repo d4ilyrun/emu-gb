@@ -136,7 +136,7 @@ DUMP_FUNCTION(mbc1)
     u16 bank_start;
 
     // This value is set but never used in the original algorithm.
-    // I don't know what purpose it has but i'll leave it anyway.
+    // I don't know what purpose it serves but i'll leave it anyway.
     unsigned buf = 0;
 
     write_mbc1(0x6000, 0x01);

@@ -97,7 +97,6 @@ void latch_rtc()
     memcpy(rtc.readable, rtc.writable, sizeof(rtc.writable));
 }
 
-/// FIXME: I don't really understand the documentation on this one ...
 void map_rtc(const u8 data)
 {
     update_rtc();
@@ -146,5 +145,98 @@ WRITE_FUNCTION(mbc3)
             update_rtc();
             rtc.writable[rtc_mapped_register - 0x8] = data;
         }
+    }
+}
+
+WRITE_16_FUNCTION(mbc3)
+{
+    // TODO: check for actual implementation
+
+    // Write the lower bytes after so that we keep the correct lower bits for
+    // when we update the registers
+    write_mbc3(address + 1, MSB(data));
+    write_mbc3(address, LSB(data));
+}
+
+/**
+ * \see compute_physical_addresss in mbc1.c
+ */
+static unsigned compute_physical_addresss(u16 address)
+{
+    u8 bank_size = 5;
+    u8 bank = 0b0000000;
+
+    /* Trying to write into RAM.
+     *
+     * In this case the physical address is a combination of the 13 lower
+     * bits of the requested address and BANK2, if mode is set, 0b00 else.
+     */
+    if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
+        bank = chip_registers.mode ? chip_registers.bank_2 : 0b00;
+        return (address & 0x1FFF) + (bank << 13);
+    }
+
+    if (address < 0x4000) {
+        if (chip_registers.mode)
+            bank = chip_registers.bank_2 << bank_size;
+    } else if (address < 0x8000) {
+        bank = chip_registers.bank_2 << bank_size;
+        bank += chip_registers.bank_1;
+    } else {
+        // TODO: throw nice error
+        assert(false && "MBC3: Reading an out of bounds address.");
+    }
+
+    return (address & 0x3FFF) + (bank << 14);
+}
+
+READ_FUNCTION(mbc3)
+{
+    if (address >= VIDEO_RAM && address < EXTERNAL_RAM && !ram_access)
+        return 0xFF; // Undefined value
+
+    if (rtc_mapped_register >= 0x8 && rtc_mapped_register <= 0xC)
+        return rtc.readable[rtc_mapped_register - 0x8];
+
+    unsigned physical_address = compute_physical_addresss(address);
+
+    // TODO: gracefully throw an error
+    assert(physical_address < cartridge.rom_size);
+
+    return cartridge.rom[physical_address];
+}
+
+READ_16_FUNCTION(mbc3)
+{
+    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
+        return 0xFFFF; // Undefined value
+
+    if (rtc_mapped_register >= 0x8 && rtc_mapped_register <= 0xC)
+        return rtc.readable[rtc_mapped_register - 0x8];
+
+    unsigned physical_address = compute_physical_addresss(address);
+
+    // TODO: gracefully throw an error
+    assert(physical_address < cartridge.rom_size);
+
+    return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
+}
+
+DUMP_FUNCTION(mbc3)
+{
+    u8 num_banks = 2 << (HEADER(cartridge)->rom_size + 1);
+    u16 bank_start;
+
+    // This value is set but never used in the original algorithm.
+    // I don't know what purpose it serves but i'll leave it anyway.
+    unsigned buf = 0;
+
+    write_mbc1(0x6000, 0x01);
+    for (u8 bank = 0; bank < num_banks; ++bank) {
+        write_mbc1(0x2000, bank);
+        write_mbc1(0x4000, bank >> 5);
+        bank_start = (bank & 0x1F) ? 0x4000 : 0x0000;
+        for (u16 addr = bank_start; addr < bank_start + 0x4000; ++addr)
+            buf += read_mbc1(addr);
     }
 }
