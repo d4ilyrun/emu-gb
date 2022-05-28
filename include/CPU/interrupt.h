@@ -5,6 +5,8 @@
 #define IF_ADDRESS 0xFF0F
 #define IE_ADDRESS 0xFFFF
 
+// TODO: Comments ! What does all this refer to !?
+
 // Interrupt vectors
 typedef enum interrupt_vector
 {
@@ -15,11 +17,6 @@ typedef enum interrupt_vector
     IV_SERIAL = 0x0058,
     IV_JOYPAD = 0x0060,
 } interrupt_vector;
-
-struct interrupt {
-    u8 flag;
-    interrupt_vector vector;
-};
 
 u8 handle_interrupts();
 void interrupt_set_ime(bool value);

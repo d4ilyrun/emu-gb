@@ -20,12 +20,12 @@ endif()
 # COMPILATION FLAGS
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-unused-result")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPT_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPTI_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG
-    "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG_LOG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -O0 -g3 -fsanitize=address")
+    "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG_LOG -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -O0 -g3 -fsanitize=address")
 
 # OPTIMISATION FLAGS
-set(OPT_FLAGS "-O3")
+set(OPTI_FLAGS "-O3")
 
 # SOURCE DIRECTORIES
 set(CMAKE_SOURCE_DIR src/ include/)
@@ -37,5 +37,8 @@ add_subdirectory(src/)
 # TESTS
 
 # PROJECT EXECUTABLE
-add_executable(emu-gb src/main.c src/cartridge.c src/test_rom.c)
-target_link_libraries(emu-gb PRIVATE cpu)
+add_executable(emu-gb src/main.c src/test_rom.c)
+target_link_libraries(emu-gb PRIVATE cpu cartridge)
+
+# DOCUMENTATION
+add_subdirectory(doc)

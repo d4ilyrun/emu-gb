@@ -1,12 +1,11 @@
 #include "CPU/memory.h"
 
 #include "CPU/cpu.h"
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 #include "utils/macro.h"
 
-// TODO: handle different cases in memory map
+bool ram_access = false;
 
-// TODO: Actually write in memory lol
 void write_memory(u16 address, u8 val)
 {
     if (address < ROM_BANK_SWITCHABLE) {
