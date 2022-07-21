@@ -19,7 +19,7 @@ all: $(EXE)
 $(EXE): build
 	$(CC) $(BIN_FILES) $(LDFLAGS) -o $@
 
-build:	CFLAGS += $(OPTI_FLAGS)
+build: CFLAGS += $(OPTI_FLAGS)
 build: $(BIN_FILES)
 
 debug: CFLAGS += $(DEBUG_FLAGS)
