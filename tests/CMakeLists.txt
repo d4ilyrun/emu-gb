@@ -1,0 +1,20 @@
+# Download GTest
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+    )
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+function(TestFeature feature files libs)
+    add_executable(${feature} ${files})
+    target_link_libraries(${feature} ${libs} gtest_main)
+    add_test(NAME ${feature} COMMAND ${feature})
+endfunction()
+
+TestFeature("example" "main.cc" cpu)
