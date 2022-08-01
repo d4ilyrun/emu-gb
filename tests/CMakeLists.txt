@@ -17,4 +17,4 @@ function(TestFeature feature files libs)
     add_test(NAME ${feature} COMMAND ${feature})
 endfunction()
 
-TestFeature("example" "main.cc" cpu)
+TestFeature("registers" "src/cpu/registers.cc" cpu)
