@@ -10,17 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@v17
         with:
           nix_conf: experimental-features = nix-command flakes
+
       - name: Build project and tests
         run: nix build .#unit-tests
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: unit-tests
-          path: result
+          path: result/tests
 
   test:
     name: Run unit tests
@@ -31,6 +34,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: unit-tests
+
       - name: Run tests for CPU
         run: |
-          ./result/test_registers
+          ./result/tests/test_registers

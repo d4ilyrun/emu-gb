@@ -69,9 +69,9 @@
             '';
 
             installPhase = ''
-              mkdir -p $out
-              mv tests/test_* $out/
-              rm -rf $out/unit-tests/*.cmake
+              mkdir -p $out/tests
+              mv tests/test_* $out/tests/
+              rm -rf $out/tests/*.cmake
             '';
           };
         };
