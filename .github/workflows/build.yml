@@ -34,12 +34,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: unit-tests
-          path: result
+          path: unit-tests
+      - name: Fix permissions on artifacts
+        run: sudo chmod 777 unit-tests/*
 
-      - name: DEBUG
-        run: |
-          tree
-          tree result
       - name: Run tests for CPU
         run: |
-          sudo ./test_registers
+          ./unit-tests/test_registers
