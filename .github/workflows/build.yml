@@ -35,6 +35,7 @@ jobs:
         with:
           name: unit-tests
           path: /unit-tests
+      - run: sudo mkdir /unit-tests
       - name: Fix permissions on artifacts
         run: sudo chmod 777 /unit-tests/*
 
