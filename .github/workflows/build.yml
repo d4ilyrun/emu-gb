@@ -36,7 +36,7 @@ jobs:
           name: unit-tests
           path: ~/unit-tests
       - name: Fix permissions on artifacts
-        run: sudo chmod 777 /unit-tests/*
+        run: sudo chmod 777 ~/unit-tests/*
 
       - name: Run tests for CPU
         run: |
