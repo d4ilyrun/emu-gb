@@ -41,4 +41,4 @@ jobs:
           tree result
       - name: Run tests for CPU
         run: |
-          ./test_registers
+          sudo ./test_registers
