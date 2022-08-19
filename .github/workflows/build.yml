@@ -16,9 +16,11 @@ jobs:
         with:
           nix_conf: experimental-features = nix-command flakes
 
+      - name: Install dependencies
+        run: nix-env -iA nixos.gtest nixos.gcc nixos.cmake
+
       - name: Build project and tests
         run: |
-          nix develop
           mkdir build && cd build
           cmake .. -DBUILD_TESTS=ON
           make -j4
