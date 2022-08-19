@@ -63,6 +63,8 @@ static unsigned compute_physical_adress(u16 address)
         return (chip_registers.rom_b << 13) + (address & 0x3FF);
 
     assert(false && "MBC2: compute_physical_adress: invalid area");
+
+    return 0xFFFF; // TODO: never reached macro
 }
 
 READ_FUNCTION(mbc2)

@@ -13,7 +13,7 @@ jobs:
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@v17
       - name: Install build dependencies
-        run: nix-shell
+        run: nix develop
         #uses: jwlawson/actions-setup-cmake@v1.12
       - name: build
         run: |
