@@ -64,7 +64,7 @@ static unsigned compute_physical_adress(u16 address)
 
     assert(false && "MBC2: compute_physical_adress: invalid area");
 
-    return 0xFFFF; // TODO: never reached macro
+    return 0xFF; // TODO: never reached macro
 }
 
 READ_FUNCTION(mbc2)

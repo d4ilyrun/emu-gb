@@ -5,6 +5,7 @@ pkgs.mkShell {
     wla-dx
     pre-commit
     doxygen
+    gtest
   ];
 
   shellHook = ''
