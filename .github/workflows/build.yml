@@ -20,7 +20,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: unit-tests
-          path: result/unit-tests
+          path: result
 
   test:
     name: Run unit tests
