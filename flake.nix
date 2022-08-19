@@ -32,19 +32,27 @@
             version = "0.1.0";
             src = self;
 
-            enableParallelBuilding = true;
-            hardeningDisable = [ "all" ];
+            nativeBuildInputs = with pkgs; [ gcc cmake ];
 
-            nativeBuildInputs = with pkgs; [ cmake ];
-            buildInputs = with pkgs; [
-              doxygen
-              valgrind
-            ];
+            configurePhase = ''
+              mkdir build && cd build
+              cmake ..
+            '';
+
+            buildPhase = ''
+              make emu-gb
+            '';
+
+            installPhase = ''
+              mkdir -p $out/bin
+              mv emu-gb $out/bin
+            '';
           };
         };
 
         devShell = pkgs.mkShell {
           inputsFrom = [ packages.emu-gb ];
+          buildInputs = with pkgs; [ doxygen valgrind ];
         };
 
       }
