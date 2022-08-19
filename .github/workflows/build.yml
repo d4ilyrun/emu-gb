@@ -22,8 +22,8 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: result
-          path: result
+          name: unit-tests
+          path: result/tests
 
   test:
     name: Run unit tests
@@ -33,7 +33,7 @@ jobs:
       - name: Download buils artifacts
         uses: actions/download-artifact@v3
         with:
-          name: result
+          name: unit-tests
           path: result
 
       - name: DEBUG
@@ -42,4 +42,4 @@ jobs:
           tree result
       - name: Run tests for CPU
         run: |
-          sudo ./result/test_registers
+          sudo ./test_registers
