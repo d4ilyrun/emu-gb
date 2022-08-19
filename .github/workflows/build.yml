@@ -35,6 +35,10 @@ jobs:
         with:
           name: unit-tests
 
+      - name: DEBUG
+        run: |
+          tree
+          tree result
       - name: Run tests for CPU
         run: |
           ./result/tests/test_registers
