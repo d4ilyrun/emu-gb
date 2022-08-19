@@ -52,7 +52,7 @@
           };
 
           unit-tests = stdenv.mkDerivation {
-            pname = "emu-gb-tests";
+            pname = "unit-tests";
             version = "0.1.0";
             src = self;
 
