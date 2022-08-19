@@ -69,9 +69,12 @@
             '';
 
             installPhase = ''
-              mkdir -p $out/tests
-              mv tests/test_* $out/tests/
-              rm -rf $out/tests/*.cmake
+              # Run tests and save output
+              cd tests
+
+              # Move test to reuse it later
+              mkdir -p $out/
+              mv tests/*_test $out/
             '';
           };
         };
@@ -81,7 +84,6 @@
           inputsFrom = [ packages.emu-gb ];
           buildInputs = with pkgs; [ doxygen valgrind gtest ];
         };
-
       }
     );
 }

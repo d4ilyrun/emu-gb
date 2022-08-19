@@ -1,28 +1,22 @@
-name: Build & Test
+name: gtest
 
 on:
   push:
   pull_request:
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
-    name: Build & Test
+    name: Build project & tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@v17
         with:
           nix_conf: experimental-features = nix-command flakes
-
       - name: Build project and tests
-        run: |
-          nix develop
-          mkdir build && cd build
-          cmake .. -DBUILD_TESTS=ON
-          make -j4
+        run: nix build .#unit-tests
 
-      - name: Run tests
-        working-directory: build/tests
-        run: ctest -C Release -R

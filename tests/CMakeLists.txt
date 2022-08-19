@@ -1,13 +1,15 @@
 find_package(GTest REQUIRED)
 include(GoogleTest)
+include(CTest)
 
 enable_testing()
 
 function(TestFeature feature file libs)
-    add_executable("test_${feature}" ${file})
-    target_link_libraries("test_${feature}" PRIVATE ${libs} gtest gtest_main)
-    add_test(NAME "test_${feature}" COMMAND "${feature}")
-    gtest_discover_tests("test_${feature}")
+    set(feature "${feature}_test")
+    add_executable("${feature}" ${file})
+    target_link_libraries("${feature}" PRIVATE ${libs} gtest gtest_main)
+    add_test(NAME "${feature}" COMMAND "${feature}" WORKING_DIRECTORY "./tests")
+    gtest_discover_tests("${feature}")
 endfunction()
 
 TestFeature("registers" "src/cpu/registers.cc" cpu)
