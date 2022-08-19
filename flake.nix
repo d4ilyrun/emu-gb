@@ -26,13 +26,15 @@
 
         defaultPackage = packages.emu-gb;
         
-        packages = {
+        packages = let
+          nativeBuildInputs = with pkgs; [ gcc cmake ];
+        in {
           emu-gb = stdenv.mkDerivation {
             pname = "emu-gb";
             version = "0.1.0";
             src = self;
 
-            nativeBuildInputs = with pkgs; [ gcc cmake ];
+            inherit nativeBuildInputs;
 
             configurePhase = ''
               mkdir build && cd build
@@ -48,11 +50,33 @@
               mv emu-gb $out/bin
             '';
           };
+
+          unit-tests = stdenv.mkDerivation {
+            pname = "emu-gb-tests";
+            version = "0.1.0";
+            src = self;
+
+            inherit nativeBuildInputs;
+            buildInputs = with pkgs; [ gtest ];
+
+            configurePhase = ''
+              mkdir build && cd build
+              cmake ..
+            '';
+
+            buildPhase = ''
+              make
+            '';
+
+            installPhase = ''
+              mv tests $out/unit-tests
+            '';
+          };
         };
 
         devShell = pkgs.mkShell {
           inputsFrom = [ packages.emu-gb ];
-          buildInputs = with pkgs; [ doxygen valgrind ];
+          buildInputs = with pkgs; [ doxygen valgrind gtest ];
         };
 
       }
