@@ -11,10 +11,10 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-function(TestFeature feature files libs)
-    add_executable(${feature} ${files})
-    target_link_libraries(${feature} ${libs} gtest_main)
-    add_test(NAME ${feature} COMMAND ${feature})
+function(TestFeature feature file libs)
+    add_executable("test_${feature}" ${file})
+    target_link_libraries("test_${feature}" ${libs} gtest_main)
+    add_test(NAME "test_${feature}" COMMAND "${feature}")
 endfunction()
 
 TestFeature("registers" "src/cpu/registers.cc" cpu)
