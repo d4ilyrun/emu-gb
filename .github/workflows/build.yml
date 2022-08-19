@@ -33,4 +33,4 @@ jobs:
           name: unit-tests
       - name: Run tests for CPU
         run: |
-          ./tests/registers
+          ./result/test_registers

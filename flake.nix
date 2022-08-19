@@ -42,7 +42,7 @@
             '';
 
             buildPhase = ''
-              make emu-gb
+              make -j4 emu-gb
             '';
 
             installPhase = ''
@@ -61,20 +61,23 @@
 
             configurePhase = ''
               mkdir build && cd build
-              cmake ..
+              cmake -DBUILD_TESTS=ON ..
             '';
 
             buildPhase = ''
-              make
+              make -j4
             '';
 
             installPhase = ''
-              mv tests $out/unit-tests
+              mkdir -p $out
+              mv tests/test_* $out/
+              rm -rf $out/unit-tests/*.cmake
             '';
           };
         };
 
         devShell = pkgs.mkShell {
+          name = "emu-gb";
           inputsFrom = [ packages.emu-gb ];
           buildInputs = with pkgs; [ doxygen valgrind gtest ];
         };

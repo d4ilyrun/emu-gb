@@ -35,7 +35,13 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(src/)
 
 # TESTS
-add_subdirectory(tests/)
+option(BUILD_TESTS "Build unit tests along the program" OFF)
+if (BUILD_TESTS)
+    add_subdirectory(tests/)
+else ()
+    message("<!> UNIT TESTS NOT BUILT. <!>")
+    message("-- If you want to build the unit tests use '-DBUILD_TESTS=ON'.")
+endif()
 
 # PROJECT EXECUTABLE
 add_executable(emu-gb src/main.c src/test_rom.c)
