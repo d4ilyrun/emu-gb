@@ -30,15 +30,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - run: sudo mkdir /unit-tests
       - name: Download buils artifacts
         uses: actions/download-artifact@v3
         with:
           name: unit-tests
-          path: /unit-tests
+          path: ~/unit-tests
       - name: Fix permissions on artifacts
         run: sudo chmod 777 /unit-tests/*
 
       - name: Run tests for CPU
         run: |
-          /unit-tests/test_registers
+          ~/unit-tests/test_registers
