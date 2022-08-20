@@ -11,6 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Configure
+        run: |
+          addgroup --system nixbld
+          adduser --home /home/nix --disabled-password --gecos "" --shell /bin/bash nix && \
+          adduser nix nixbld && \
+          mkdir -m 0755 /nix && chown nix /nix && \
+          mkdir -p /etc/nix && echo 'sandbox = false' > /etc/nix/nix.conf
+
       - name: Install Nix
         uses: cachix/install-nix-action@v15
         with:
