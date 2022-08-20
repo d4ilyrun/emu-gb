@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.21)
 PROJECT(
     emu-gb
     VERSION 0.0.0
-    LANGUAGES C
+    LANGUAGES C CXX
     )
 
 # BUILD OPTIONS
@@ -35,6 +35,13 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(src/)
 
 # TESTS
+option(BUILD_TESTS "Build unit tests along the program" OFF)
+if (BUILD_TESTS)
+    add_subdirectory(tests/)
+else ()
+    message("<!> UNIT TESTS NOT BUILT. <!>")
+    message("-- If you want to build the unit tests use '-DBUILD_TESTS=ON'.")
+endif()
 
 # PROJECT EXECUTABLE
 add_executable(emu-gb src/main.c src/test_rom.c)
