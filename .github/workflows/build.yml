@@ -13,9 +13,9 @@ jobs:
 
       - name: Configure
         run: |
-          addgroup --system nixbld
-          adduser --home /home/nix --disabled-password --gecos "" --shell /bin/bash nix && \
-          adduser nix nixbld
+          sudo addgroup --system nixbld
+          sudo adduser --home /home/nix --disabled-password --gecos "" --shell /bin/bash nix && \
+          sudo adduser nix nixbld
 
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@v17
