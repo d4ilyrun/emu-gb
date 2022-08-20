@@ -69,12 +69,8 @@
             '';
 
             installPhase = ''
-              # Run tests and save output
-              cd tests
-
-              # Move test to reuse it later
-              mkdir -p $out/
-              mv tests/*_test $out/
+              mkdir -p $out/tests
+              mv tests/*_test $out/tests
             '';
           };
         };
