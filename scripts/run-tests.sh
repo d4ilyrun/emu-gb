@@ -21,7 +21,7 @@ for test in $(ls *_test); do
     if [[ $VERBOSE -eq 0 ]]; then
         echo -e "$GRAY======== Running $test ========$NC"
         "./$test"
-        FAILED=$((FAILED + $?))
+        FAILED=$((FAILED + 1))
     else
         echo -ne "$GREY- $test: $NC"
         "./$test" > /dev/null
