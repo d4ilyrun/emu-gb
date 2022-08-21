@@ -7,7 +7,7 @@ extern "C" {
 #include "CPU/cpu.h"
 }
 
-namespace tests
+namespace cpu_tests
 {
 
 class TestCPURegisters : public ::testing::Test
@@ -91,6 +91,34 @@ TEST_F(CPURegisters8bit, LSB)
     SET_8BIT_REG(0x01);
 
     ASSERT_REGISTERS_EQ(expected);
+}
+
+// Write native 16-bit registers (PC/SP)
+// Should write onto the lower byte (0x00??)
+TEST_F(CPURegisters8bit, WriteSpecialRegister)
+{
+    const u8 val = 0x27;
+
+    write_register(REG_PC, val);
+    write_register(REG_SP, val | 0x10);
+
+    ASSERT_EQ(cpu.registers.pc, val);
+    ASSERT_EQ(cpu.registers.sp, val | 0x10);
+}
+
+// Read native 16-bit registers (PC/SP)
+TEST_F(CPURegisters8bit, ReadSpecialRegister)
+{
+    const u8 val = 0x27;
+
+    cpu.registers.pc = val;
+    cpu.registers.sp = val | 0x10;
+
+    auto pc = read_register(REG_PC);
+    auto sp = read_register(REG_SP);
+
+    ASSERT_EQ(pc, val);
+    ASSERT_EQ(sp, val | 0x10);
 }
 
 #pragma endregion tests_8bit
@@ -231,6 +259,45 @@ TEST_F(CPURegisters16bit, WriteCorrectRegister)
     });
 }
 
+// Read native 16-bit registers (PC/SP)
+TEST_F(CPURegisters16bit, ReadSpecialRegister)
+{
+    const u16 val = 0x0727;
+
+    cpu.registers.pc = val;
+    cpu.registers.sp = val | 0x1000;
+
+    auto pc = read_register_16bit(REG_PC);
+    auto sp = read_register_16bit(REG_SP);
+
+    ASSERT_EQ(pc, val);
+    ASSERT_EQ(sp, val | 0x1000);
+}
+
+// Write native 16-bit registers (PC/SP)
+TEST_F(CPURegisters16bit, WriteSpecialRegister)
+{
+    const u16 val = 0x0727;
+
+    write_register_16bit(REG_PC, val);
+    write_register_16bit(REG_SP, val | 0x1000);
+
+    ASSERT_EQ(cpu.registers.pc, val);
+    ASSERT_EQ(cpu.registers.sp, val | 0x1000);
+}
+
+// Make sure the registers are initialised correctly
+TEST_F(CPURegisters16bit, InitialRegisterValues)
+{
+    u16 expected[NB_REG] = {0x01B0, 0x0013, 0x00D8, 0x014D};
+
+    reset_cpu();
+
+    ASSERT_REGISTERS_16BIT_EQ(expected);
+    ASSERT_EQ(cpu.registers.pc, 0x0100);
+    ASSERT_EQ(cpu.registers.sp, 0xFFFE);
+}
+
 #pragma endregion tests_16bit
 
-} // namespace tests
+} // namespace cpu_tests

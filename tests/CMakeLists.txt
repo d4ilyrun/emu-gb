@@ -12,4 +12,6 @@ function(TestFeature feature file libs)
     gtest_discover_tests("${feature}")
 endfunction()
 
+# TODO: use subfolder
+
 TestFeature("registers" "src/cpu/registers.cc" cpu)

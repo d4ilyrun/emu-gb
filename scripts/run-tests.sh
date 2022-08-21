@@ -22,7 +22,6 @@ for test in $(ls *_test); do
         echo -e "$GRAY======== Running $test ========$NC"
         "./$test"
         FAILED=$((FAILED + $?))
-        echo -e "$GRAY===============================$NC"
     else
         echo -ne "$GREY- $test: $NC"
         "./$test" > /dev/null
