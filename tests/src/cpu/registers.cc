@@ -1,16 +1,22 @@
 // REG_ERR is also defined inside gtest ...
 #define REG_ERR REG_ERR_
+#include <gtest/gtest-param-test.h>
 #include <gtest/gtest.h>
+#include <gtest/gtest_pred_impl.h>
 #undef REG_ERR
+
+#include <algorithm>
 
 extern "C" {
 #include "CPU/cpu.h"
+#include "utils/macro.h"
 }
 
 namespace cpu_tests
 {
 
-class TestCPURegisters : public ::testing::Test
+template <typename T>
+class TestCPURegisters : public ::testing::TestWithParam<T>
 {
   public:
     TestCPURegisters() {}
@@ -23,7 +29,7 @@ class TestCPURegisters : public ::testing::Test
 
 #pragma region tests_8bit
 
-using CPURegisters8bit = TestCPURegisters;
+using CPURegisters8bit = TestCPURegisters<u8>;
 
 /**
  * \brief Map a function to each of the CPU's 8bits registers
@@ -35,8 +41,8 @@ using CPURegisters8bit = TestCPURegisters;
         }                                      \
     } while (0);
 
-#define SET_8BIT_REG(value) \
-    MAP_8BIT_REG([](int i) { write_register((cpu_register_name)i, value); })
+#define SET_8BIT_REG(value_) \
+    MAP_8BIT_REG([](int i) { write_register((cpu_register_name)i, (value_)); })
 
 /**
  * \brief Compare the content inside the CPU's 8bits registers with a list of
@@ -60,37 +66,29 @@ TEST_F(CPURegisters8bit, NullValues)
     ASSERT_REGISTERS_EQ(null_registers);
 }
 
-// Registers with all bits set
-TEST_F(CPURegisters8bit, MaxValue)
+TEST_P(CPURegisters8bit, Read)
 {
     u8 expected[NB_REG] = {0};
-    memset(expected, 0xFF, sizeof(expected));
+    const auto &val = GetParam();
 
-    SET_8BIT_REG(0xFF);
+    memset(expected, val, sizeof(expected));
+    memset(&cpu.registers, val, sizeof(cpu.registers));
 
     ASSERT_REGISTERS_EQ(expected);
 }
 
-// MSB is set everytime (0x80)
-TEST_F(CPURegisters8bit, MSB)
+TEST_P(CPURegisters8bit, Write)
 {
-    u8 expected[NB_REG] = {0};
-    memset(expected, 0x80, sizeof(expected));
+    SET_8BIT_REG(GetParam());
 
-    SET_8BIT_REG(0x80);
+    const auto &val = GetParam();
+    const auto &reg = cpu.registers;
 
-    ASSERT_REGISTERS_EQ(expected);
-}
+    const auto reg_values = {reg.a, reg.f, reg.b, reg.c,
+                             reg.d, reg.e, reg.h, reg.l};
 
-// MSB is set everytime (0x01)
-TEST_F(CPURegisters8bit, LSB)
-{
-    u8 expected[NB_REG] = {0};
-    memset(expected, 0x01, sizeof(expected));
-
-    SET_8BIT_REG(0x01);
-
-    ASSERT_REGISTERS_EQ(expected);
+    ASSERT_TRUE(std::all_of(reg_values.begin(), reg_values.end(),
+                            [&val](u8 x) { return x == val; }));
 }
 
 // Write native 16-bit registers (PC/SP)
@@ -107,12 +105,13 @@ TEST_F(CPURegisters8bit, WriteSpecialRegister)
 }
 
 // Read native 16-bit registers (PC/SP)
+// Should read the lower half only (0x1027 -> 0x27)
 TEST_F(CPURegisters8bit, ReadSpecialRegister)
 {
     const u8 val = 0x27;
 
-    cpu.registers.pc = val;
-    cpu.registers.sp = val | 0x10;
+    cpu.registers.pc = val | 0x1000;
+    cpu.registers.sp = val | 0x1010;
 
     auto pc = read_register(REG_PC);
     auto sp = read_register(REG_SP);
@@ -121,11 +120,19 @@ TEST_F(CPURegisters8bit, ReadSpecialRegister)
     ASSERT_EQ(sp, val | 0x10);
 }
 
+// Test cases:
+// - null value (0x00)
+// - max value (0xFF)
+// - "mirror" values (0b1010 0b0101 ; 0b1000 0b0001 ; ...)
+INSTANTIATE_TEST_SUITE_P(CPURegisters, CPURegisters8bit,
+                         ::testing::Values(0x00, 0xFF, 0x80, 0x01, 0xF0, 0x0F,
+                                           0x18, 0x81, 0x5A));
+
 #pragma endregion tests_8bit
 
 #pragma region tests_16bit
 
-using CPURegisters16bit = TestCPURegisters;
+using CPURegisters16bit = TestCPURegisters<u16>;
 
 /**
  * \brief Map a function to each of the CPU's 16bits registers
@@ -176,74 +183,31 @@ TEST_F(CPURegisters16bit, MaxValue)
     ASSERT_REGISTERS_16BIT_EQ(expected);
 }
 
-// Make sure the 16bit registers are read in correct order (bits 9-16 set)
-TEST_F(CPURegisters16bit, ReadByteOrderMSB)
+TEST_P(CPURegisters16bit, Read)
 {
-    u16 expected[NB_REG] = {0};
+    const auto &val = GetParam();
+    u16 expected[NB_REG] = {val, val, val, val};
 
-    for (auto i = 0; i < NB_REG; ++i)
-        expected[i] = 0xFF00;
+    const u8 lsb = LSB(val);
+    const u8 msb = MSB(val);
 
-    cpu.registers.a = 0xFF;
-    cpu.registers.b = 0xFF;
-    cpu.registers.d = 0xFF;
-    cpu.registers.h = 0xFF;
+    cpu.registers = {msb, lsb, msb, lsb, msb, lsb, msb, lsb};
 
     ASSERT_REGISTERS_16BIT_EQ(expected);
 }
 
-// Make sure the 16bit registers are read in correct order (bits 1-8 set)
-TEST_F(CPURegisters16bit, ReadByteOrderLSB)
+TEST_P(CPURegisters16bit, Write)
 {
-    u16 expected[NB_REG] = {0};
+    SET_16BIT_REG(GetParam());
 
-    for (auto i = 0; i < NB_REG; ++i)
-        expected[i] = 0x00FF;
+    const auto &val = GetParam();
+    const auto &reg = cpu.registers;
 
-    cpu.registers.f = 0xFF;
-    cpu.registers.c = 0xFF;
-    cpu.registers.e = 0xFF;
-    cpu.registers.l = 0xFF;
+    const auto reg_values = {(reg.a << 8) | reg.f, (reg.b << 8) | reg.c,
+                             (reg.d << 8) | reg.e, (reg.h << 8) | reg.l};
 
-    ASSERT_REGISTERS_16BIT_EQ(expected);
-}
-
-// Make sure the 16bit registers are correcly reordered when read
-TEST_F(CPURegisters16bit, ReadByteOrder)
-{
-    u16 expected[NB_REG] = {0};
-
-    for (auto i = 0; i < NB_REG; ++i)
-        expected[i] = 0xAABB;
-
-    cpu.registers = {0xAA, 0xBB, 0xAA, 0xBB, 0xAA, 0xBB, 0xAA, 0xBB};
-
-    ASSERT_REGISTERS_16BIT_EQ(expected);
-}
-
-// Make sure the 16bit registers are written in the correct order (bits 9-16
-// set)
-TEST_F(CPURegisters16bit, WriteByteOrderMSB)
-{
-    write_register_16bit(REG_AF, 0xFF00);
-    ASSERT_EQ(cpu.registers.a, 0xFF);
-    ASSERT_EQ(cpu.registers.f, 0x00);
-}
-
-// Make sure the 16bit registers are written in the correct order (bits 1-8 set)
-TEST_F(CPURegisters16bit, WriteByteOrderLSB)
-{
-    write_register_16bit(REG_AF, 0x00FF);
-    ASSERT_EQ(cpu.registers.a, 0x00);
-    ASSERT_EQ(cpu.registers.f, 0xFF);
-}
-
-// Make sure the 16bit registers are written in the correct order
-TEST_F(CPURegisters16bit, WriteByteOrder)
-{
-    write_register_16bit(REG_AF, 0xAABB);
-    ASSERT_EQ(cpu.registers.a, 0xAA);
-    ASSERT_EQ(cpu.registers.f, 0xBB);
+    ASSERT_TRUE(std::all_of(reg_values.begin(), reg_values.end(),
+                            [&val](u16 x) { return x == val; }));
 }
 
 // Make sure we don't accidentally write onto other registers
@@ -297,6 +261,15 @@ TEST_F(CPURegisters16bit, InitialRegisterValues)
     ASSERT_EQ(cpu.registers.pc, 0x0100);
     ASSERT_EQ(cpu.registers.sp, 0xFFFE);
 }
+
+// Test cases:
+// - null value (0x0000)
+// - max value (0xFFFF)
+// - One byte set only (0xFF00 ; 0x00FF ; ...)
+// - "mirror" values (0x8001; 0x0180; ...)
+INSTANTIATE_TEST_SUITE_P(CPURegisters, CPURegisters16bit,
+                         ::testing::Values(0x00, 0xFF, 0x80, 0x01, 0xF0, 0x0F,
+                                           0x18, 0x81, 0x5A));
 
 #pragma endregion tests_16bit
 
