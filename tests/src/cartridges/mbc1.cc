@@ -35,10 +35,12 @@ class MBC1Generator : public CartridgeGenerator<rom, ram>,
 };
 
 // 2 MiB ROM & 32 KiB RAM
-using MBC1 = MBC1Generator<1 << 21, 1 << 15>;
+class MBC1_Registers : public MBC1Generator<1 << 21, 1 << 15>
+{
+};
 
 // Update RAM access when writing to 0x0000 -> 0x1FFF
-TEST_F(MBC1, EnableRAM)
+TEST_F(MBC1_Registers, EnableRAM)
 {
     const auto address = 0x0010; // Between 0x0000 and 0x1FFF
 
@@ -63,7 +65,7 @@ TEST_F(MBC1, EnableRAM)
 
 // Update the lower 5 bits of the ROM bank number
 // when writing to 0x2000 -> 0x3FFF
-TEST_F(MBC1, ROMBankNumber)
+TEST_F(MBC1_Registers, ROMBankNumber)
 {
     const auto address = 0x3113;
 
@@ -86,7 +88,7 @@ TEST_F(MBC1, ROMBankNumber)
 
 // If the ROM Bank Number is set to a higher value than the number of banks in
 // the cart, the bank number is masked to the required number of bits.
-TEST_F(MBC1, ROMBankNumberMasking)
+TEST_F(MBC1_Registers, ROMBankNumberMasking)
 {
     // TODO
     GTEST_SKIP_("TODO: Not implemented");
@@ -94,7 +96,7 @@ TEST_F(MBC1, ROMBankNumberMasking)
 
 // Select RAM bank number (from 0x00 to 0x03) when writing to 0x4000 - 0x5FFF
 // Specify the upper two bibts of the ROM bank number (1MiB ROM or larger)
-TEST_F(MBC1, RAMBankNumber)
+TEST_F(MBC1_Registers, RAMBankNumber)
 {
     const auto address = 0x5025;
 
@@ -111,7 +113,7 @@ TEST_F(MBC1, RAMBankNumber)
 }
 
 // When writing to 0x6000 - 0x7FFF, switch between RAM and ROM banking mode
-TEST_F(MBC1, BankingModeSelect)
+TEST_F(MBC1_Registers, BankingModeSelect)
 {
     const auto address = 0x5025;
 
@@ -165,9 +167,9 @@ class MBC1RWGenerator : public MBC1Generator<rom, ram>,
     }
 };
 
-using MBC1_read_write = MBC1RWGenerator<1 << 21, 1 << 15>;
+using MBC1 = MBC1RWGenerator<1 << 21, 1 << 15>;
 
-TEST_P(MBC1_read_write, Write)
+TEST_P(MBC1, Write)
 {
     const auto &param = GetParam();
 
@@ -183,7 +185,7 @@ TEST_P(MBC1_read_write, Write)
     }
 }
 
-TEST_P(MBC1_read_write, Read)
+TEST_P(MBC1, Read)
 {
     const auto &param = GetParam();
     auto expected = param.value;
@@ -201,7 +203,7 @@ TEST_P(MBC1_read_write, Read)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Memory, MBC1_read_write,
+    Memory_8bit, MBC1,
     ::testing::Values(
         // ROM
         (struct mbc1_rw_param){0x21B3, 0x69, false, 0x12, 0b01, 0, 0x21B3},
@@ -214,9 +216,9 @@ INSTANTIATE_TEST_SUITE_P(
         (struct mbc1_rw_param){0xB123, 0x77, true, 0x00, 0b10, 1, 0x5123}));
 
 // 64 KiB ROM & 8 KiB RAM
-using MBC1_out_of_range = MBC1RWGenerator<1 << 16, 1 << 13>;
+using MBC1_Death = MBC1RWGenerator<1 << 16, 1 << 13>;
 
-TEST_P(MBC1_out_of_range, Write)
+TEST_P(MBC1_Death, Write)
 {
     const auto &param = GetParam();
 
@@ -228,7 +230,7 @@ TEST_P(MBC1_out_of_range, Write)
     EXPECT_DEATH(write_mbc1(param.address, param.value), "");
 }
 
-TEST_P(MBC1_out_of_range, Read)
+TEST_P(MBC1_Death, Read)
 {
     const auto &param = GetParam();
 
@@ -241,7 +243,7 @@ TEST_P(MBC1_out_of_range, Read)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Memory, MBC1_out_of_range,
+    Memory_8bit, MBC1_Death,
     ::testing::Values(
         // ROM
         (struct mbc1_rw_param){0x72A7, 0x42, false, 0x04, 0b10, 1, 0x1132A7},

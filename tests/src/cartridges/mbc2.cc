@@ -38,9 +38,9 @@ class MBC2Generator : public CartridgeGenerator<rom, 0x200>,
     }
 };
 
-using MBC2Registers = MBC2Generator<1 << 18>;
+using MBC2_Registers = MBC2Generator<1 << 18>;
 
-TEST_F(MBC2Registers, RAMEnable)
+TEST_F(MBC2_Registers, RAMEnable)
 {
     // When BIT 8 is clear: control RAM
     // RAM is disabled by default
@@ -63,7 +63,7 @@ TEST_F(MBC2Registers, RAMEnable)
     ASSERT_FALSE(ram_access);
 }
 
-TEST_F(MBC2Registers, ROMBankNumber)
+TEST_F(MBC2_Registers, ROMBankNumber)
 {
     // When BIT 8 is set: control ROM
     // Set to 1 by default
@@ -117,9 +117,9 @@ class MBC2RWGenerator : public MBC2Generator<rom>,
     }
 };
 
-using MBC2_read_write = MBC2RWGenerator<1 << 18>;
+using MBC2 = MBC2RWGenerator<1 << 18>;
 
-TEST_P(MBC2_read_write, Read)
+TEST_P(MBC2, Read)
 {
     const auto &param = GetParam();
     auto value = param.value;
@@ -136,7 +136,7 @@ TEST_P(MBC2_read_write, Read)
     ASSERT_EQ(read_mbc2(param.address), value);
 }
 
-TEST_P(MBC2_read_write, Write)
+TEST_P(MBC2, Write)
 {
     const auto &param = GetParam();
 
@@ -153,7 +153,7 @@ TEST_P(MBC2_read_write, Write)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Memory, MBC2_read_write,
+    Memory_8bit, MBC2,
     ::testing::Values(
         // ROM
         (struct mbc2_rw_param){0x12A7, 0x42, false, 0x4, 0x12A7},
@@ -167,13 +167,13 @@ INSTANTIATE_TEST_SUITE_P(
         (struct mbc2_rw_param){0xA000, 0x77, true, 0x0, 0x5123}));
 
 // 32KiB ROM
-using MBC2_out_of_range = MBC2RWGenerator<1 << 15>;
+using MBC2_Death = MBC2RWGenerator<1 << 15>;
 
 // No tests for writing because we either write into a predtermined address
 // range (no computation for the RAM) or into the ROM.
 // Thus, it is impossible to write outside of the boundaries.
 
-TEST_P(MBC2_out_of_range, Read)
+TEST_P(MBC2_Death, Read)
 {
     const auto &param = GetParam();
 
@@ -185,7 +185,7 @@ TEST_P(MBC2_out_of_range, Read)
     EXPECT_DEATH(write_mbc1(param.address, param.value), "");
 }
 
-INSTANTIATE_TEST_SUITE_P(Memory, MBC2_out_of_range,
+INSTANTIATE_TEST_SUITE_P(Memory_8bit, MBC2_Death,
                          ::testing::Values((struct mbc2_rw_param){
                              0x7FFF, 0x42, true, 0xF, 0x3FFFF}));
 } // namespace cartridge_tests

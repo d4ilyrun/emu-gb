@@ -48,11 +48,12 @@ TEST_P(ROMOnly, Read)
     ASSERT_EQ(read_cartridge(address), value);
 }
 
-INSTANTIATE_TEST_SUITE_P(Memory, ROMOnly, ::testing::Values(0, 0x7FFF, 0x001F));
+INSTANTIATE_TEST_SUITE_P(Memory_8bit, ROMOnly,
+                         ::testing::Values(0, 0x7FFF, 0x001F));
 
-using ROMOnlyDeath = ROMOnly;
+using ROMOnly_Death = ROMOnly;
 
-TEST_F(ROMOnlyDeath, OutOfRange)
+TEST_F(ROMOnly_Death, OutOfRange)
 {
     ASSERT_DEATH(write_cartridge(0x8000, 0x69), "");
     ASSERT_DEATH(read_cartridge(0x8000), "");
