@@ -7,6 +7,8 @@ PROJECT(
     LANGUAGES C CXX
     )
 
+option(BUILD_TESTS "Build unit tests along with the program" OFF)
+
 # BUILD OPTIONS
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -15,6 +17,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
   set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if (BUILD_TESTS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUNIT_TEST")
 endif()
 
 # COMPILATION FLAGS
@@ -35,12 +41,11 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(src/)
 
 # TESTS
-option(BUILD_TESTS "Build unit tests along the program" OFF)
 if (BUILD_TESTS)
     add_subdirectory(tests/)
 else ()
-    message("<!> UNIT TESTS NOT BUILT. <!>")
-    message("-- If you want to build the unit tests use '-DBUILD_TESTS=ON'.")
+    message("<!> UNIT TESTS NOT BUILT <!>")
+    message("-- If you want to build the unit tests use '-DBUILD_TESTS=ON'")
 endif()
 
 # PROJECT EXECUTABLE
