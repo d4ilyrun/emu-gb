@@ -221,7 +221,7 @@ TEST_P(MBC1_out_of_range, Write)
     const auto &param = GetParam();
 
     if (param.address < 0xA000)
-        GTEST_SKIP();
+        GTEST_SKIP() << "Writing into ROM";
     else
         EXPECT_GT(param.expected, sizeof(cartridge.ram));
 

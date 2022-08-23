@@ -5,7 +5,7 @@ extern "C" {
 namespace cartridge_tests
 {
 
-template <uint rom_size, uint ram_size = 0> class CartridgeGenerator
+template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
 {
   public:
     CartridgeGenerator(cartridge_type type)
@@ -18,7 +18,7 @@ template <uint rom_size, uint ram_size = 0> class CartridgeGenerator
             .game_info = info,
             .new_license_code = 0x014B,
             .sgb_flag = 0,
-            .type = MBC1,
+            .type = (u8)type,
             .rom_size = header_rom_size(),
             .ram_size = header_ram_size(),
             .dst_code = 0x01,

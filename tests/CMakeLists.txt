@@ -25,4 +25,6 @@ endfunction()
 # TODO: use subfolder
 
 NewTest(NAME "registers" SRCS "src/cpu/registers.cc" DEPS cpu)
+NewTest(NAME "rom" SRCS "src/cartridges/rom.cc" DEPS cartridge cpu)
 NewTest(NAME "mbc1" SRCS "src/cartridges/mbc1.cc" DEPS cartridge cpu)
+NewTest(NAME "mbc2" SRCS "src/cartridges/mbc2.cc" DEPS cartridge cpu)
