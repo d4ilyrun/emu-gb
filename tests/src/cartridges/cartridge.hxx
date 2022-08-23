@@ -2,9 +2,6 @@ extern "C" {
 #include <cartridge/cartridge.h>
 }
 
-namespace cartridge_tests
-{
-
 template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
 {
   public:
@@ -30,6 +27,11 @@ template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
                  .rom_size = rom_size,
                  .rom = rom_,
                  .ram = ram_};
+    }
+
+    auto GetCart() const
+    {
+        return cart_;
     }
 
   protected:
@@ -67,5 +69,3 @@ template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
         }
     }
 };
-
-} // namespace cartridge_tests

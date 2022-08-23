@@ -596,7 +596,9 @@ struct instruction fetch_instruction(u8 opcode)
         break;
     }
 
+#ifdef NDEBUG
     display_instruction(in);
+#endif
 
     return in;
 }
