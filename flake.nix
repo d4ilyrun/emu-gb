@@ -25,7 +25,7 @@
       in rec {
 
         defaultPackage = packages.emu-gb;
-        
+
         packages = let
           nativeBuildInputs = with pkgs; [ gcc cmake ];
         in {
@@ -69,8 +69,10 @@
             '';
 
             installPhase = ''
-              mkdir -p $out/tests
-              mv tests/*_test $out/tests
+              for test in $(find tests -type f -and -executable); do
+                mkdir -p "$out/$(dirname $test)"
+                mv $test "$out/$test"
+              done
             '';
           };
         };

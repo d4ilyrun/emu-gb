@@ -17,7 +17,7 @@ cd result/tests
 
 echo -e "====${GRAY} Running tests in result/tests $NC===="
 
-for test in $(ls *_test); do
+for test in $(find * -type f -and -executable); do
     if [[ $VERBOSE -eq 0 ]]; then
         echo -e "$GRAY======== Running $test ========$NC"
         "./$test"
@@ -35,12 +35,12 @@ for test in $(ls *_test); do
     fi
 done
 
-echo -e "====${GRAY}     Finished running tests    $NC===="
+echo -e "====${GRAY}     Finished running tests    $NC====\n"
 
 if [[ $FAILED -eq 0 ]]; then
-    echo -e "${GREEN}ALL TEST SUCCESFULLY PASSED!"
+    echo -e "${GREEN}ALL TESTS PASSED SUCESSFULLY!"
 else
-    echo -e "${RED}FAILED $FAILED TESTS"
+    echo -e "${RED}FAILED $FAILED TEST(S)"
 fi
 
 exit $FAILED
