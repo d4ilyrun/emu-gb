@@ -34,9 +34,9 @@ NewTest(NAME "registers" PREFIX "cpu" SRCS "src/cpu/registers.cc" DEPS cpu)
 
 # CPU Instruction set
 NewTest(NAME "ld" PREFIX "cpu/instructions"
-        SRCS "src/cpu/instructions/ld/register.cc"
-             "src/cpu/instructions/ld/immediate.cc"
-             "src/cpu/instructions/ld/relative.cc"
+        SRCS "src/cpu/instructions/load/register.cc"
+             "src/cpu/instructions/load/immediate.cc"
+             "src/cpu/instructions/load/relative.cc"
         DEPS cpu cartridge)
 
 NewTest(NAME "add" PREFIX "cpu/instructions"

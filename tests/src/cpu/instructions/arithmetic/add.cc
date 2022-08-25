@@ -16,8 +16,6 @@ extern "C" {
 
 #include "../instruction.hxx"
 
-#define CASES(prefix_, struct_) const std::vector<struct_> prefix_##_##struct_
-
 namespace cpu_tests
 {
 
