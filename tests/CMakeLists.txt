@@ -31,10 +31,16 @@ endfunction()
 
 # CPU
 NewTest(NAME "registers" PREFIX "cpu" SRCS "src/cpu/registers.cc" DEPS cpu)
+
+# CPU Instruction set
 NewTest(NAME "ld" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/ld/register.cc"
              "src/cpu/instructions/ld/immediate.cc"
              "src/cpu/instructions/ld/relative.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "add" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/add.cc"
         DEPS cpu cartridge)
 
 # CARTRIDGES
