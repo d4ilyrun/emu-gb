@@ -43,6 +43,10 @@ NewTest(NAME "add" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/arithmetic/add.cc"
         DEPS cpu cartridge)
 
+NewTest(NAME "sub" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/sub.cc"
+        DEPS cpu cartridge)
+
 # CARTRIDGES
 NewTest(NAME "rom"  PREFIX "cartridge" SRCS "src/cartridges/rom.cc" DEPS cartridge cpu)
 NewTest(NAME "mbc1" PREFIX "cartridge" SRCS "src/cartridges/mbc1.cc" DEPS cartridge cpu)
