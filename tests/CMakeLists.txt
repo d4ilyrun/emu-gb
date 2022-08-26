@@ -39,6 +39,14 @@ NewTest(NAME "ld" PREFIX "cpu/instructions"
              "src/cpu/instructions/load/relative.cc"
         DEPS cpu cartridge)
 
+NewTest(NAME "ldd" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/load/ldd.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "ldi" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/load/ldi.cc"
+        DEPS cpu cartridge)
+
 NewTest(NAME "push" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/load/push.cc"
         DEPS cpu cartridge)

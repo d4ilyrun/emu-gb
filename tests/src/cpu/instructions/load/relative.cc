@@ -17,7 +17,7 @@ namespace cpu_tests
 {
 
 template <uint size, typename param_type>
-class LoadRelative : public LoadInstructionTest<size, param_type>
+class LoadRelativeTest : public LoadInstructionTest<size, param_type>
 {
   public:
     void TearDown() override
@@ -52,7 +52,7 @@ struct adr_to_reg {
     u8 *out = nullptr; // Has to be here but not used
 };
 
-using AddressInRegisterToRegister = LoadRelative<1, adr_to_reg>;
+using AddressInRegisterToRegister = LoadRelativeTest<1, adr_to_reg>;
 
 // Value from an 8bit reg -> the address in a 16bit register
 struct reg_to_adr {
@@ -64,17 +64,17 @@ struct reg_to_adr {
     u8 *out = nullptr;
 };
 
-using RegisterToAddressInRegister = LoadRelative<1, reg_to_adr>;
+using RegisterToAddressInRegister = LoadRelativeTest<1, reg_to_adr>;
 
 // Immediate value -> the address in the HL register
-struct imm_to_hl {
+struct ldi_params {
     u16 address;
     u8 instruction[2] = {0x36, 0x42};
     u8 expected = 0x42;
     u8 *out = nullptr;
 };
 
-using ImmediateToRelativeHL = LoadRelative<2, imm_to_hl>;
+using ImmediateToRelativeHL = LoadRelativeTest<2, ldi_params>;
 
 // From an immediate address -> A register
 struct imm_adr_to_a {
@@ -84,11 +84,12 @@ struct imm_adr_to_a {
     u8 *out = nullptr;
 };
 
-using ImmediateAddressToA = LoadRelative<3, imm_adr_to_a>;
+using ImmediateAddressToA = LoadRelativeTest<3, imm_adr_to_a>;
 
 // From the A register -> an immediate address
-using AToImmediateAddress = LoadRelative<3, imm_adr_to_a>; // Same basically !
-                                                           //
+using AToImmediateAddress =
+    LoadRelativeTest<3, imm_adr_to_a>; // Same basically !
+                                       //
 TEST_P(AddressInRegisterToRegister, Load)
 {
     const auto &param = GetParam();
@@ -158,9 +159,9 @@ INSTANTIATE_TEST_SUITE_P(LoadRelative, RegisterToAddressInRegister,
                          ::testing::ValuesIn(register_to_address));
 
 // Start of some memory areas inside a cartridge
-const std::vector<imm_to_hl> immediate_to_hl{{0xFFFF}, {0x0000}, {0x4000},
-                                             {0x8000}, {0xA000}, {0xC000},
-                                             {0xD000}, {0xE000}};
+const std::vector<ldi_params> immediate_to_hl{{0xFFFF}, {0x0000}, {0x4000},
+                                              {0x8000}, {0xA000}, {0xC000},
+                                              {0xD000}, {0xE000}};
 
 INSTANTIATE_TEST_SUITE_P(LoadRelative, ImmediateToRelativeHL,
                          ::testing::ValuesIn(immediate_to_hl));
