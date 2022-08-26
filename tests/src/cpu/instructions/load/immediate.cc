@@ -22,14 +22,45 @@ struct ld_imm_params {
     u8 expected;
 };
 
-class LoadImmediate : public LoadInstructionTest<2 * sizeof(u8), ld_imm_params>
-{
-  public:
-    LoadImmediate() : LoadInstructionTest() {}
-    static std::vector<ld_imm_params> cases;
+struct ld_imm_params_16 {
+    u8 instruction[3];
+    cpu_register_name out;
+    u16 expected;
 };
 
-std::vector<ld_imm_params> LoadImmediate::cases{
+using LoadImmediate = LoadInstructionTest<2, ld_imm_params>;
+
+class LoadImmediate16 : public InstructionTest,
+                        public ::testing::WithParamInterface<ld_imm_params_16>
+{
+  public:
+    LoadImmediate16() : InstructionTest(3) {}
+
+    virtual void SetUp() override
+    {
+        InstructionTest::SetUp();
+        Load((void *)this->GetParam().instruction);
+    }
+
+    void TearDown() override
+    {
+        InstructionTest::TearDown();
+        const auto &param = this->GetParam();
+        ASSERT_EQ(param.expected, read_register_16bit(param.out));
+    }
+};
+
+TEST_P(LoadImmediate, ImmediateValueToRegister)
+{
+    execute_instruction();
+}
+
+TEST_P(LoadImmediate16, ImmediateValueToRegister)
+{
+    execute_instruction();
+}
+
+CASES(registers, ld_imm_params) = {
     {{0b00111110, 0xFF}, &cpu.registers.a, 0xFF}, // A
     {{0b00000110, 0x42}, &cpu.registers.b, 0x42}, // B
     {{0b00001110, 0x00}, &cpu.registers.c, 0x00}, // C
@@ -39,12 +70,17 @@ std::vector<ld_imm_params> LoadImmediate::cases{
     {{0b00101110, 0xA5}, &cpu.registers.l, 0xA5}, // L
 };
 
-TEST_P(LoadImmediate, ImmediateValueToRegister)
-{
-    execute_instruction();
-}
+INSTANTIATE_TEST_SUITE_P(Registers, LoadImmediate,
+                         testing::ValuesIn(registers_ld_imm_params));
 
-INSTANTIATE_TEST_SUITE_P(LoadImmediate, LoadImmediate,
-                         testing::ValuesIn(LoadImmediate::cases));
+CASES(registers, ld_imm_params_16) = {
+    {{0x01, 0xFF, 0xFF}, REG_BC, 0xFFFF}, // BC
+    {{0x11, 0x24, 0x42}, REG_DE, 0x4224}, // DE
+    {{0x21, 0xF0, 0x0F}, REG_HL, 0x0FF0}, // HL
+    {{0x31, 0x80, 0x08}, REG_SP, 0x0880}, // SP
+};
+
+INSTANTIATE_TEST_SUITE_P(Registers, LoadImmediate16,
+                         ::testing::ValuesIn(registers_ld_imm_params_16));
 
 }; // namespace cpu_tests

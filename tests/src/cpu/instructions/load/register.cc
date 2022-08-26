@@ -52,4 +52,22 @@ TEST_P(LoadFromRegister, RegisterToRegister)
 INSTANTIATE_TEST_SUITE_P(LD_8bit, LoadFromRegister,
                          ::testing::ValuesIn(LoadFromRegister::cases));
 
+class LoadFrom16BitRegister : public InstructionTest
+{
+  public:
+    LoadFrom16BitRegister() : InstructionTest(1) {}
+};
+
+TEST_F(LoadFrom16BitRegister, HLToSP)
+{
+    const u8 instruction[1] = {0xF9};
+
+    Load((void *)instruction);
+    cpu.registers.h = 0x12;
+    cpu.registers.l = 0x34;
+    execute_instruction();
+
+    ASSERT_EQ(cpu.registers.sp, 0x1234);
+}
+
 } // namespace cpu_tests

@@ -37,6 +37,6 @@ class InstructionTest : public ::testing::Test
   protected:
     void Load(void *instruction)
     {
-        memcpy(&cartridge.rom[start_pc_], instruction, size_);
+        memcpy(&cartridge.rom[cpu.registers.pc], instruction, size_);
     }
 };

@@ -35,6 +35,11 @@ class LoadRelative : public LoadInstructionTest<size, param_type>
  * - Immediate value -> the address in the HL register
  * - From an immediate address -> A register
  * - From the A register -> an immediate address
+ * - From SP -> relative immediate address
+ * - A <- (FF00+n)
+ * - (FF00+n) <- A
+ * - A <- (FF00+C)
+ * - (FF00+C) <- A
  */
 
 // Value stored at the address stored in a 16bit reg -> 8bit register
@@ -83,7 +88,7 @@ using ImmediateAddressToA = LoadRelative<3, imm_adr_to_a>;
 
 // From the A register -> an immediate address
 using AToImmediateAddress = LoadRelative<3, imm_adr_to_a>; // Same basically !
-
+                                                           //
 TEST_P(AddressInRegisterToRegister, Load)
 {
     const auto &param = GetParam();
@@ -181,5 +186,73 @@ const std::vector<imm_adr_to_a> a_to_immediate_adr{
 
 INSTANTIATE_TEST_SUITE_P(LoadRelative, AToImmediateAddress,
                          ::testing::ValuesIn(a_to_immediate_adr));
+
+// NON PARAMETERIZED TESTS
+
+class SPToImmediateAddress : public InstructionTest
+{
+  public:
+    SPToImmediateAddress() : InstructionTest(3) {}
+};
+
+class RelativeToFF00 : public InstructionTest
+{
+  public:
+    RelativeToFF00() : InstructionTest(2) {}
+};
+
+TEST_F(SPToImmediateAddress, LoadRelative)
+{
+    const u8 instruction[3] = {0x08, 0x42, 0x24};
+
+    cpu.registers.sp = 0x1234;
+    Load((void *)instruction);
+    execute_instruction();
+
+    ASSERT_EQ(read_memory_16bit(0x2442), cpu.registers.sp);
+}
+
+TEST_F(RelativeToFF00, OffsetFromC)
+{
+    u8 instruction[2] = {0xF2, 0x00};
+    const u8 offset = 0x42;
+    const u8 data = 0x69;
+
+    Load((void *)instruction);
+
+    write_memory(0xFF00 | offset, data);
+    cpu.registers.c = offset;
+    execute_instruction();
+    ASSERT_EQ(cpu.registers.a, data);
+
+    instruction[0] = 0xE2;
+    Load((void *)instruction);
+
+    write_memory(0xFF00 | offset, 0);
+    execute_instruction();
+    ASSERT_EQ(read_memory(0xFF00 | offset), cpu.registers.a);
+}
+
+TEST_F(RelativeToFF00, OffsetFromImmediateValue)
+{
+    const u8 offset = 0x42;
+    const u8 data = 0x69;
+    u8 instruction[2] = {0xF0, offset};
+
+    Load((void *)instruction);
+
+    write_memory(0xFF00 | offset, data);
+    cpu.registers.c = offset;
+    execute_instruction();
+    ASSERT_EQ(cpu.registers.a, data);
+
+    cpu.registers.pc -= 2; // Necessary for TearDown's test
+    instruction[0] = 0xE0;
+    Load((void *)instruction);
+
+    write_memory(0xFF00 | offset, 0);
+    execute_instruction();
+    ASSERT_EQ(read_memory(0xFF00 | offset), cpu.registers.a);
+}
 
 }; // namespace cpu_tests
