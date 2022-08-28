@@ -59,9 +59,50 @@ NewTest(NAME "add" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/arithmetic/add.cc"
         DEPS cpu cartridge)
 
+NewTest(NAME "adc" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/adc.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "sbc" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/sbc.cc"
+        DEPS cpu cartridge)
+
 NewTest(NAME "sub" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/arithmetic/sub.cc"
         DEPS cpu cartridge)
+
+NewTest(NAME "dec" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/dec.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "inc" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/arithmetic/inc.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "and" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/and.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "or" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/or.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "xor" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/xor.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "cp" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/cp.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "daa" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/daa.cc"
+        DEPS cpu cartridge)
+
+NewTest(NAME "cpl" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/logical/cpl.cc"
+        DEPS cpu cartridge)
+
 
 # CARTRIDGES
 NewTest(NAME "rom"  PREFIX "cartridge" SRCS "src/cartridges/rom.cc" DEPS cartridge cpu)

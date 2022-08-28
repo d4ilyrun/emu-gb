@@ -30,6 +30,17 @@ struct ld_imm_params_16 {
 
 using LoadImmediate = LoadInstructionTest<2, ld_imm_params>;
 
+class LoadSPAddition : public InstructionTest
+{
+  public:
+    LoadSPAddition() : InstructionTest(2) {}
+
+    void SetUp() override
+    {
+        InstructionTest::SetUp();
+    }
+};
+
 class LoadImmediate16 : public InstructionTest,
                         public ::testing::WithParamInterface<ld_imm_params_16>
 {
@@ -82,5 +93,21 @@ CASES(registers, ld_imm_params_16) = {
 
 INSTANTIATE_TEST_SUITE_P(Registers, LoadImmediate16,
                          ::testing::ValuesIn(registers_ld_imm_params_16));
+
+TEST_F(LoadSPAddition, AddToSP)
+{
+    u8 opcode[2] = {0xF8};
+
+    cpu.registers.h = 0x12;
+    cpu.registers.l = 0x34;
+
+    opcode[1] = 0x01;
+    Load((void *)opcode);
+    ASSERT_EQ(cpu.registers.sp, 0x1235);
+
+    // TODO: Test flags and add more tests for 0xF8
+    // I'm way too tired rn and it should be good anyway since it's basically
+    // calling the same function as 0xE8 (maybe copy & paste tests from add.cc)
+}
 
 }; // namespace cpu_tests
