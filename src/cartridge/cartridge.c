@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "CPU/memory.h"
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
@@ -83,6 +84,8 @@ bool load_cartridge(char *path)
     cartridge.rom = malloc(cartridge.rom_size);
     cartridge.multicart = false;
 
+    const struct cartridge_header *header = HEADER(cartridge);
+
     // Do the same for the RAM
     // RAM size equivalent to the code inside the header:
     //
@@ -92,7 +95,7 @@ bool load_cartridge(char *path)
     // $03 = 32 KiB     4 banks of 8 KiB each
     // $04 = 128 KiB    16 banks of 8 KiB each
     // $05 = 64 KiB     8 banks of 8 KiB each
-    const u8 ram_size_code = HEADER(cartridge)->ram_size;
+    const u8 ram_size_code = header->ram_size;
     switch (ram_size_code) {
     case 2:
         cartridge.ram_size = 2 << 13;
@@ -109,6 +112,11 @@ bool load_cartridge(char *path)
     default:
         cartridge.ram_size = 0;
         break;
+    }
+
+    // If is MBC2: 512*4 bit internal RAM, no external RAM
+    if (header->rom_version > MBC1 && header->rom_version <= MBC2) {
+        cartridge.ram_size = 512;
     }
 
     cartridge.ram = malloc(cartridge.ram_size ? cartridge.ram_size : 1);

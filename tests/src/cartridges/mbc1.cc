@@ -37,9 +37,7 @@ class MBC1Generator : public CartridgeGenerator<rom, ram>,
 };
 
 // 2 MiB ROM & 32 KiB RAM
-class MBC1_Registers : public MBC1Generator<1 << 21, 1 << 16>
-{
-};
+using MBC1_Registers = MBC1Generator<1 << 21, 1 << 16>;
 
 // Update RAM access when writing to 0x0000 -> 0x1FFF
 TEST_F(MBC1_Registers, EnableRAM)

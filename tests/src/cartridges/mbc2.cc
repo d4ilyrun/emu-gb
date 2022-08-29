@@ -17,16 +17,15 @@ namespace cartridge_tests
 {
 
 template <uint rom>
-class MBC2Generator : public CartridgeGenerator<rom, 0x200>,
+class MBC2Generator : public CartridgeGenerator<rom, 512>,
                       public ::testing::Test
 {
   public:
-    MBC2Generator() : CartridgeGenerator<rom, 0x200>(MBC2) {}
+    MBC2Generator() : CartridgeGenerator<rom, 512>(MBC2) {}
 
     void SetUp()
     {
         // Manually set the newly generated cartridge as loaded
-        this->cart_.ram = &cpu.memory[0xA000];
         cartridge = this->cart_;
     };
 
@@ -43,6 +42,7 @@ using MBC2_Registers = MBC2Generator<1 << 18>;
 TEST_F(MBC2_Registers, RAMEnable)
 {
     // When BIT 8 is clear: control RAM
+
     // RAM is disabled by default
     ASSERT_FALSE(ram_access);
     ASSERT_NE(chip_registers.ram_g, 0xA);
@@ -54,13 +54,15 @@ TEST_F(MBC2_Registers, RAMEnable)
     write_mbc2(0xFF, 0x1A);
     ASSERT_TRUE(ram_access);
 
-    // Write 0xA with BIT 8 set: deactivate
-    write_mbc2(0x3FF, 0xA);
-    ASSERT_FALSE(ram_access);
-
     // Write anything else than 0xA with BIT 8 clear: deactivate
     write_mbc2(0x12FF, 0xB);
     ASSERT_FALSE(ram_access);
+
+    // Write 0xA with BIT 8 set: do not change
+    const auto tmp = chip_registers.rom_b;
+    write_mbc2(0x3FF, 0xA);
+    ASSERT_FALSE(ram_access);
+    chip_registers.rom_b = tmp;
 }
 
 TEST_F(MBC2_Registers, ROMBankNumber)
@@ -70,10 +72,10 @@ TEST_F(MBC2_Registers, ROMBankNumber)
     ASSERT_EQ(chip_registers.rom_b, 1);
 
     // The lower 4 bits of the address control the rom bank number
-    write_mbc2(0x10F, 0x0);
+    write_mbc2(0x10F, 0xF);
     ASSERT_EQ(chip_registers.rom_b, 0xF);
 
-    write_mbc2(0x10A, 0x0);
+    write_mbc2(0x10A, 0x3A);
     ASSERT_EQ(chip_registers.rom_b, 0xA);
 
     // Similar to MBC1, can never be null and should be replaced by 1
@@ -126,7 +128,7 @@ TEST_P(MBC2, Read)
 
     if (param.address >= 0xA000 && param.address < 0xA200) {
         value |= 0xF;
-        cartridge.ram[param.address & 0x1FF] = value;
+        cartridge.ram[param.expected] = value;
         if (!ram_access)
             value = 0xFF;
     } else {
@@ -144,11 +146,11 @@ TEST_P(MBC2, Write)
 
     if (param.address >= 0xA000 && param.address < 0xA200) {
         if (ram_access)
-            ASSERT_EQ(cartridge.ram[param.address & 0x1FF], param.value | 0xF);
+            ASSERT_EQ(cartridge.ram[param.expected], param.value | 0xF);
         else
-            ASSERT_EQ(cartridge.ram[param.address & 0x1FF], 0);
+            ASSERT_EQ(cartridge.ram[param.expected], 0);
     } else {
-        ASSERT_EQ(cartridge.rom[param.expected], param.value);
+        ASSERT_EQ(cartridge.rom[param.expected], 0);
     }
 }
 
@@ -159,12 +161,11 @@ INSTANTIATE_TEST_SUITE_P(
         (struct mbc2_rw_param){0x12A7, 0x42, false, 0x4, 0x12A7},
         (struct mbc2_rw_param){0x54C1, 0x42, false, 0x4, 0x94C1},
         (struct mbc2_rw_param){0x0000, 0x42, true, 0x4, 0x0000},
-        (struct mbc2_rw_param){0x7FFF, 0x42, true, 0xF, 0x3FFFF}, // Max value
+        (struct mbc2_rw_param){0x7FFF, 0x42, true, 0xF, 0x1FFFF}, // Max value
         // RAM
-        (struct mbc2_rw_param){0xA1FF, 0x42, true, 0x4, 0x0000},
-        (struct mbc2_rw_param){0xA01B, 0x42, true, 0x4, 0x0000},
-        (struct mbc2_rw_param){0xA01B, 0x42, false, 0x4, 0x0000},
-        (struct mbc2_rw_param){0xA000, 0x77, true, 0x0, 0x5123}));
+        (struct mbc2_rw_param){0xA1FF, 0x42, true, 0x4, 0x1FF},
+        (struct mbc2_rw_param){0xA01B, 0x42, true, 0x4, 0x01B},
+        (struct mbc2_rw_param){0xA01B, 0x42, false, 0x4, 0x01B}));
 
 // 32KiB ROM
 using MBC2_Death = MBC2RWGenerator<1 << 15>;
@@ -178,14 +179,14 @@ TEST_P(MBC2_Death, Read)
     const auto &param = GetParam();
 
     if (param.address < 0x8000)
-        EXPECT_GT(param.expected, sizeof(cartridge.rom));
+        ASSERT_GT(param.expected, cartridge.rom_size);
     else
         GTEST_SKIP() << "Cannot read outside of RAM.";
 
-    EXPECT_DEATH(write_mbc1(param.address, param.value), "");
+    EXPECT_DEATH(read_mbc2(param.address), "");
 }
 
 INSTANTIATE_TEST_SUITE_P(Memory_8bit, MBC2_Death,
                          ::testing::Values((struct mbc2_rw_param){
-                             0x7FFF, 0x42, true, 0xF, 0x3FFFF}));
+                             0x7FFF, 0x42, true, 0x10, 0x3FFFF}));
 } // namespace cartridge_tests
