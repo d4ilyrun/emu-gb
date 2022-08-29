@@ -83,6 +83,36 @@ bool load_cartridge(char *path)
     cartridge.rom = malloc(cartridge.rom_size);
     cartridge.multicart = false;
 
+    // Do the same for the RAM
+    // RAM size equivalent to the code inside the header:
+    //
+    // $00 = 0          No RAM
+    // $01 = Unused
+    // $02 = 8 KiB      1 bank
+    // $03 = 32 KiB     4 banks of 8 KiB each
+    // $04 = 128 KiB    16 banks of 8 KiB each
+    // $05 = 64 KiB     8 banks of 8 KiB each
+    const u8 ram_size_code = HEADER(cartridge)->ram_size;
+    switch (ram_size_code) {
+    case 2:
+        cartridge.ram_size = 2 << 13;
+        break;
+    case 3:
+        cartridge.ram_size = 2 << 15;
+        break;
+    case 4:
+        cartridge.ram_size = 2 << 17;
+        break;
+    case 5:
+        cartridge.ram_size = 2 << 16;
+        break;
+    default:
+        cartridge.ram_size = 0;
+        break;
+    }
+
+    cartridge.ram = malloc(cartridge.ram_size ? cartridge.ram_size : 1);
+
     rewind(rom);
     fread(cartridge.rom, 1, cartridge.rom_size, rom);
 

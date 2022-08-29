@@ -21,6 +21,8 @@
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
+static unsigned compute_physical_addresss(u16 address);
+
 WRITE_FUNCTION(mbc1)
 {
     // READ_ONLY AREA
@@ -44,18 +46,16 @@ WRITE_FUNCTION(mbc1)
 
     // READ/WRITE AREA
     else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
-        cpu.memory[address] = data;
+        cartridge.ram[compute_physical_addresss(address)] = data;
     }
 }
 
 WRITE_16_FUNCTION(mbc1)
 {
-    // TODO: check for actual implementation
-
     // Write the lower bytes after so that we keep the correct lower bits for
     // when we update the registers
-    write_mbc1(address + 1, MSB(data));
     write_mbc1(address, LSB(data));
+    write_mbc1(address + 1, MSB(data));
 }
 
 /**
@@ -116,28 +116,27 @@ static unsigned compute_physical_addresss(u16 address)
 
 READ_FUNCTION(mbc1)
 {
-    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
+    const bool is_ram = VIDEO_RAM <= address && address < EXTERNAL_RAM;
+
+    if (is_ram && !ram_access)
         return 0xFF; // Undefined value
 
     unsigned physical_address = compute_physical_addresss(address);
 
     // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
 
+    if (is_ram) {
+        assert(physical_address < cartridge.ram_size);
+        return cartridge.ram[physical_address];
+    }
+
+    assert(physical_address < cartridge.rom_size);
     return cartridge.rom[physical_address];
 }
 
 READ_16_FUNCTION(mbc1)
 {
-    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
-        return 0xFFFF; // Undefined value
-
-    unsigned physical_address = compute_physical_addresss(address);
-
-    // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
-
-    return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
+    return read_mbc1(address) + (read_mbc1(address + 1) << 8);
 }
 
 DUMP_FUNCTION(mbc1)

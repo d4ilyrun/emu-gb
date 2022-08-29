@@ -21,11 +21,13 @@ class MBC1Generator : public CartridgeGenerator<rom, ram>,
   public:
     MBC1Generator() : CartridgeGenerator<rom, ram>(MBC1) {}
 
-    void SetUp()
+    void SetUp() override
     {
         // Manually set the newly generated cartridge as loaded
-        cartridge = this->cart_;
+        cartridge = this->GetCart();
     };
+
+    void TearDown() override {}
 
   private:
     inline void enable_ram()
@@ -35,7 +37,7 @@ class MBC1Generator : public CartridgeGenerator<rom, ram>,
 };
 
 // 2 MiB ROM & 32 KiB RAM
-class MBC1_Registers : public MBC1Generator<1 << 21, 1 << 15>
+class MBC1_Registers : public MBC1Generator<1 << 21, 1 << 16>
 {
 };
 
@@ -115,7 +117,7 @@ TEST_F(MBC1_Registers, RAMBankNumber)
 // When writing to 0x6000 - 0x7FFF, switch between RAM and ROM banking mode
 TEST_F(MBC1_Registers, BankingModeSelect)
 {
-    const auto address = 0x5025;
+    const auto address = 0x6025;
 
     // default value
     ASSERT_EQ(chip_registers.mode, 0);
