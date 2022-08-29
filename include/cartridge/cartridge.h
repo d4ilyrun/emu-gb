@@ -107,6 +107,12 @@ struct cartridge {
     u32 rom_size;
 
     /**
+     * Actual size of the game's RAM. \n
+     * Depends on the \c ram_size inside the header
+     */
+    u32 ram_size;
+
+    /**
      * The actual content of the game's ROM. \n
      * \warning ROM stands for Read-Only memory, it should NEVER be modified.
      */

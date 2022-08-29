@@ -28,8 +28,21 @@ extern struct chip_registers_t {
     // MBC1 registers
 
     u8 ram_g;
-    u8 bank_1;
-    u8 bank_2;
+
+    /**
+     * Determines which rom bank to access.
+     *
+     * Set to 1 by default.
+     */
+    u8 rom_bank;
+
+    /**
+     * Determines which rom bank to access.
+     * Only used by MBC1 cartridges.
+     *
+     * Set to 1 by default.
+     */
+    u8 ram_bank;
 
     /**
      * Determines how the ROM_BANK2 register value is used during access
@@ -39,20 +52,6 @@ extern struct chip_registers_t {
      * 0= ROM_BANK2 only affects accesses to 0x4000-0x7FFF
      */
     bool mode;
-
-    // MBC2 registers
-
-    // TODO: change it to a static variable inside mbc2.c as it isn't used by
-    // any other MBC and may end up being confusing.
-
-    /**
-     * Determines which rom bank to access.
-     * Only used by MBC2 cartridges.
-     *
-     * Set to 1 by default.
-     */
-    u8 rom_b;
-
 } chip_registers;
 
 // Cartridge register addresses
