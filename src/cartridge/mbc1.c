@@ -2,6 +2,15 @@
  * \file mbc1.c
  * \brief memory access for MBC1 cartridges
  * \author Léo DUBOIN
+ *
+ * (max 2MByte ROM and/or 32 KiB RAM)
+ *
+ * In its default configuration, MBC1 supports up to 512 KiB ROM
+ * with up to 32 KiB of banked RAM.
+ * Some cartridges wire the MBC differently, where the 2-bit RAM banking
+ * register is wired as an extension of the ROM banking register (instead of to
+ * RAM) in order to support up to 2 MiB ROM, at the cost of only supporting a
+ * fixed 8 KiB of cartridge RAM.
  */
 
 #include <assert.h>
@@ -19,6 +28,7 @@ WRITE_FUNCTION(mbc1)
     if (address < RAM_GATE) {
         // bits 7-4 are ignored during write
         chip_registers.ram_g = data & 0xF;
+        // FIXME: Euh ... just ... why? makes no sense ... what was i thinking?
         // Update RAM access
         ram_access = cartridge.rom[address] & 0b1010;
     } else if (address < ROM_BANK) {
@@ -100,6 +110,8 @@ static unsigned compute_physical_addresss(u16 address)
         // TODO: error trying to access invalid address
         assert(false && "MBC1: Reading an out of bounds address.");
     }
+
+    // printf("computed: %X\n", (address & 0x3FFF) + (bank << 14));
 
     return (address & 0x3FFF) + (bank << 14);
 }

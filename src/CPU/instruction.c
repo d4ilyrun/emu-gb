@@ -78,8 +78,10 @@ INSTRUCTION(ld)
         write_register_16bit(in.reg1, in.data);
     else if (in.type == HL_REL_D8) // load immediate value from operands
         write_memory(in.address, in.data);
-    else // load value from register source
-        write_memory(in.address, read_register_16bit(in.reg1));
+    else { // load value from 8bit register source
+        // printf("0x%04X <- 0x%2X\n", in.address, read_register(in.reg1));
+        write_memory(in.address, read_register(in.reg1));
+    }
     return in.cycle_count;
 }
 

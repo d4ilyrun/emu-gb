@@ -14,11 +14,17 @@
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
+#ifdef UNIT_TEST
+#define STATIC
+#else
+#define STATIC static
+#endif
+
 /// Currently mapped  rtc register (similar to the ram_g register for MBC1
 /// cartridges)
-static u8 rtc_mapped_register = 0;
+STATIC u8 rtc_mapped_register = 0;
 
-struct {
+struct mbc3_rtc_register {
     /// Actual computer clock, cannot be accessed directly.
     /// Its content shall be latched into the following registers to be read.
     time_t time;

@@ -41,10 +41,17 @@ extern struct chip_registers_t {
     bool mode;
 
     // MBC2 registers
-    // TODO: change it to a static variable inside mbc2.c as it isn't used by
-    // any other MBC
 
-    u8 rom_b; // Set to 1 by default
+    // TODO: change it to a static variable inside mbc2.c as it isn't used by
+    // any other MBC and may end up being confusing.
+
+    /**
+     * Determines which rom bank to access.
+     * Only used by MBC2 cartridges.
+     *
+     * Set to 1 by default.
+     */
+    u8 rom_b;
 
 } chip_registers;
 

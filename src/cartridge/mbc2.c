@@ -2,6 +2,14 @@
  * \file mbc2.c
  * \brief memory API for MBC2 cartridges
  * \author Léo DUBOIN
+ *
+ * (max 256 KiB ROM and 512x4 bits RAM)
+ *
+ * The MBC2 doesn’t support external RAM, instead it includes 512x4 bits of
+ * built-in RAM (in the MBC2 chip itself). It still requires an external battery
+ * to save data during power-off though. As the data consists of 4bit values,
+ * only the lower 4 bits of the bit octets in the RAM area (A000-A1FF) are used.
+ * The upper 4 bits of each byte are undefined and should not be relied upon.
  */
 
 #include <assert.h>

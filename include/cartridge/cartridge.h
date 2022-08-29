@@ -111,6 +111,11 @@ struct cartridge {
      * \warning ROM stands for Read-Only memory, it should NEVER be modified.
      */
     u8 *rom;
+
+    /**
+     * The game's RAM.
+     */
+    u8 *ram;
 };
 
 /**
