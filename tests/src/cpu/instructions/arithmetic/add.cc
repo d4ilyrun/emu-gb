@@ -132,7 +132,7 @@ TEST_P(Add16BitRegisterToHL, Add)
     execute_instruction();
 }
 
-TEST_P(AddSigned8bitToSP, Add)
+TEST_P(AddSigned8bitToSP, IntoSP)
 {
     const auto &param = GetParam();
     cpu.registers.sp = param.x;

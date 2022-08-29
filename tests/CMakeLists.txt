@@ -27,8 +27,6 @@ function(NewTest)
 
 endfunction()
 
-# TODO: use subfolder
-
 # CPU
 NewTest(NAME "registers" PREFIX "cpu" SRCS "src/cpu/registers.cc" DEPS cpu)
 
@@ -37,6 +35,7 @@ NewTest(NAME "ld" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/load/register.cc"
              "src/cpu/instructions/load/immediate.cc"
              "src/cpu/instructions/load/relative.cc"
+             "src/cpu/instructions/arithmetic/ld.cc"
         DEPS cpu cartridge)
 
 NewTest(NAME "ldd" PREFIX "cpu/instructions"
