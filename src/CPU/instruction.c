@@ -5,7 +5,8 @@
 #include "CPU/flag.h"
 #include "CPU/interrupt.h"
 #include "CPU/stack.h"
-#include "utils/macro.h"
+#include "utils/error.h"
+#include "utils/log.h"
 
 #define INSTRUCTION(_name) static u8 _name(struct instruction in)
 
@@ -13,8 +14,8 @@ typedef u8 (*in_handler)(struct instruction);
 
 INSTRUCTION(invalid)
 {
-    fprintf(stderr, "\nInvalid instruction. (code: " HEX8 ")\n",
-            read_memory(in.pc));
+    fatal_error("\nInvalid instruction. (code: " HEX8 ")\n",
+                read_memory(in.pc));
     exit(-1);
 }
 
@@ -125,7 +126,7 @@ INSTRUCTION(scf)
 INSTRUCTION(daa)
 {
     // TODO: DAA
-    NOT_IMPLEMENTED(__FUNCTION__);
+    not_implemented(__FUNCTION__);
     return in.cycle_count;
 }
 
@@ -395,7 +396,7 @@ INSTRUCTION(rrca)
 
 INSTRUCTION(stop)
 {
-    NOT_IMPLEMENTED(__FUNCTION__);
+    not_implemented(__FUNCTION__);
     return in.cycle_count;
 }
 

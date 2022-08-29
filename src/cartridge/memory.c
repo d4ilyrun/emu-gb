@@ -4,6 +4,7 @@
 
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 struct chip_registers_t chip_registers = {0, 1, 0, false};
@@ -23,7 +24,8 @@ u8 read_cartridge(u16 address)
         return read_mbc3(address);
     }
 
-    // TODO: invalid cartridge type
+    log_err("Unsupported cartdrige type: " HEX, rom->type);
+
     return cartridge.rom[address];
 }
 
@@ -46,6 +48,8 @@ void write_cartridge(u16 address, u8 data)
     } else if (rom->type <= MBC3) {
         write_mbc3(address, data);
     }
+
+    log_err("Unsupported cartdrige type: " HEX, rom->type);
 }
 
 void write_cartridge_16bit(u16 address, u16 data)

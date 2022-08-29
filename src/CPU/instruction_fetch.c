@@ -1,8 +1,9 @@
-#include <err.h>
+#include <stdlib.h>
 
 #include "CPU/flag.h"
 #include "CPU/instruction.h"
 #include "CPU/memory.h"
+#include "utils/error.h"
 #include "utils/macro.h"
 
 struct in_type {
@@ -41,9 +42,8 @@ static cpu_register_name find_register(uint8_t code)
     if (code == 0x7)
         return REG_A;
 
-    // TODO: assert not reached macro
     if (code == 0x6)
-        errx(1, "Unreachable code reached: %s", __FUNCTION__);
+        assert_not_reached();
 
     return REG_B + code;
 }

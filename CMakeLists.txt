@@ -55,7 +55,7 @@ endif()
 
 # PROJECT EXECUTABLE
 add_executable(emu-gb src/main.c src/test_rom.c)
-target_link_libraries(emu-gb PRIVATE cpu cartridge)
+target_link_libraries(emu-gb PRIVATE utils cpu cartridge)
 
 # DOCUMENTATION
 add_subdirectory(doc)

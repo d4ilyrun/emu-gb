@@ -12,6 +12,7 @@
 #include "CPU/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "utils/error.h"
 #include "utils/macro.h"
 
 #ifdef UNIT_TEST
@@ -154,16 +155,6 @@ WRITE_FUNCTION(mbc3)
     }
 }
 
-WRITE_16_FUNCTION(mbc3)
-{
-    // TODO: check for actual implementation
-
-    // Write the lower bytes after so that we keep the correct lower bits for
-    // when we update the registers
-    write_mbc3(address + 1, MSB(data));
-    write_mbc3(address, LSB(data));
-}
-
 /**
  * \see compute_physical_addresss in mbc1.c
  */
@@ -189,8 +180,7 @@ static unsigned compute_physical_addresss(u16 address)
         bank = chip_registers.ram_bank << bank_size;
         bank += chip_registers.rom_bank;
     } else {
-        // TODO: throw nice error
-        assert(false && "MBC3: Reading an out of bounds address.");
+        assert_not_reached();
     }
 
     return (address & 0x3FFF) + (bank << 14);
@@ -206,26 +196,10 @@ READ_FUNCTION(mbc3)
 
     unsigned physical_address = compute_physical_addresss(address);
 
-    // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
+    assert_msg(physical_address < cartridge.rom_size,
+               "MBC3: Reading out of bounds (" HEX16 ")", physical_address);
 
     return cartridge.rom[physical_address];
-}
-
-READ_16_FUNCTION(mbc3)
-{
-    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
-        return 0xFFFF; // Undefined value
-
-    if (rtc_mapped_register >= 0x8 && rtc_mapped_register <= 0xC)
-        return rtc.readable[rtc_mapped_register - 0x8];
-
-    unsigned physical_address = compute_physical_addresss(address);
-
-    // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
-
-    return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
 }
 
 DUMP_FUNCTION(mbc3)

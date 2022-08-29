@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "CPU/instruction.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 #ifdef TEST_ROM
@@ -22,14 +23,10 @@ char *condition_names[] = {"NZ", "Z", "NC", "C", "???"};
 char *register_names[] = {"A",  "F",  "B",  "C",  "D",  "E",  "H",  "L",
                           "PC", "SP", "AF", "BC", "DE", "HL", "???"};
 
-// TODO: add nice colors :^)
-// TODO: rethink format (address value instead of address ?, show flags)
 void display_instruction(struct instruction in)
 {
+    char *line = NULL;
     char *operands = NULL;
-
-    // print instruction's name
-    printf("[" HEX "] %-4.4s ", in.pc, instruction_names[in.instruction]);
 
     switch (in.type) {
     case R16:
@@ -167,22 +164,37 @@ void display_instruction(struct instruction in)
         break;
     }
 
-    // print operands
-    printf("%-15.32s", operands);
-    free(operands);
+// might be useful later ... we never know
+#if 0
+    char *registers = NULL;
+    char *parameters = NULL;
+    char *opcode = NULL;
+
+    // print instruction's name
+    asprintf(&opcode, "[" HEX "] %-4.4s ", in.pc, instruction_names[in.instruction]);
 
     // print 3 bytes at pc address: opcode + operands
-    printf("(%02X %02X %02X) ", read_memory(in.pc), read_memory(in.pc + 1),
-           read_memory(in.pc + 2));
+    asprintf(&parameters, "(%02X %02X %02X) ", read_memory(in.pc),
+             read_memory(in.pc + 1), read_memory(in.pc + 2));
 
     // print content of the registers
-    printf("AF=" HEX " BC=" HEX " DE=" HEX " HL=" HEX,
-           read_register_16bit(REG_AF), read_register_16bit(REG_BC),
-           read_register_16bit(REG_DE), read_register_16bit(REG_HL));
+    asprintf(&registers, "AF=" HEX " BC=" HEX " DE=" HEX " HL=" HEX,
+             read_register_16bit(REG_AF), read_register_16bit(REG_BC),
+             read_register_16bit(REG_DE), read_register_16bit(REG_HL));
 
-#ifdef TEST_ROM
-    printf(" " HEX "=" HEX8, TEST_CHECK, read_memory(TEST_CHECK));
+    asprintf(&line, "%s%-15.32s%s%s", opcode, operands, parameters, registers);
+
+    free(opcode);
+    free(operands);
+    free(parameters);
+    free(registers);
+#else
+    // print instruction's name
+    asprintf(&line, "[" HEX "] %-4.4s %s", in.pc,
+             instruction_names[in.instruction], operands);
+    free(operands);
 #endif
 
-    putchar('\n');
+    log_trace(line);
+    free(line);
 }

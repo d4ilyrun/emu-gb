@@ -19,6 +19,7 @@
 #include "CPU/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "utils/error.h"
 #include "utils/macro.h"
 
 static unsigned compute_physical_address(u16 address);
@@ -112,8 +113,7 @@ static unsigned compute_physical_address(u16 address)
                       : chip_registers.rom_bank;
         }
     } else {
-        // TODO: error trying to access invalid address
-        assert(false && "MBC1: Reading an out of bounds address.");
+        fatal_error("MBC1: Reading an out of bounds address.");
     }
 
     // printf("computed: %X\n", (address & 0x3FFF) + (bank << 14));
@@ -130,14 +130,13 @@ READ_FUNCTION(mbc1)
 
     unsigned physical_address = compute_physical_address(address);
 
-    // TODO: gracefully throw an error
-
     if (is_ram) {
-        assert(physical_address < cartridge.ram_size);
+        assert_msg(physical_address < cartridge.ram_size,
+                   "Reading out of bounds");
         return cartridge.ram[physical_address];
     }
 
-    assert(physical_address < cartridge.rom_size);
+    assert_msg(physical_address < cartridge.rom_size, "Reading out of bounds");
     return cartridge.rom[physical_address];
 }
 

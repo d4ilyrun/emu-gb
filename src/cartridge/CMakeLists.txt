@@ -6,3 +6,5 @@ add_library(
     mbc2.c
     mbc3.c
 )
+
+target_link_libraries(cartridge PRIVATE utils)
