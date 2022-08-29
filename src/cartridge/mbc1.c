@@ -33,12 +33,12 @@ WRITE_FUNCTION(mbc1)
         ram_access = chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK) {
         // bits 7-5 are ignored during write
-        chip_registers.bank_1 = data & 0x1F;
-        if (!chip_registers.bank_1) // Value can never be null
-            chip_registers.bank_1 = 1;
+        chip_registers.rom_bank = data & 0x1F;
+        if (!chip_registers.rom_bank) // Value can never be null
+            chip_registers.rom_bank = 1;
     } else if (address < ROM_BANK2) {
         // bits 7-2 are ignored during write
-        chip_registers.bank_2 = data & 0x3;
+        chip_registers.ram_bank = data & 0x3;
     } else if (address < ROM_BANK_SWITCHABLE) {
         // bits 7-1 are ignored during write
         chip_registers.mode = data & 0x1;
@@ -94,18 +94,23 @@ static unsigned compute_physical_address(u16 address)
      * bits of the requested address and BANK2, if mode is set, 0b00 else.
      */
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
-        bank = chip_registers.mode ? chip_registers.bank_2 : 0b00;
+        bank = chip_registers.mode ? chip_registers.ram_bank : 0b00;
         return (address & 0x1FFF) + (bank << 13);
     }
 
     if (address < 0x4000) {
         if (chip_registers.mode)
-            bank = chip_registers.bank_2 << bank_size;
+            bank = chip_registers.ram_bank << bank_size;
     } else if (address < 0x8000) {
-        bank = chip_registers.bank_2 << bank_size;
-        bank += cartridge.multicart
-                  ? chip_registers.bank_1 & 0xF // Only 4 first bits
-                  : chip_registers.bank_1;
+        bank = chip_registers.ram_bank << bank_size;
+        // If the ROM banking register is 0, read as if it was set to 1.
+        if (!chip_registers.rom_bank) {
+            bank += 1;
+        } else {
+            bank += cartridge.multicart
+                      ? chip_registers.rom_bank & 0xF // Only 4 first bits
+                      : chip_registers.rom_bank;
+        }
     } else {
         // TODO: error trying to access invalid address
         assert(false && "MBC1: Reading an out of bounds address.");

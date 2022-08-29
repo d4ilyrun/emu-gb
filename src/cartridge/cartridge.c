@@ -40,15 +40,15 @@ static bool check_multicart()
     cartridge.multicart = true;
 
     // Set BANK1 to zero
-    u8 bank2 = chip_registers.bank_2;
-    chip_registers.bank_1 = 0;
+    u8 bank2 = chip_registers.ram_bank;
+    chip_registers.rom_bank = 0;
     chip_registers.mode = true;
 
     // Loop through all four possiblbbe BANK2 values
-    for (chip_registers.bank_2 = 0b00; chip_registers.bank_2 <= 0b11;
-         ++chip_registers.bank_2) {
+    for (chip_registers.ram_bank = 0b00; chip_registers.ram_bank <= 0b11;
+         ++chip_registers.ram_bank) {
         // Look for the nintendo logo
-        printf("NEW BANK: %d\n", chip_registers.bank_2);
+        printf("NEW BANK: %d\n", chip_registers.ram_bank);
         for (size_t i = 0; i < sizeof(nintendo_logo); ++i) {
             printf("%x = %x, ", read_cartridge(0x0104 + i), nintendo_logo[i]);
             if (read_cartridge(0x0104 + i) != nintendo_logo[i]) {
@@ -61,7 +61,7 @@ static bool check_multicart()
 
     printf("%d\n", nb_games);
     cartridge.multicart = nb_games;
-    chip_registers.bank_2 = bank2;
+    chip_registers.ram_bank = bank2;
     chip_registers.mode = false; // Always initialized at false
     return cartridge.multicart;
 }

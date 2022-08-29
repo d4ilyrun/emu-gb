@@ -70,20 +70,20 @@ TEST_F(MBC1_Registers, ROMBankNumber)
     const auto address = 0x3113;
 
     // The lower bits can never be set to 0 and should be set to 1 instead
-    ASSERT_TRUE(chip_registers.bank_1 != 0);
+    ASSERT_TRUE(chip_registers.rom_bank != 0);
 
-    chip_registers.bank_1 = 1;
+    chip_registers.rom_bank = 1;
 
     write_mbc1(address, 0x03);
-    ASSERT_EQ(chip_registers.bank_1, 0x03);
+    ASSERT_EQ(chip_registers.rom_bank, 0x03);
 
     // Higher bits are discarded
     write_mbc1(address, 0xE1);
-    ASSERT_EQ(chip_registers.bank_1, 0x01);
+    ASSERT_EQ(chip_registers.rom_bank, 0x01);
 
     // When writing 0, automatically change it to one
     write_mbc1(address, 0);
-    ASSERT_EQ(chip_registers.bank_1, 1);
+    ASSERT_EQ(chip_registers.rom_bank, 1);
 }
 
 // If the ROM Bank Number is set to a higher value than the number of banks in
@@ -100,16 +100,16 @@ TEST_F(MBC1_Registers, RAMBankNumber)
 {
     const auto address = 0x5025;
 
-    ASSERT_EQ(chip_registers.bank_2, 0);
+    ASSERT_EQ(chip_registers.ram_bank, 0);
 
     write_mbc1(address, 0b0101);
-    ASSERT_EQ(chip_registers.bank_2, 1);
+    ASSERT_EQ(chip_registers.ram_bank, 1);
 
     write_mbc1(address, 0b0011);
-    ASSERT_EQ(chip_registers.bank_2, 3);
+    ASSERT_EQ(chip_registers.ram_bank, 3);
 
     write_mbc1(address, 0xFC);
-    ASSERT_EQ(chip_registers.bank_2, 0);
+    ASSERT_EQ(chip_registers.ram_bank, 0);
 }
 
 // When writing to 0x6000 - 0x7FFF, switch between RAM and ROM banking mode
@@ -153,8 +153,8 @@ class MBC1RWGenerator : public MBC1Generator<rom, ram>,
         const auto &param = GetParam();
 
         ram_access = param.ram_access;
-        chip_registers.bank_1 = param.rom_bank;
-        chip_registers.bank_2 = param.ram_bank;
+        chip_registers.rom_bank = param.rom_bank;
+        chip_registers.ram_bank = param.ram_bank;
         chip_registers.mode = param.mode;
 
         if (ram_access)
@@ -209,6 +209,10 @@ INSTANTIATE_TEST_SUITE_P(
         (struct mbc1_rw_param){0x21B3, 0x69, false, 0x12, 0b01, 0, 0x21B3},
         (struct mbc1_rw_param){0x21B3, 0x69, false, 0x12, 0b01, 1, 0x821B3},
         (struct mbc1_rw_param){0x72A7, 0x42, false, 0x04, 0b10, 1, 0x1132A7},
+
+        // rom_bank 0 -> 1 in this range
+        (struct mbc1_rw_param){0x4000, 0x42, false, 0x00, 0b00, 1, 0x4000},
+
         // RAM
         (struct mbc1_rw_param){0xB123, 0x77, true, 0x12, 0b10, 0, 0x1123},
         (struct mbc1_rw_param){0xB123, 0x77, true, 0x12, 0b10, 1, 0x5123},

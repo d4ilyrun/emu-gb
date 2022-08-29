@@ -50,8 +50,8 @@ WRITE_FUNCTION(mbc2)
  * the ROMB register.
  *
  * Physical address is:
- * - 0x0000 - 0x3FFF: 0000 + 13 lower bits of address
- * - 0x4000 - 0x7FFF: ROMB + 13 lower bits of address
+ * - 0x0000 - 0x3FFF: 0000 + 14 lower bits of address
+ * - 0x4000 - 0x7FFF: ROMB + 14 lower bits of address
  */
 static unsigned compute_physical_adress(u16 address)
 {
@@ -60,8 +60,12 @@ static unsigned compute_physical_adress(u16 address)
 
     if (address < ROM_BANK)
         return address & 0x1FFF;
-    if (address < ROM_BANK_SWITCHABLE)
-        return (chip_registers.rom_b << 13) + (address & 0x1FFF);
+    if (address < ROM_BANK_SWITCHABLE) {
+        // Switch to rom bank 1 of set to 0
+        if (!chip_registers.rom_b)
+            return (1 << 14) | (address & 0x3FFF);
+        return (chip_registers.rom_b << 14) + (address & 0x3FFF);
+    }
 
     assert(false && "MBC2: compute_physical_adress: invalid area");
 

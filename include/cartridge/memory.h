@@ -28,8 +28,8 @@ extern struct chip_registers_t {
     // MBC1 registers
 
     u8 ram_g;
-    u8 bank_1;
-    u8 bank_2;
+    u8 rom_bank;
+    u8 ram_bank;
 
     /**
      * Determines how the ROM_BANK2 register value is used during access

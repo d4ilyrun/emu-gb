@@ -159,9 +159,10 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // ROM
         (struct mbc2_rw_param){0x12A7, 0x42, false, 0x4, 0x12A7},
-        (struct mbc2_rw_param){0x54C1, 0x42, false, 0x4, 0x94C1},
+        (struct mbc2_rw_param){0x54C1, 0x42, false, 0x4, 0x114C1},
         (struct mbc2_rw_param){0x0000, 0x42, true, 0x4, 0x0000},
-        (struct mbc2_rw_param){0x7FFF, 0x42, true, 0xF, 0x1FFFF}, // Max value
+        (struct mbc2_rw_param){0x7FFF, 0x42, true, 0xF, 0x3FFFF}, // Max value
+        (struct mbc2_rw_param){0x4000, 0x42, true, 0x0, 0x4000},
         // RAM
         (struct mbc2_rw_param){0xA1FF, 0x42, true, 0x4, 0x1FF},
         (struct mbc2_rw_param){0xA01B, 0x42, true, 0x4, 0x01B},
