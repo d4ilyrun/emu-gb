@@ -28,9 +28,7 @@ WRITE_FUNCTION(mbc1)
     if (address < RAM_GATE) {
         // bits 7-4 are ignored during write
         chip_registers.ram_g = data & 0xF;
-        // FIXME: Euh ... just ... why? makes no sense ... what was i thinking?
-        // Update RAM access
-        ram_access = cartridge.rom[address] & 0b1010;
+        ram_access = chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK) {
         // bits 7-5 are ignored during write
         chip_registers.bank_1 = data & 0x1F;
