@@ -21,7 +21,7 @@
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
-static unsigned compute_physical_addresss(u16 address);
+static unsigned compute_physical_address(u16 address);
 
 WRITE_FUNCTION(mbc1)
 {
@@ -46,7 +46,9 @@ WRITE_FUNCTION(mbc1)
 
     // READ/WRITE AREA
     else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
-        cartridge.ram[compute_physical_addresss(address)] = data;
+        const u16 physical_address = compute_physical_address(address);
+        assert(physical_address < cartridge.ram_size);
+        cartridge.ram[physical_address] = data;
     }
 }
 
@@ -80,7 +82,7 @@ WRITE_16_FUNCTION(mbc1)
  *
  * For more explanations please refer to the given documentation.
  */
-static unsigned compute_physical_addresss(u16 address)
+static unsigned compute_physical_address(u16 address)
 {
     // In case the chip is MBC1M, the BANK1 register is actually 4 bit long
     u8 bank_size = cartridge.multicart ? 4 : 5;
@@ -121,7 +123,7 @@ READ_FUNCTION(mbc1)
     if (is_ram && !ram_access)
         return 0xFF; // Undefined value
 
-    unsigned physical_address = compute_physical_addresss(address);
+    unsigned physical_address = compute_physical_address(address);
 
     // TODO: gracefully throw an error
 
