@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "CPU/memory.h"
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
@@ -39,15 +40,15 @@ static bool check_multicart()
     cartridge.multicart = true;
 
     // Set BANK1 to zero
-    u8 bank2 = chip_registers.bank_2;
-    chip_registers.bank_1 = 0;
+    u8 bank2 = chip_registers.ram_bank;
+    chip_registers.rom_bank = 0;
     chip_registers.mode = true;
 
     // Loop through all four possiblbbe BANK2 values
-    for (chip_registers.bank_2 = 0b00; chip_registers.bank_2 <= 0b11;
-         ++chip_registers.bank_2) {
+    for (chip_registers.ram_bank = 0b00; chip_registers.ram_bank <= 0b11;
+         ++chip_registers.ram_bank) {
         // Look for the nintendo logo
-        printf("NEW BANK: %d\n", chip_registers.bank_2);
+        printf("NEW BANK: %d\n", chip_registers.ram_bank);
         for (size_t i = 0; i < sizeof(nintendo_logo); ++i) {
             printf("%x = %x, ", read_cartridge(0x0104 + i), nintendo_logo[i]);
             if (read_cartridge(0x0104 + i) != nintendo_logo[i]) {
@@ -60,7 +61,7 @@ static bool check_multicart()
 
     printf("%d\n", nb_games);
     cartridge.multicart = nb_games;
-    chip_registers.bank_2 = bank2;
+    chip_registers.ram_bank = bank2;
     chip_registers.mode = false; // Always initialized at false
     return cartridge.multicart;
 }
@@ -82,6 +83,43 @@ bool load_cartridge(char *path)
     cartridge.rom_size = ftell(rom);
     cartridge.rom = malloc(cartridge.rom_size);
     cartridge.multicart = false;
+
+    const struct cartridge_header *header = HEADER(cartridge);
+
+    // Do the same for the RAM
+    // RAM size equivalent to the code inside the header:
+    //
+    // $00 = 0          No RAM
+    // $01 = Unused
+    // $02 = 8 KiB      1 bank
+    // $03 = 32 KiB     4 banks of 8 KiB each
+    // $04 = 128 KiB    16 banks of 8 KiB each
+    // $05 = 64 KiB     8 banks of 8 KiB each
+    const u8 ram_size_code = header->ram_size;
+    switch (ram_size_code) {
+    case 2:
+        cartridge.ram_size = 2 << 13;
+        break;
+    case 3:
+        cartridge.ram_size = 2 << 15;
+        break;
+    case 4:
+        cartridge.ram_size = 2 << 17;
+        break;
+    case 5:
+        cartridge.ram_size = 2 << 16;
+        break;
+    default:
+        cartridge.ram_size = 0;
+        break;
+    }
+
+    // If is MBC2: 512*4 bit internal RAM, no external RAM
+    if (header->rom_version > MBC1 && header->rom_version <= MBC2) {
+        cartridge.ram_size = 512;
+    }
+
+    cartridge.ram = malloc(cartridge.ram_size ? cartridge.ram_size : 1);
 
     rewind(rom);
     fread(cartridge.rom, 1, cartridge.rom_size, rom);

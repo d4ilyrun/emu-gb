@@ -20,36 +20,29 @@
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
+static unsigned compute_physical_adress(u16 address);
+
 WRITE_FUNCTION(mbc2)
 {
     // READ ONLY
     if (address < ROM_BANK && !BIT(address, 8)) {
         // bits 7-4 are ignored during write
         chip_registers.ram_g = data & 0xF;
-        // Update RAM access
-        ram_access = cartridge.rom[address] & 0b1010;
+        ram_access = chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK && BIT(address, 8)) {
         // bits 7-4 are ignored during write
-        chip_registers.rom_b = data & 0xF;
-        if (!chip_registers.rom_b) // Can never be null
-            chip_registers.rom_b = 0b0001;
+        chip_registers.rom_bank = data & 0xF;
+        if (!chip_registers.rom_bank) // Can never be null
+            chip_registers.rom_bank = 0b0001;
     }
 
     // READ/WRITE AREA
     else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
         // Upper 4 bits are ignored
-        cpu.memory[address] = data & 0xF;
+        const u16 physical_address = compute_physical_adress(address);
+        assert(physical_address < cartridge.ram_size);
+        cartridge.ram[physical_address] = data & 0xF;
     }
-}
-
-WRITE_16_FUNCTION(mbc2)
-{
-    // TODO: check for actual implementation
-
-    // Write the lower bytes after so that we keep the correct lower bits for
-    // when we update the registers
-    write_mbc2(address + 1, MSB(data));
-    write_mbc2(address, LSB(data));
 }
 
 /**
@@ -57,18 +50,22 @@ WRITE_16_FUNCTION(mbc2)
  * the ROMB register.
  *
  * Physical address is:
- * - 0x0000 - 0x3FFF: 0000 + 13 lower bits of address
- * - 0x4000 - 0x7FFF: ROMB + 13 lower bits of address
+ * - 0x0000 - 0x3FFF: 0000 + 14 lower bits of address
+ * - 0x4000 - 0x7FFF: ROMB + 14 lower bits of address
  */
 static unsigned compute_physical_adress(u16 address)
 {
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM)
-        return address;
+        return address - 0xA000;
 
     if (address < ROM_BANK)
-        return address & 0x3FF;
-    if (address < ROM_BANK_SWITCHABLE)
-        return (chip_registers.rom_b << 13) + (address & 0x3FF);
+        return address & 0x1FFF;
+    if (address < ROM_BANK_SWITCHABLE) {
+        // Switch to rom bank 1 of set to 0
+        if (!chip_registers.rom_bank)
+            return (1 << 14) | (address & 0x3FFF);
+        return (chip_registers.rom_bank << 14) + (address & 0x3FFF);
+    }
 
     assert(false && "MBC2: compute_physical_adress: invalid area");
 
@@ -77,28 +74,24 @@ static unsigned compute_physical_adress(u16 address)
 
 READ_FUNCTION(mbc2)
 {
-    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
+    const bool is_ram = VIDEO_RAM <= address && address < EXTERNAL_RAM;
+
+    if (is_ram && !ram_access)
         return 0xFF; // Undefined value
 
     unsigned physical_address = compute_physical_adress(address);
 
     // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
 
+    // printf(">> computed %X\n", physical_address);
+
+    if (is_ram) {
+        assert(physical_address < cartridge.ram_size);
+        return cartridge.ram[physical_address];
+    }
+
+    assert(physical_address < cartridge.rom_size);
     return cartridge.rom[physical_address];
-}
-
-READ_16_FUNCTION(mbc2)
-{
-    if (VIDEO_RAM <= address && address < EXTERNAL_RAM && !ram_access)
-        return 0xFFFF; // Undefined value
-
-    unsigned physical_address = compute_physical_adress(address);
-
-    // TODO: gracefully throw an error
-    assert(physical_address < cartridge.rom_size);
-
-    return cartridge.rom[physical_address] + (cartridge.rom[address + 1] << 8);
 }
 
 DUMP_FUNCTION(mbc2)

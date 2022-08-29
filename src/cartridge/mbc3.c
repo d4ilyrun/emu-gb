@@ -120,13 +120,13 @@ WRITE_FUNCTION(mbc3)
         // Update RAM and RTC access
         ram_access = cartridge.rom[address] & 0b1010;
     } else if (address < ROM_BANK) {
-        chip_registers.bank_1 = data;
-        if (!chip_registers.bank_1) // Value can never be null
-            chip_registers.bank_1 = 1;
+        chip_registers.rom_bank = data;
+        if (!chip_registers.rom_bank) // Value can never be null
+            chip_registers.rom_bank = 1;
     } else if (address < ROM_BANK2) {
         // 00h - 03h: maps the corresponding external RAM bank
         if (data <= 0x3)
-            chip_registers.bank_2 = data & 0x3;
+            chip_registers.ram_bank = data & 0x3;
         // 08h - 0Ch: maps the corresponding RTC registers
         // (checked when accessing A000h-BFFFh)
         rtc_mapped_register = data;
@@ -178,16 +178,16 @@ static unsigned compute_physical_addresss(u16 address)
      * bits of the requested address and BANK2, if mode is set, 0b00 else.
      */
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
-        bank = chip_registers.mode ? chip_registers.bank_2 : 0b00;
+        bank = chip_registers.mode ? chip_registers.ram_bank : 0b00;
         return (address & 0x1FFF) + (bank << 13);
     }
 
     if (address < 0x4000) {
         if (chip_registers.mode)
-            bank = chip_registers.bank_2 << bank_size;
+            bank = chip_registers.ram_bank << bank_size;
     } else if (address < 0x8000) {
-        bank = chip_registers.bank_2 << bank_size;
-        bank += chip_registers.bank_1;
+        bank = chip_registers.ram_bank << bank_size;
+        bank += chip_registers.rom_bank;
     } else {
         // TODO: throw nice error
         assert(false && "MBC3: Reading an out of bounds address.");

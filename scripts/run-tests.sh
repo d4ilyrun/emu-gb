@@ -24,7 +24,7 @@ for test in $(find * -type f -and -executable); do
         FAILED=$((FAILED + 1))
     else
         echo -ne "$GREY- $test: $NC"
-        "./$test" > /dev/null
+        "./$test" &> /dev/null
         if [[ $? -eq 0 ]]; then
             echo -e "${GREEN}OK"
         else

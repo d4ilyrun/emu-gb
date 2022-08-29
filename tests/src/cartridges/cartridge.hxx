@@ -25,6 +25,7 @@ template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
         cart_ = {.filename = "/home/user/nope",
                  .multicart = false,
                  .rom_size = rom_size,
+                 .ram_size = ram_size,
                  .rom = rom_,
                  .ram = ram_};
     }
