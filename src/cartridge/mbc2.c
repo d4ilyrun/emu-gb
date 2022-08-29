@@ -31,9 +31,9 @@ WRITE_FUNCTION(mbc2)
         ram_access = chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK && BIT(address, 8)) {
         // bits 7-4 are ignored during write
-        chip_registers.rom_b = data & 0xF;
-        if (!chip_registers.rom_b) // Can never be null
-            chip_registers.rom_b = 0b0001;
+        chip_registers.rom_bank = data & 0xF;
+        if (!chip_registers.rom_bank) // Can never be null
+            chip_registers.rom_bank = 0b0001;
     }
 
     // READ/WRITE AREA
@@ -62,9 +62,9 @@ static unsigned compute_physical_adress(u16 address)
         return address & 0x1FFF;
     if (address < ROM_BANK_SWITCHABLE) {
         // Switch to rom bank 1 of set to 0
-        if (!chip_registers.rom_b)
+        if (!chip_registers.rom_bank)
             return (1 << 14) | (address & 0x3FFF);
-        return (chip_registers.rom_b << 14) + (address & 0x3FFF);
+        return (chip_registers.rom_bank << 14) + (address & 0x3FFF);
     }
 
     assert(false && "MBC2: compute_physical_adress: invalid area");
@@ -83,7 +83,7 @@ READ_FUNCTION(mbc2)
 
     // TODO: gracefully throw an error
 
-    printf(">> computed %X\n", physical_address);
+    // printf(">> computed %X\n", physical_address);
 
     if (is_ram) {
         assert(physical_address < cartridge.ram_size);

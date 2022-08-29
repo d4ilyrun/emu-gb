@@ -6,7 +6,7 @@
 #include "cartridge/memory.h"
 #include "utils/macro.h"
 
-struct chip_registers_t chip_registers = {0, 0, 0, false, 1};
+struct chip_registers_t chip_registers = {0, 1, 0, false};
 
 u8 read_cartridge(u16 address)
 {
