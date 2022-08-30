@@ -26,4 +26,7 @@ jobs:
         run: nix build
 
       - name: Run tests
-        run: bash scripts/run-blargg-tests.sh
+        run: |
+          mkdir -p build
+          cp -rf result/bin/emu-gb build/emu-gb
+          bash scripts/run-blargg-tests.sh
