@@ -153,6 +153,8 @@ INSTRUCTION(push)
 INSTRUCTION(pop)
 {
     write_register_16bit(in.reg1, stack_pop_16bit());
+    // Don't overwrite F's unused bits
+    cpu.registers.f = cpu.registers.f & 0xF0;
     return in.cycle_count;
 }
 

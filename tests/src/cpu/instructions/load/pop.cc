@@ -39,7 +39,14 @@ class Pop : public InstructionTest,
     {
         InstructionTest::TearDown();
         ASSERT_EQ(cpu.registers.sp, start_sp_ + 2);
-        ASSERT_EQ(read_register_16bit(GetParam().reg), GetParam().data);
+
+        const auto &param = GetParam();
+
+        if (param.reg == REG_AF) {
+            ASSERT_EQ(read_register_16bit(param.reg), param.data & 0xFFF0);
+        } else {
+            ASSERT_EQ(read_register_16bit(param.reg), param.data);
+        }
     }
 
   protected:
@@ -56,6 +63,7 @@ TEST_P(Pop, Pop)
 CASES(registers, pop_param) = {{0x0000, 0xC1, REG_BC},
                                {0xFF00, 0xD1, REG_DE},
                                {0x00FF, 0xE1, REG_HL},
+                               {0xFFF0, 0xF1, REG_AF},
                                {0xFFFF, 0xF1, REG_AF}};
 
 INSTANTIATE_TEST_SUITE_P(Registers, Pop,
