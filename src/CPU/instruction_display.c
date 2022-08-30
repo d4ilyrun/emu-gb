@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "CPU/instruction.h"
+#include "options.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -25,6 +26,9 @@ char *register_names[] = {"A",  "F",  "B",  "C",  "D",  "E",  "H",  "L",
 
 void display_instruction(struct instruction in)
 {
+    if (get_options()->trace == false)
+        return;
+
     char *line = NULL;
     char *operands = NULL;
 

@@ -67,7 +67,7 @@ static error_t parse_opt(int key, char *value, struct argp_state *state)
     return 0;
 }
 
-static char doc[] = "gb-emu: yet another gameboy emulator written in C";
+static char doc[] = "GB-EMU: Yet another gameboy emulator written in C";
 static char args_doc[] = "CARTRIDGE";
 
 static struct argp_option long_options[] = {
@@ -77,6 +77,7 @@ static struct argp_option long_options[] = {
 
     {0},
 };
+
 struct options *parse_options(int argc, char **argv)
 {
     static struct argp argp = {long_options, parse_opt, args_doc, doc};
