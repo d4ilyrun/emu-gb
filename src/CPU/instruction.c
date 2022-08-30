@@ -5,6 +5,7 @@
 #include "CPU/flag.h"
 #include "CPU/interrupt.h"
 #include "CPU/stack.h"
+#include "options.h"
 #include "utils/error.h"
 #include "utils/log.h"
 
@@ -34,8 +35,13 @@ INSTRUCTION(jp)
 
 INSTRUCTION(jr)
 {
+    if (get_options()->exit_infinite_loop && (i8)in.data == -2) {
+        fatal_error("Infinite JR loop");
+    }
+
     if (!in.condition)
         return in.cycle_count_false;
+
     write_register_16bit(REG_PC, read_register_16bit(REG_PC) + (i8)in.data);
     return in.cycle_count_false;
 }

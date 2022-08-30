@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "CPU/memory.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 static char output[1024] = {0};
@@ -19,5 +20,5 @@ void test_rom_update()
 void test_rom_print()
 {
     if (output[0])
-        printf(">> test result: %s\n", output);
+        log_info("test result: %s", output);
 }

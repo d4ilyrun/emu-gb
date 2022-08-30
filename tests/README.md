@@ -30,4 +30,4 @@ make -j4 ld_test
 ## ROMs
 
 I've taken these ROM files from [rokytriton's Game Boy emulator](https://github.com/rockytriton/LLD_gbemu/tree/main/roms).  
-To use them it is necessary to compile using `-DTEST_ROM`. They should display wether the test passed (or run indefinitely ...).
+To use them it is necessary to run with `--blargg`. They should display wether the test passed (or run indefinitely ...).
