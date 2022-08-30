@@ -301,8 +301,16 @@ INSTRUCTION(adc)
                   ? in.data
                   : read_register_16bit(in.reg2);
 
+    u8 half = (val & 0xF) + (added & 0xF) + get_flag(FLAG_C);
+    u16 carry = val + added + get_flag(FLAG_C);
+
     added += get_flag(FLAG_C);
+
     write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
+
+    set_flag(FLAG_H, half & 0x10);
+    set_flag(FLAG_C, carry & 0x100);
+
     return in.cycle_count;
 }
 
@@ -322,8 +330,15 @@ INSTRUCTION(sbc)
                    ? in.data
                    : read_register_16bit(in.reg2);
 
+    u8 half_borrow = (val & 0xF) - (subbed & 0xF) - get_flag(FLAG_C);
+    u16 borrow = val - subbed - get_flag(FLAG_C);
+
     subbed += get_flag(FLAG_C);
     write_register_16bit(in.reg1, static_sub(val, subbed, in.type == HL_R16));
+
+    set_flag(FLAG_H, half_borrow & 0x10);
+    set_flag(FLAG_C, borrow & 0x100);
+
     return in.cycle_count;
 }
 

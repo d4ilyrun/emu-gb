@@ -94,7 +94,7 @@ TEST_P(SbcRegisterToA, Sub)
 TEST_P(SbcHLRelativeToA, Sub)
 {
     const auto &param = GetParam();
-    constexpr auto hl = 0x7FFF;
+    constexpr auto hl = 0x7FF8;
     cpu.registers.a = param.x;
     write_register_16bit(REG_HL, hl);
     write_memory(hl, param.y);
@@ -146,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(borrow, SbcRegisterToA,
 CASES(easy, hl_rel_to_a) = {
     {0x00, 0x00, 0x00, 0x00, {.z = true}},
     {0x02, 0x00, true, 0x01,},
-    {0x85, 0x43, true, 0xC7,},
+    {0x85, 0x43, true, 0x41,},
 };
 
 CASES(borrow, hl_rel_to_a) = {

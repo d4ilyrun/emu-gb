@@ -2,6 +2,7 @@
 
 #include "CPU/cpu.h"
 #include "cartridge/cartridge.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 bool ram_access = false;
@@ -13,6 +14,7 @@ void write_memory(u16 address, u8 val)
         return;
     }
 
+    // log_warn("Writing to an unsupported range: " HEX16, address);
     cpu.memory[address] = val;
 }
 
@@ -33,6 +35,8 @@ u8 read_memory(u16 address)
     if (address < ROM_BANK_SWITCHABLE) {
         return read_cartridge(address);
     }
+
+    // log_warn("Reading from an unsupported range: " HEX16, address);
 
     return cpu.memory[address];
 }
