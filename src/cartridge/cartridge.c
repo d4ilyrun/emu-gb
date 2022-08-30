@@ -6,6 +6,7 @@
 
 #include "CPU/memory.h"
 #include "cartridge/memory.h"
+#include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -49,7 +50,7 @@ static bool check_multicart()
     for (chip_registers.ram_bank = 0b00; chip_registers.ram_bank <= 0b11;
          ++chip_registers.ram_bank) {
         // Look for the nintendo logo
-        printf("NEW BANK: %d\n", chip_registers.ram_bank);
+        log_info("NEW BANK: %d\n", chip_registers.ram_bank);
         for (size_t i = 0; i < sizeof(nintendo_logo); ++i) {
             printf("%x = %x, ", read_cartridge(0x0104 + i), nintendo_logo[i]);
             if (read_cartridge(0x0104 + i) != nintendo_logo[i]) {
@@ -60,7 +61,7 @@ static bool check_multicart()
         printf("\n");
     }
 
-    printf("%d\n", nb_games);
+    log_info("%d\n", nb_games);
     cartridge.multicart = nb_games;
     chip_registers.ram_bank = bank2;
     chip_registers.mode = false; // Always initialized at false
@@ -72,8 +73,7 @@ bool load_cartridge(char *path)
     FILE *rom = fopen(path, "r");
 
     if (rom == NULL) {
-        perror("Failed to load cartridge");
-        return false;
+        fatal_error("Failed to load cartridge: Invalid file (%s)", path);
     }
 
     // TODO: check if filename is too long !!!
@@ -126,8 +126,7 @@ bool load_cartridge(char *path)
     fread(cartridge.rom, 1, cartridge.rom_size, rom);
 
     if (verify_header_checksum(cartridge)) {
-        fputs("Failed to load cartridge: Invalid checksum.", stderr);
-        return false;
+        fatal_error("Failed to load cartridge: Invalid checksum");
     }
 
     cartridge_type type = HEADER(cartridge)->type;
@@ -151,6 +150,44 @@ static void print_nintendo_logo()
     }
 }
 
+static const char *ROM_TYPES[] = {
+    "ROM ONLY",
+    "MBC1",
+    "MBC1+RAM",
+    "MBC1+RAM+BATTERY",
+    "0x04 ???",
+    "MBC2",
+    "MBC2+BATTERY",
+    "0x07 ???",
+    "ROM+RAM 1",
+    "ROM+RAM+BATTERY 1",
+    "0x0A ???",
+    "MMM01",
+    "MMM01+RAM",
+    "MMM01+RAM+BATTERY",
+    "0x0E ???",
+    "MBC3+TIMER+BATTERY",
+    "MBC3+TIMER+RAM+BATTERY 2",
+    "MBC3",
+    "MBC3+RAM 2",
+    "MBC3+RAM+BATTERY 2",
+    "0x14 ???",
+    "0x15 ???",
+    "0x16 ???",
+    "0x17 ???",
+    "0x18 ???",
+    "MBC5",
+    "MBC5+RAM",
+    "MBC5+RAM+BATTERY",
+    "MBC5+RUMBLE",
+    "MBC5+RUMBLE+RAM",
+    "MBC5+RUMBLE+RAM+BATTERY",
+    "0x1F ???",
+    "MBC6",
+    "0x21 ???",
+    "MBC7+SENSOR+RUMBLE+RAM+BATTERY",
+};
+
 void cartridge_info()
 {
     struct cartridge_header *header = HEADER(cartridge);
@@ -160,9 +197,8 @@ void cartridge_info()
     log_info("Cartridge information:");
     log_info("\tPath      : %s", cartridge.filename);
     log_info("\tTitle     : %s", header->game_info.game_title);
-    log_info("\tROM Size  : %X KB", 32 << header->rom_size);
-    log_info("\tRAM Size  : %2.2X", header->ram_size);
-    log_info("\tROM Vers  : %2.2X", header->rom_version);
+    log_info("\tType      : %s", ROM_TYPES[header->rom_version]);
+    log_info("\tROM Size  : %X KB", cartridge.rom_size);
+    log_info("\tRAM Size  : %2.2X KB", cartridge.ram_size);
     log_info("\tMulticart : %s", cartridge.multicart ? "YES" : "NO");
-    putchar('\n');
 }
