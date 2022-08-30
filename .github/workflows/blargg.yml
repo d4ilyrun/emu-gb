@@ -1,0 +1,29 @@
+name: Run blargg's testsuite
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure
+        run: |
+          sudo addgroup --system nixbld
+          sudo adduser --home /home/nix --disabled-password --gecos "" --shell /bin/bash nix && \
+          sudo adduser nix nixbld
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v17
+        with:
+          nix_conf: experimental-features = nix-command flakes
+
+      - name: Build project
+        run: nix build
+
+      - name: Run tests
+        run: bash scripts/run-blargg-tests.sh
