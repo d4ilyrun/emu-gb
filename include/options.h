@@ -11,6 +11,8 @@ struct options {
     char *args[GBEMU_NB_ARGS];
     bool trace;
     log_level log_level;
+    bool exit_infinite_loop;
+    bool blargg;
 };
 
 /**

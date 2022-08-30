@@ -34,6 +34,12 @@ static error_t parse_opt(int key, char *value, struct argp_state *state)
     case 't':
         arguments->trace = true;
         break;
+    case 'x':
+        arguments->exit_infinite_loop = true;
+        break;
+    case 'b':
+        arguments->blargg = true;
+        break;
 
     case 'l':
         if (STR_EQ(value, "TRACE"))
@@ -74,6 +80,11 @@ static struct argp_option long_options[] = {
     // Log related
     {"trace", 't', 0, 0, "Output traces during execution"},
     {"log-level", 'l', "LEVEL", 0, "Do not output logs of lower importance"},
+
+    // Runtime
+    {"blargg", 'b', 0, 0, "Display the result of blargg's test roms"},
+    {"exit-infinite-loop", 'x', 0, 0,
+     "Terminate the program when encountering an infinite JR loop"},
 
     {0},
 };
