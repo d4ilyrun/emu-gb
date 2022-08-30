@@ -25,8 +25,11 @@ jobs:
       - name: Build project
         run: nix build
 
-      - name: Run tests
+      - name: Set up environment
         run: |
           mkdir -p build
           cp -rf result/bin/emu-gb build/emu-gb
-          bash scripts/run-blargg-tests.sh
+          git submodule update --recursive
+
+      - name: Run tests
+        run: bash scripts/run-blargg-tests.sh
