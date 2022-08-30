@@ -1,4 +1,4 @@
-name: Run blargg's testsuite
+name: Blargg
 
 on:
   push:
