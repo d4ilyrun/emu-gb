@@ -101,7 +101,7 @@ TEST_P(SbcHLRelativeToA, Sub)
     execute_instruction();
 }
 
-TEST_P(SbcImmediateToA, Sub)
+TEST_P(SbcImmediateToA, 0xDE)
 {
     const auto &param = GetParam();
     cpu.registers.a = param.x;
@@ -178,6 +178,18 @@ CASES(borrow, immediate_to_a) = {
     {.x = 0x00, .c = true, .y = 0x00, .expected = 0xFF, .flags = {.c = true, .h = true}},
     {.x = 0x00, .c = false, .y = 0x01, .expected = 0xFF, .flags = {.c = true, .h = true}},
     {.x = 0xFF, .c = true, .y = 0xFF, .expected = 0xFF, .flags = {.c = true, .h = true}},
+};
+
+CASES(blargg, immediate_to_a) = {
+    {.x = 0x00, .c = false, .y = 0x00, .expected = 0x00},
+    {.x = 0x00, .c = false, .y = 0x01, .expected = 0xFF, .flags = {.c = true, .h = true}},
+    {.x = 0x00, .c = false, .y = 0x0F, .expected = 0xF1, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x10, .expected = 0xF0, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x1F, .expected = 0xE1, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x7F, .expected = 0x81, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x80, .expected = 0x80, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0xF0, .expected = 0xF0, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0xFF, .expected = 0xF0, .flags = {.c = true}},
 };
 // clang-format on
 

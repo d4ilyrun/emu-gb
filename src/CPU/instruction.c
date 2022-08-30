@@ -331,13 +331,15 @@ INSTRUCTION(sbc)
                    : read_register_16bit(in.reg2);
 
     u8 half_borrow = (val & 0xF) - (subbed & 0xF) - get_flag(FLAG_C);
-    u16 borrow = val - subbed - get_flag(FLAG_C);
+    i16 borrow = val - subbed - get_flag(FLAG_C);
 
-    subbed += get_flag(FLAG_C);
-    write_register_16bit(in.reg1, static_sub(val, subbed, in.type == HL_R16));
+    val -= subbed + get_flag(FLAG_C);
+    write_register(in.reg1, val);
 
+    set_flag(FLAG_Z, val == 0);
     set_flag(FLAG_H, half_borrow & 0x10);
-    set_flag(FLAG_C, borrow & 0x100);
+    set_flag(FLAG_C, borrow < 0);
+    set_flag(FLAG_N, true);
 
     return in.cycle_count;
 }
