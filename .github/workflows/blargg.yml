@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p build
           cp -rf result/bin/emu-gb build/emu-gb
-          git submodule update --recursive
+          git clone https://github.com/retrio/gb-test-roms.git tests/blargg
 
       - name: Run tests
         run: bash scripts/run-blargg-tests.sh
