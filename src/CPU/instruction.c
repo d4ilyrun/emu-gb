@@ -36,7 +36,7 @@ INSTRUCTION(jp)
 INSTRUCTION(jr)
 {
     if (get_options()->exit_infinite_loop && (i8)in.data == -2) {
-        fatal_error("Infinite  JR loop");
+        fatal_error("Infinite JR loop");
     }
 
     if (!in.condition)

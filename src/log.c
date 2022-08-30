@@ -13,7 +13,7 @@
 const char *level_colors[] = {
     [LOG_INFO] = "\033[1;34m",    // cyan
     [LOG_TRACE] = "\033[1;30m",   // dark grey
-    [LOG_WARNING] = "\033[1;30m", // yellow
+    [LOG_WARNING] = "\033[1;33m", // yellow
     [LOG_ERROR] = "\033[1;31m",   // red
 };
 

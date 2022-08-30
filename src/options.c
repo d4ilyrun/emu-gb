@@ -41,6 +41,9 @@ static error_t parse_opt(int key, char *value, struct argp_state *state)
         arguments->blargg = true;
         break;
 
+    case 's':
+        arguments->log_level = -1;
+        break;
     case 'l':
         if (STR_EQ(value, "TRACE"))
             arguments->log_level = LOG_TRACE;
@@ -80,6 +83,7 @@ static struct argp_option long_options[] = {
     // Log related
     {"trace", 't', 0, 0, "Output traces during execution"},
     {"log-level", 'l', "LEVEL", 0, "Do not output logs of lower importance"},
+    {"silent", 's', 0, 0, "Do not show any log"},
 
     // Runtime
     {"blargg", 'b', 0, 0, "Display the result of blargg's test roms"},
