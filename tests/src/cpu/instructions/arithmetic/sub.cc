@@ -121,7 +121,7 @@ CASES(registers, from_register) = {
     {0xFF, 0x01, 0xFE, {false, false, true, false}, 0x93, REG_E},
     {0xFF, 0x01, 0xFE, {false, false, true, false}, 0x94, REG_H},
     {0xFF, 0x01, 0xFE, {false, false, true, false}, 0x95, REG_L},
-    {0xFF, 0xFF, 0x00, {false, false, true, true}, 0x96, REG_A},
+    {0xFF, 0xFF, 0x00, {false, false, true, true}, 0x97, REG_A},
 };
 
 CASES(borrow, from_register) = {

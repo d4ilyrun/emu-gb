@@ -317,7 +317,7 @@ INSTRUCTION(adc)
 INSTRUCTION(sub)
 {
     u16 val = read_register_16bit(in.reg1);
-    u16 subbed = (in.type == A_R8) ? read_register(REG_A) : in.data;
+    u16 subbed = (in.type == A_R8) ? read_register(in.reg2) : in.data;
 
     write_register(in.reg1, static_sub(val, subbed, false));
     return in.cycle_count;
