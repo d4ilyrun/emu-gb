@@ -4,6 +4,7 @@
 
 #include "CPU/interrupt.h"
 #include "CPU/memory.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 void reset_timer()
@@ -26,11 +27,8 @@ void write_timer(u16 address, u8 data)
     case TIMER_TIMA:
         write_memory(address, data);
         break;
-    // TODO: error printing macro
     case TIMER_UNKNOWN:
-        fprintf(stderr,
-                ">> Timer: trying to write into an unknown register "
-                "(" HEX ")\n",
+        log_err("Timer: trying to write into an unknown register (" HEX ")\n",
                 address);
         break;
     }
@@ -45,12 +43,9 @@ u8 read_timer(u16 address)
     case TIMER_TMA:
     case TIMER_TIMA:
         return read_memory(address);
-    // TODO: error printing macro
     default:
     case TIMER_UNKNOWN:
-        fprintf(stderr,
-                ">> Timer: trying to read into an unknown register "
-                "(" HEX ")\n",
+        log_err("Timer: trying to read from an unknown register (" HEX ")\n",
                 address);
         return 0;
     }

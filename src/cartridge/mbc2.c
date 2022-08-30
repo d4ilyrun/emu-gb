@@ -18,6 +18,7 @@
 #include "CPU/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "utils/error.h"
 #include "utils/macro.h"
 
 static unsigned compute_physical_adress(u16 address);
@@ -40,7 +41,8 @@ WRITE_FUNCTION(mbc2)
     else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
         // Upper 4 bits are ignored
         const u16 physical_address = compute_physical_adress(address);
-        assert(physical_address < cartridge.ram_size);
+        assert_msg(physical_address < cartridge.ram_size,
+                   "MBC2: writing outside of RAM bounds");
         cartridge.ram[physical_address] = data & 0xF;
     }
 }
@@ -67,9 +69,8 @@ static unsigned compute_physical_adress(u16 address)
         return (chip_registers.rom_bank << 14) + (address & 0x3FFF);
     }
 
-    assert(false && "MBC2: compute_physical_adress: invalid area");
-
-    return 0xFF; // TODO: never reached macro
+    assert_not_reached();
+    // fatal_error("MBC2: compute_physical_adress: invalid area");
 }
 
 READ_FUNCTION(mbc2)
@@ -81,16 +82,14 @@ READ_FUNCTION(mbc2)
 
     unsigned physical_address = compute_physical_adress(address);
 
-    // TODO: gracefully throw an error
-
-    // printf(">> computed %X\n", physical_address);
-
     if (is_ram) {
-        assert(physical_address < cartridge.ram_size);
+        assert_msg(physical_address < cartridge.ram_size,
+                   "MBC2: Reading outside of RAM bounds");
         return cartridge.ram[physical_address];
     }
 
-    assert(physical_address < cartridge.rom_size);
+    assert_msg(physical_address < cartridge.rom_size,
+               "MBC2: Reading outside of ROM bounds");
     return cartridge.rom[physical_address];
 }
 

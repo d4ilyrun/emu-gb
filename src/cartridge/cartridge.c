@@ -6,6 +6,7 @@
 
 #include "CPU/memory.h"
 #include "cartridge/memory.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 struct cartridge cartridge;
@@ -156,12 +157,12 @@ void cartridge_info()
 
     print_nintendo_logo();
 
-    puts("\nCartridge information:");
-    printf("\tPath      : %s\n", cartridge.filename);
-    printf("\tTitle     : %s\n", header->game_info.game_title);
-    printf("\tROM Size  : %d KB\n", 32 << header->rom_size);
-    printf("\tRAM Size  : %2.2X\n", header->ram_size);
-    printf("\tROM Vers  : %2.2X\n", header->rom_version);
-    printf("\tMulticart : %s\n", cartridge.multicart ? "YES" : "NO");
+    log_info("Cartridge information:");
+    log_info("\tPath      : %s", cartridge.filename);
+    log_info("\tTitle     : %s", header->game_info.game_title);
+    log_info("\tROM Size  : %X KB", 32 << header->rom_size);
+    log_info("\tRAM Size  : %2.2X", header->ram_size);
+    log_info("\tROM Vers  : %2.2X", header->rom_version);
+    log_info("\tMulticart : %s", cartridge.multicart ? "YES" : "NO");
     putchar('\n');
 }

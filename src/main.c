@@ -6,6 +6,7 @@
 #include "CPU/timer.h"
 #include "cartridge/cartridge.h"
 #include "test_rom.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 int main(int argc, char **argv)
