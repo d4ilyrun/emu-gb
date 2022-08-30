@@ -131,8 +131,31 @@ INSTRUCTION(scf)
 
 INSTRUCTION(daa)
 {
-    // TODO: DAA
-    not_implemented(__FUNCTION__);
+    u8 reg_a = read_register(REG_A);
+    u8 flag_c = get_flag(FLAG_C);
+
+    if (!get_flag(FLAG_N)) { // Add
+        if (flag_c || reg_a > 0x99) {
+            reg_a += 0x60;
+            set_flag(FLAG_C, true);
+        }
+        if (get_flag(FLAG_H) || (reg_a & 0x0F) > 0x09) {
+            reg_a += 0x06;
+        }
+    } else { // Sub
+        if (flag_c) {
+            reg_a -= 0x60;
+        }
+        if (get_flag(FLAG_H)) {
+            reg_a -= 0x06;
+        }
+    }
+
+    write_register(REG_A, reg_a);
+
+    set_flag(FLAG_H, false);
+    set_flag(FLAG_Z, reg_a == 0);
+
     return in.cycle_count;
 }
 
@@ -153,6 +176,8 @@ INSTRUCTION(push)
 INSTRUCTION(pop)
 {
     write_register_16bit(in.reg1, stack_pop_16bit());
+    // Don't overwrite F's unused bits
+    cpu.registers.f = cpu.registers.f & 0xF0;
     return in.cycle_count;
 }
 

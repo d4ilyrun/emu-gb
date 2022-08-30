@@ -1,4 +1,4 @@
-name: Unit-tests
+name: Blargg
 
 on:
   push:
@@ -22,8 +22,14 @@ jobs:
         with:
           nix_conf: experimental-features = nix-command flakes
 
-      - name: Build project and tests
-        run: nix build .#unit-tests
+      - name: Build project
+        run: nix build
+
+      - name: Set up environment
+        run: |
+          mkdir -p build
+          cp -rf result/bin/emu-gb build/emu-gb
+          git clone https://github.com/retrio/gb-test-roms.git tests/blargg
 
       - name: Run tests
-        run: bash scripts/run-tests.sh
+        run: bash scripts/run-blargg-tests.sh

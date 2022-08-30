@@ -48,7 +48,7 @@ class DaaTest : public InstructionTest,
 
         ASSERT_EQ(cpu.registers.a, param.expected);
 
-        ASSERT_EQ(get_flag(FLAG_C), param.flags.c);
+        ASSERT_EQ(get_flag(FLAG_C), param.flags.c | param.c);
         ASSERT_EQ(get_flag(FLAG_Z), param.flags.z);
         ASSERT_EQ(get_flag(FLAG_H), false);
     };
@@ -101,6 +101,15 @@ CASES(carry, daa) = {
 INSTANTIATE_TEST_SUITE_P(Easy, DaaAdd, ValuesIn(easy_daa));
 INSTANTIATE_TEST_SUITE_P(Carry, DaaAdd, ValuesIn(carry_daa));
 
+CASES(easy_sub, daa) = {
+    {0x00, 0x00, {.z = true}},
+    {0x09, 0x09},
+    {0x0A, 0x0A},
+    {0x10, 0x10},
+    {0xF0, 0xF0},
+    {0x1A, 0x1A},
+};
+
 CASES(borrow, daa) = {
     {0x0F, 0x09, {}, false, true},
     {0x1F, 0x19, {}, false, true},
@@ -112,7 +121,7 @@ CASES(borrow, daa) = {
     {0x06, 0x00, {.z = true}, false, true},
 };
 
-INSTANTIATE_TEST_SUITE_P(Easy, DaaSub, ValuesIn(easy_daa));
+INSTANTIATE_TEST_SUITE_P(Easy, DaaSub, ValuesIn(easy_sub_daa));
 INSTANTIATE_TEST_SUITE_P(Borrow, DaaSub, ValuesIn(borrow_daa));
 
 } // namespace cpu_tests

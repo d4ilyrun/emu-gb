@@ -47,9 +47,9 @@ void write_cartridge(u16 address, u8 data)
         write_mbc2(address, data);
     } else if (rom->type <= MBC3) {
         write_mbc3(address, data);
+    } else {
+        log_err("Unsupported cartdrige type: " HEX, rom->type);
     }
-
-    log_err("Unsupported cartdrige type: " HEX, rom->type);
 }
 
 void write_cartridge_16bit(u16 address, u16 data)
