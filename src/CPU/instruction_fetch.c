@@ -377,12 +377,12 @@ struct in_type opcodes[] = {
     [0xF5] = {IN_PUSH, R16, 4},
     [0xF6] = {IN_OR, A_D8, 2},
     [0xF7] = {IN_RST, RST, 4},
+    [0xF8] = {IN_LD, HL_S8, 4},
     [0xF9] = {IN_LD, SP_HL, 2},
     [0xFA] = {IN_LD, A_D16_REL, 4},
     [0xFB] = {IN_EI, NO_OPERAND, 1},
     [0xFE] = {IN_CP, A_D8, 2},
     [0xFF] = {IN_RST, RST, 4},
-
 };
 
 /*
@@ -531,6 +531,11 @@ struct instruction fetch_instruction(u8 opcode)
     case HL_R16:
         in.reg1 = REG_HL;
         in.reg2 = find_register_16bit(OPCODE_P(opcode));
+        break;
+
+    case HL_S8:
+        in.reg1 = REG_HL;
+        in.data = read_8bit_data();
         break;
 
     case SP_S8:

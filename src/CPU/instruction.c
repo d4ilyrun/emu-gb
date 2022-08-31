@@ -77,19 +77,46 @@ INSTRUCTION(rst)
     return in.cycle_count;
 }
 
+// for 0xF8
+INSTRUCTION(add);
+
 INSTRUCTION(ld)
 {
-    if (in.type == R8_R8 || in.type == SP_HL)
-        write_register_16bit(in.reg1, read_register_16bit(in.reg2));
-    else if (IS_DST_REGISTER(in))
-        write_register_16bit(in.reg1, in.data);
-    else if (in.type == D16_REL_SP)
-        write_memory_16bit(in.address, in.data);
-    else if (in.type == HL_REL_D8) // load immediate value from operands
-        write_memory(in.address, in.data);
-    else { // load value from 8bit register source
-        write_memory(in.address, read_register(in.reg1));
+    if (in.type == HL_S8) {
+        u16 val = read_register_16bit(REG_SP);
+        i8 data = in.data;
+
+        write_register_16bit(REG_HL, val + data);
+
+        set_all_flags(0, 0, 0, 0);
+        set_flag(FLAG_C, ((val & 0xFF) + (data & 0xFF)) & 0x100);
+        set_flag(FLAG_H, ((val & 0xF) + (data & 0xF)) & 0x10);
+
+        return in.cycle_count;
     }
+
+    switch (in.type) {
+    case R8_R8:
+    case SP_HL:
+        write_register_16bit(in.reg1, read_register_16bit(in.reg2));
+        break;
+
+    case D16_REL_SP:
+        write_memory_16bit(in.address, in.data);
+        break;
+
+    case HL_REL_D8: // load immediate value from operands
+        write_memory(in.address, in.data);
+        break;
+
+    default:
+        if (IS_DST_REGISTER(in))
+            write_register_16bit(in.reg1, in.data);
+        else // load value from 8bit register source
+            write_memory(in.address, read_register(in.reg1));
+        break;
+    }
+
     return in.cycle_count;
 }
 
