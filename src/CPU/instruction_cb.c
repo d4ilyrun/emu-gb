@@ -20,7 +20,7 @@ static struct cb_instruction fetch_cb_instruction()
     struct cb_instruction cb;
 
     if ((cb.is_address = z == 0x6))
-        cb.address = read_memory(read_register_16bit(REG_HL));
+        cb.address = read_register_16bit(REG_HL);
     else
         cb.reg = (z == 0x7) ? REG_A : REG_B + z;
 

@@ -25,6 +25,13 @@ class Bit : public InstructionTest,
     Bit() : InstructionTest(2) {}
 };
 
+class BitRelative : public InstructionTest,
+                    public ::testing::WithParamInterface<u16>
+{
+  public:
+    BitRelative() : InstructionTest(2) {}
+};
+
 using Swap = Bit;
 
 TEST_P(Bit, IsSet)
@@ -49,7 +56,7 @@ TEST_P(Bit, IsSet)
             ASSERT_TRUE(get_flag(FLAG_H));
             ASSERT_FALSE(get_flag(FLAG_N));
             ASSERT_FALSE(get_flag(FLAG_C));
-            ASSERT_EQ(get_flag(FLAG_Z), BIT(val, bit));
+            ASSERT_EQ(get_flag(FLAG_Z), !BIT(val, bit));
         }
     }
 }
@@ -71,7 +78,28 @@ TEST_P(Bit, Set)
         Load((void *)inst);
         write_register(reg, 0);
         execute_instruction();
-        ASSERT_FALSE(BIT(read_register(reg), bit));
+        ASSERT_TRUE(BIT(read_register(reg), bit));
+    }
+}
+
+TEST_P(BitRelative, SetRelative)
+{
+    u8 inst[2] = {0xCB, 0xC6};
+    const auto address = GetParam();
+
+    u8 opcode = inst[1];
+
+    const auto pc = cpu.registers.pc;
+    for (u8 bit = 0; bit < 8; ++bit) {
+        cpu.registers.pc = pc;
+        inst[1] = opcode | (bit << 3);
+        Load((void *)inst);
+
+        write_register_16bit(REG_HL, address);
+        write_memory(address, 0);
+        execute_instruction();
+
+        ASSERT_TRUE(BIT(read_memory(address), bit));
     }
 }
 
@@ -129,5 +157,7 @@ INSTANTIATE_TEST_SUITE_P(Registers, Bit,
                          ::testing::ValuesIn(registers_cpu_register_name));
 INSTANTIATE_TEST_SUITE_P(Registers, Swap,
                          ::testing::ValuesIn(registers_cpu_register_name));
+
+INSTANTIATE_TEST_SUITE_P(Relative, BitRelative, ::testing::Values(0x1FFF));
 
 } // namespace cpu_tests
