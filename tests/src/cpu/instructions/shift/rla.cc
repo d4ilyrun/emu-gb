@@ -31,7 +31,7 @@ using RLCA = RLA;
     execute_instruction();                                   \
     ASSERT_EQ(get_flag(FLAG_C), BIT(val, 7) ? 1 : 0);        \
     ASSERT_EQ(read_register(reg) & 0xFE, (val << 1) & 0xFE); \
-    ASSERT_EQ(get_flag(FLAG_Z), read_register(REG_A) == 0);
+    ASSERT_EQ(get_flag(FLAG_Z), false);
 
 TEST_F(RLA, ImmediateValue)
 {

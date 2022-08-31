@@ -404,12 +404,12 @@ INSTRUCTION(rla)
 
     set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
 
-    a = (a << 1) + c;
+    a = (a << 1) | c;
     write_register(REG_A, a);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
-    set_flag(FLAG_Z, a == 0);
+    set_flag(FLAG_Z, false);
 
     return in.cycle_count;
 }
@@ -425,7 +425,7 @@ INSTRUCTION(rlca)
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
-    set_flag(FLAG_Z, a == 0);
+    set_flag(FLAG_Z, false);
 
     return in.cycle_count;
 }
@@ -439,6 +439,8 @@ INSTRUCTION(rra)
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 
@@ -450,6 +452,8 @@ INSTRUCTION(rrca)
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 
