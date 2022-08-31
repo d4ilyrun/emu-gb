@@ -108,6 +108,7 @@ typedef enum operand_type
     A_D8,
     A_HL_REL,
     HL_R16,
+    HL_S8,
 
     // other types with two operands
     HL_REL_R8,
