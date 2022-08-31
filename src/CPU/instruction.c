@@ -244,72 +244,18 @@ INSTRUCTION(dec)
 
 #pragma region add_sub
 
-static u16 static_sub(u16 val, u16 subbed, bool bit16)
-{
-    u16 base_val = val;
-
-    val -= subbed;
-
-    set_flag(FLAG_Z, !val);
-    set_flag(FLAG_N, 1);
-    set_flag(FLAG_C, subbed > base_val);
-    if (bit16) { // 16-bit subtraction
-        // set_flag(FLAG_H, (base_val & 0xFFF) < (subbed & 0xFFF));
-        set_flag(FLAG_H, (((int)base_val & 0xFFF) - ((int)subbed & 0xFFF)) < 0);
-    } else {
-        set_flag(FLAG_H, (((int)base_val & 0xF) - ((int)subbed & 0xF)) < 0);
-    }
-
-    return val;
-}
-
-INSTRUCTION(add)
-{
-    u16 val = read_register_16bit(in.reg1);
-    u16 added = (in.type == A_HL_REL || in.type == A_D8)
-                  ? in.data
-                  : read_register_16bit(in.reg2);
-
-    set_flag(FLAG_N, false);
-
-    if (in.type == HL_R16) { // 16-bit addition
-        u32 carry = val + added;
-        set_flag(FLAG_C, carry > 0xFFFF);
-        set_flag(FLAG_H, ((val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
-    } else {
-        set_flag(FLAG_C, ((val & 0xFF) + (added & 0xFF)) > 0xFF);
-        set_flag(FLAG_H, ((val & 0xF) + (added & 0xF)) > 0xF);
-        set_flag(FLAG_Z, ((val + added) & 0xFF) == 0);
-    }
-
-    write_register_16bit(in.reg1, val + added);
-    return in.cycle_count;
-}
-
-INSTRUCTION(adc)
-{
-    u8 c = get_flag(FLAG_C);
-    u16 val = read_register_16bit(in.reg1);
-    u16 added = (in.type == A_HL_REL || in.type == A_D8)
-                  ? in.data
-                  : read_register_16bit(in.reg2);
-
-    set_flag(FLAG_N, false);
-    set_flag(FLAG_H, ((val & 0xF) + (added & 0xF) + c) & 0x10);
-    set_flag(FLAG_C, (val + added + c) & 0x100);
-    set_flag(FLAG_Z, ((val + added + c) & 0xFF) == 0);
-
-    write_register_16bit(in.reg1, val + added + c);
-
-    return in.cycle_count;
-}
-
 INSTRUCTION(sub)
 {
     u16 val = read_register_16bit(in.reg1);
-    u16 subbed = (in.type == A_R8) ? read_register(in.reg2) : in.data;
+    u16 data = (in.type == A_R8) ? read_register(in.reg2) : in.data;
 
-    write_register(in.reg1, static_sub(val, subbed, false));
+    set_flag(FLAG_N, true);
+    set_flag(FLAG_Z, val - data == 0);
+    set_flag(FLAG_C, data > val);
+    set_flag(FLAG_H, ((val & 0xF) - (data & 0xF)) < 0);
+
+    write_register(in.reg1, val - data);
+
     return in.cycle_count;
 }
 
@@ -330,6 +276,47 @@ INSTRUCTION(sbc)
     set_flag(FLAG_Z, val == 0);
     set_flag(FLAG_H, h & 0x10);
     set_flag(FLAG_C, c & 0x100);
+
+    return in.cycle_count;
+}
+
+INSTRUCTION(add)
+{
+    u16 val = read_register_16bit(in.reg1);
+    u16 data = (in.type == A_R8 || in.type == HL_R16)
+                 ? read_register_16bit(in.reg2)
+                 : in.data;
+
+    set_flag(FLAG_N, false);
+
+    if (in.type == HL_R16) { // 16-bit addition
+        set_flag(FLAG_C, (val + data) > 0xFFFF);
+        set_flag(FLAG_H, ((val & 0xFFF) + (data & 0xFFF)) > 0xFFF);
+    } else {
+        set_flag(FLAG_C, ((val & 0xFF) + (data & 0xFF)) & 0x100);
+        set_flag(FLAG_H, ((val & 0xF) + (data & 0xF)) & 0x10);
+        // No Z for 16bit addition
+        set_flag(FLAG_Z, ((val + data) & 0xFF) == 0 && !IS_16BIT(in.reg1));
+    }
+
+    write_register_16bit(in.reg1, val + data);
+    return in.cycle_count;
+}
+
+INSTRUCTION(adc)
+{
+    u8 c = get_flag(FLAG_C);
+    u16 val = read_register_16bit(in.reg1);
+    u16 added = (in.type == A_HL_REL || in.type == A_D8)
+                  ? in.data
+                  : read_register_16bit(in.reg2);
+
+    set_flag(FLAG_N, false);
+    set_flag(FLAG_H, ((val & 0xF) + (added & 0xF) + c) & 0x10);
+    set_flag(FLAG_C, (val + added + c) & 0x100);
+    set_flag(FLAG_Z, ((val + added + c) & 0xFF) == 0);
+
+    write_register_16bit(in.reg1, val + added + c);
 
     return in.cycle_count;
 }
