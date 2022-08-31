@@ -182,7 +182,7 @@ CB_INSTRUCTION(bit)
 {
     u8 val = (in.is_address) ? read_memory(in.address) : read_register(in.reg);
 
-    set_flag(FLAG_Z, BIT(val, in.bit));
+    set_flag(FLAG_Z, !BIT(val, in.bit));
     set_flag(FLAG_N, false);
     set_flag(FLAG_H, true);
 
