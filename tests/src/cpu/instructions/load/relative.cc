@@ -204,13 +204,14 @@ class RelativeToFF00 : public InstructionTest
 
 TEST_F(SPToImmediateAddress, LoadRelative)
 {
-    const u8 instruction[3] = {0x08, 0x42, 0x24};
+    const u16 address = 0x1234;
+    const u8 instruction[3] = {0x08, LSB(address), MSB(address)};
 
-    cpu.registers.sp = 0x1234;
+    cpu.registers.sp = address;
     Load((void *)instruction);
     execute_instruction();
 
-    ASSERT_EQ(read_memory_16bit(0x2442), cpu.registers.sp);
+    ASSERT_EQ(read_memory_16bit(address), cpu.registers.sp);
 }
 
 TEST_F(RelativeToFF00, OffsetFromC)

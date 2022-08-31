@@ -564,7 +564,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case D16_REL_SP:
         in.address = read_16bit_data();
-        in.reg1 = read_register_16bit(REG_SP);
+        in.data = read_register_16bit(REG_SP);
         break;
 
     case HLD_A:

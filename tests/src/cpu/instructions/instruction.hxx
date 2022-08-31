@@ -5,6 +5,7 @@
 
 extern "C" {
 #include <CPU/flag.h>
+#include <options.h>
 }
 
 #include "../../cartridges/cartridge.hxx"
@@ -23,6 +24,7 @@ class InstructionTest : public ::testing::Test
     {
         cpu.registers.pc = start_pc_;
         set_all_flags(false, false, false, false);
+        get_options()->trace = false; // Manually set the value when needed
     }
 
     virtual void TearDown() override

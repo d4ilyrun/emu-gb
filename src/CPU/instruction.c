@@ -83,10 +83,11 @@ INSTRUCTION(ld)
         write_register_16bit(in.reg1, read_register_16bit(in.reg2));
     else if (IS_DST_REGISTER(in))
         write_register_16bit(in.reg1, in.data);
+    else if (in.type == D16_REL_SP)
+        write_memory_16bit(in.address, in.data);
     else if (in.type == HL_REL_D8) // load immediate value from operands
         write_memory(in.address, in.data);
     else { // load value from 8bit register source
-        // printf("0x%04X <- 0x%2X\n", in.address, read_register(in.reg1));
         write_memory(in.address, read_register(in.reg1));
     }
     return in.cycle_count;
@@ -301,15 +302,23 @@ INSTRUCTION(adc)
                   ? in.data
                   : read_register_16bit(in.reg2);
 
+    u8 half = (val & 0xF) + (added & 0xF) + get_flag(FLAG_C);
+    u16 carry = val + added + get_flag(FLAG_C);
+
     added += get_flag(FLAG_C);
+
     write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
+
+    set_flag(FLAG_H, half & 0x10);
+    set_flag(FLAG_C, carry & 0x100);
+
     return in.cycle_count;
 }
 
 INSTRUCTION(sub)
 {
     u16 val = read_register_16bit(in.reg1);
-    u16 subbed = (in.type == A_R8) ? read_register(REG_A) : in.data;
+    u16 subbed = (in.type == A_R8) ? read_register(in.reg2) : in.data;
 
     write_register(in.reg1, static_sub(val, subbed, false));
     return in.cycle_count;
@@ -317,13 +326,22 @@ INSTRUCTION(sub)
 
 INSTRUCTION(sbc)
 {
-    u16 val = read_register_16bit(in.reg1);
+    u8 val = read_register(in.reg1);
     u16 subbed = (in.type == A_HL_REL || in.type == A_D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
 
-    subbed += get_flag(FLAG_C);
-    write_register_16bit(in.reg1, static_sub(val, subbed, in.type == HL_R16));
+    u8 h = (val & 0xF) - (subbed & 0xF) - (get_flag(FLAG_C));
+    u16 c = (val) - (subbed) - (get_flag(FLAG_C));
+
+    val -= subbed + get_flag(FLAG_C);
+    write_register(in.reg1, val);
+
+    set_flag(FLAG_N, true);
+    set_flag(FLAG_Z, val == 0);
+    set_flag(FLAG_H, h & 0x10);
+    set_flag(FLAG_C, c & 0x100);
+
     return in.cycle_count;
 }
 
@@ -383,22 +401,32 @@ INSTRUCTION(rla)
 {
     u8 a = read_register(REG_A);
     u8 c = get_flag(FLAG_C);
+
     set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
-    write_register(REG_A, (a << 1) + c);
+
+    a = (a << 1) | c;
+    write_register(REG_A, a);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 
 INSTRUCTION(rlca)
 {
     u8 a = read_register(REG_A);
-    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
-    write_register(REG_A, (a << 1) + get_flag(FLAG_C));
+
+    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit from A to carry flag
+
+    a = (a << 1) + BIT(a, 7);
+    write_register(REG_A, a);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 
@@ -411,6 +439,8 @@ INSTRUCTION(rra)
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 
@@ -422,6 +452,8 @@ INSTRUCTION(rrca)
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, false);
+
     return in.cycle_count;
 }
 

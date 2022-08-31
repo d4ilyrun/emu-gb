@@ -1,5 +1,6 @@
 #include "CPU/flag.h"
 #include "CPU/instruction.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 #define CB_INSTRUCTION(_name) static u8 _name(struct cb_instruction in)
@@ -123,19 +124,16 @@ CB_INSTRUCTION(sla)
 
 CB_INSTRUCTION(sra)
 {
-    u8 val = (in.is_address) ? read_memory(in.address) : read_register(in.reg);
-    u8 msb = BIT(val, 7);
-    val = (val >> 1) + (msb << 7);
+    u8 val = (in.is_address) ? read_memory(read_register_16bit(REG_HL))
+                             : read_register(in.reg);
+
+    set_flag(FLAG_C, val & 0x1);
+    val = (val >> 1) | (val & 0x80);
 
     if (in.is_address)
-        write_memory(in.address, val);
+        write_memory(read_register_16bit(REG_HL), val);
     else
         write_register(in.reg, val);
-
-    // C is set to the lsb of val in the original Z80 but the GB's doc sets it
-    // to 0. I don't know if it is an error or an actual change but we'll follow
-    // the GB's doc.
-    set_flag(FLAG_C, 0);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);

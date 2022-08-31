@@ -94,14 +94,14 @@ TEST_P(SbcRegisterToA, Sub)
 TEST_P(SbcHLRelativeToA, Sub)
 {
     const auto &param = GetParam();
-    constexpr auto hl = 0x7FFF;
+    constexpr auto hl = 0x7FF8;
     cpu.registers.a = param.x;
     write_register_16bit(REG_HL, hl);
     write_memory(hl, param.y);
     execute_instruction();
 }
 
-TEST_P(SbcImmediateToA, Sub)
+TEST_P(SbcImmediateToA, 0xDE)
 {
     const auto &param = GetParam();
     cpu.registers.a = param.x;
@@ -146,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(borrow, SbcRegisterToA,
 CASES(easy, hl_rel_to_a) = {
     {0x00, 0x00, 0x00, 0x00, {.z = true}},
     {0x02, 0x00, true, 0x01,},
-    {0x85, 0x43, true, 0xC7,},
+    {0x85, 0x43, true, 0x41,},
 };
 
 CASES(borrow, hl_rel_to_a) = {
@@ -178,6 +178,18 @@ CASES(borrow, immediate_to_a) = {
     {.x = 0x00, .c = true, .y = 0x00, .expected = 0xFF, .flags = {.c = true, .h = true}},
     {.x = 0x00, .c = false, .y = 0x01, .expected = 0xFF, .flags = {.c = true, .h = true}},
     {.x = 0xFF, .c = true, .y = 0xFF, .expected = 0xFF, .flags = {.c = true, .h = true}},
+};
+
+CASES(blargg, immediate_to_a) = {
+    {.x = 0x00, .c = false, .y = 0x00, .expected = 0x00},
+    {.x = 0x00, .c = false, .y = 0x01, .expected = 0xFF, .flags = {.c = true, .h = true}},
+    {.x = 0x00, .c = false, .y = 0x0F, .expected = 0xF1, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x10, .expected = 0xF0, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x1F, .expected = 0xE1, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x7F, .expected = 0x81, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0x80, .expected = 0x80, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0xF0, .expected = 0xF0, .flags = {.c = true}},
+    {.x = 0x00, .c = false, .y = 0xFF, .expected = 0xF0, .flags = {.c = true}},
 };
 // clang-format on
 

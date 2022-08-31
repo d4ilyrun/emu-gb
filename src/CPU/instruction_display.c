@@ -139,7 +139,7 @@ void display_instruction(struct instruction in)
         break;
 
     case A_D8_REL:
-        asprintf(&operands, "A, " HEX, in.data);
+        asprintf(&operands, "A, " HEX8, in.data);
         break;
 
     case C_REL_A:
@@ -147,7 +147,7 @@ void display_instruction(struct instruction in)
         break;
 
     case D8_REL_A:
-        asprintf(&operands, "(" HEX "), A", in.address);
+        asprintf(&operands, "(" HEX8 "), A", in.address);
         break;
 
     case A_R8:
@@ -155,7 +155,7 @@ void display_instruction(struct instruction in)
         break;
 
     case A_D8:
-        asprintf(&operands, "A, " HEX, in.data);
+        asprintf(&operands, "A, " HEX8, in.data);
         break;
 
     case A_HL_REL:
@@ -169,13 +169,14 @@ void display_instruction(struct instruction in)
     }
 
 // might be useful later ... we never know
-#if 0
+#if 1
     char *registers = NULL;
     char *parameters = NULL;
     char *opcode = NULL;
 
     // print instruction's name
-    asprintf(&opcode, "[" HEX "] %-4.4s ", in.pc, instruction_names[in.instruction]);
+    asprintf(&opcode, "[" HEX "] %-4.4s ", in.pc,
+             instruction_names[in.instruction]);
 
     // print 3 bytes at pc address: opcode + operands
     asprintf(&parameters, "(%02X %02X %02X) ", read_memory(in.pc),
@@ -194,8 +195,8 @@ void display_instruction(struct instruction in)
     free(registers);
 #else
     // print instruction's name
-    asprintf(&line, "[" HEX "] %-4.4s %s", in.pc,
-             instruction_names[in.instruction], operands);
+    asprintf(&line, "[" HEX "] %-4.4s %s \t(" HEX8 ")", in.pc,
+             instruction_names[in.instruction], operands, read_memory(in.pc));
     free(operands);
 #endif
 
