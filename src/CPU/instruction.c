@@ -290,16 +290,22 @@ INSTRUCTION(add)
     set_flag(FLAG_N, false);
 
     if (in.type == HL_R16) { // 16-bit addition
-        set_flag(FLAG_C, (val + data) > 0xFFFF);
-        set_flag(FLAG_H, ((val & 0xFFF) + (data & 0xFFF)) > 0xFFF);
+        set_flag(FLAG_C, (val + data) & 0x10000);
+        set_flag(FLAG_H, ((val & 0xFFF) + (data & 0xFFF)) & 0x1000);
     } else {
         set_flag(FLAG_C, ((val & 0xFF) + (data & 0xFF)) & 0x100);
         set_flag(FLAG_H, ((val & 0xF) + (data & 0xF)) & 0x10);
-        // No Z for 16bit addition
-        set_flag(FLAG_Z, ((val + data) & 0xFF) == 0 && !IS_16BIT(in.reg1));
+        set_flag(FLAG_Z, ((val + data) & 0xFF) == 0);
     }
 
-    write_register_16bit(in.reg1, val + data);
+    // No Z for 16bit addition
+    if (in.type == SP_S8) {
+        set_flag(FLAG_Z, false);
+        write_register_16bit(in.reg1, val + (i8)data);
+    } else {
+        write_register_16bit(in.reg1, val + data);
+    }
+
     return in.cycle_count;
 }
 
