@@ -244,26 +244,6 @@ INSTRUCTION(dec)
 
 #pragma region add_sub
 
-static u16 static_add(u16 val, u16 added, bool bit16)
-{
-    u16 base_val = val;
-
-    val += added;
-
-    set_flag(FLAG_N, 0);
-    if (bit16) { // 16-bit addition
-        u32 carry = base_val + added;
-        set_flag(FLAG_C, carry > 0xFFFF);
-        set_flag(FLAG_H, ((base_val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
-    } else {
-        set_flag(FLAG_C, ((base_val & 0xFF) + (added & 0xFF)) > 0xFF);
-        set_flag(FLAG_H, ((base_val & 0xF) + (added & 0xF)) > 0xF);
-        set_flag(FLAG_Z, (val & 0xFF) == 0);
-    }
-
-    return val;
-}
-
 static u16 static_sub(u16 val, u16 subbed, bool bit16)
 {
     u16 base_val = val;
@@ -290,26 +270,36 @@ INSTRUCTION(add)
                   ? in.data
                   : read_register_16bit(in.reg2);
 
-    write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
+    set_flag(FLAG_N, false);
+
+    if (in.type == HL_R16) { // 16-bit addition
+        u32 carry = val + added;
+        set_flag(FLAG_C, carry > 0xFFFF);
+        set_flag(FLAG_H, ((val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
+    } else {
+        set_flag(FLAG_C, ((val & 0xFF) + (added & 0xFF)) > 0xFF);
+        set_flag(FLAG_H, ((val & 0xF) + (added & 0xF)) > 0xF);
+        set_flag(FLAG_Z, ((val + added) & 0xFF) == 0);
+    }
+
+    write_register_16bit(in.reg1, val + added);
     return in.cycle_count;
 }
 
 INSTRUCTION(adc)
 {
+    u8 c = get_flag(FLAG_C);
     u16 val = read_register_16bit(in.reg1);
     u16 added = (in.type == A_HL_REL || in.type == A_D8)
                   ? in.data
                   : read_register_16bit(in.reg2);
 
-    u8 half = (val & 0xF) + (added & 0xF) + get_flag(FLAG_C);
-    u16 carry = val + added + get_flag(FLAG_C);
+    set_flag(FLAG_N, false);
+    set_flag(FLAG_H, ((val & 0xF) + (added & 0xF) + c) & 0x10);
+    set_flag(FLAG_C, (val + added + c) & 0x100);
+    set_flag(FLAG_Z, ((val + added + c) & 0xFF) == 0);
 
-    added += get_flag(FLAG_C);
-
-    write_register_16bit(in.reg1, static_add(val, added, in.type == HL_R16));
-
-    set_flag(FLAG_H, half & 0x10);
-    set_flag(FLAG_C, carry & 0x100);
+    write_register_16bit(in.reg1, val + added + c);
 
     return in.cycle_count;
 }
