@@ -255,7 +255,6 @@ static u16 static_add(u16 val, u16 added, bool bit16)
         u32 carry = base_val + added;
         set_flag(FLAG_C, carry > 0xFFFF);
         set_flag(FLAG_H, ((base_val & 0xFFF) + (added & 0xFFF)) > 0xFFF);
-        set_flag(FLAG_Z, val == 0);
     } else {
         set_flag(FLAG_C, ((base_val & 0xFF) + (added & 0xFF)) > 0xFF);
         set_flag(FLAG_H, ((base_val & 0xF) + (added & 0xF)) > 0xF);

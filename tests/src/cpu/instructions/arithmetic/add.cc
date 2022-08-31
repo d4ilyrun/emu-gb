@@ -224,7 +224,7 @@ INSTANTIATE_TEST_SUITE_P(Easy, AddImmediateToA,
 INSTANTIATE_TEST_SUITE_P(carry, AddImmediateToA,
                          ::testing::ValuesIn(carry_immediate_to_a));
 
-CASES(easy, reg_to_hl) = {{0x0000, 0x0000, 0x0000, {.z = true}},
+CASES(easy, reg_to_hl) = {{0x0000, 0x0000, 0x0000, {.z = false}}, // Z never set
                           {0x0808, 0x0101, 0x0909},
                           {0xDF1A, 0x1046, 0xEF60}};
 
@@ -239,13 +239,15 @@ CASES(carry, reg_to_hl) = {
     {0x00F0, 0x0010, 0x0100, {.h = false}},
     {0x0F00, 0xF000, 0xFF00, {.h = false}},
     {0x0F00, 0x0100, 0x1000, {.h = true}},
-    {0xF000, 0x1000, 0x0000, {.c = true, .z = true}},
     {0xFF00, 0x1100, 0x1000, {.c = true, .h = true}},
     {0x0FF0, 0x0110, 0x1100, {.h = true}},
     {0x0F0F, 0x0101, 0x1010, {.h = true}},
     {0x1F0F, 0x0101, 0x2010, {.h = true}},
-    {0xFFFF, 0x0001, 0x0000, {.c = true, .h = true, .z = true}},
-    {0xE2B3, 0x1D4D, 0x0000, {.c = true, .h = true, .z = true}},
+
+    // Z never set by this instruction
+    {0xF000, 0x1000, 0x0000, {.c = true, .z = false}},
+    {0xFFFF, 0x0001, 0x0000, {.c = true, .h = true, .z = false}},
+    {0xE2B3, 0x1D4D, 0x0000, {.c = true, .h = true, .z = false}},
 };
 
 INSTANTIATE_TEST_SUITE_P(Easy, Add16BitRegisterToHL,
