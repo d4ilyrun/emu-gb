@@ -2,8 +2,8 @@
 
 #include "utils/types.h"
 
-#define IF_ADDRESS 0xFF0F
 #define IE_ADDRESS 0xFFFF
+#define IF_ADDRESS 0xFF0F
 
 // TODO: Comments ! What does all this refer to !?
 
@@ -20,4 +20,5 @@ typedef enum interrupt_vector
 
 u8 handle_interrupts();
 void interrupt_set_ime(bool value);
+bool interrupt_get_ime();
 void interrupt_request(interrupt_vector interrupt);
