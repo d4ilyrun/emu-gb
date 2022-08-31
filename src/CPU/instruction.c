@@ -137,6 +137,7 @@ INSTRUCTION(di)
 
 INSTRUCTION(ei)
 {
+    // Is delayed by 1 cycle
     cpu.ime_scheduled = true;
     return in.cycle_count;
 }
@@ -526,6 +527,11 @@ u8 execute_instruction()
 {
     u8 opcode = fetch_opcode();
     struct instruction in = fetch_instruction(opcode);
+
+    if (cpu.ime_scheduled) {
+        interrupt_set_ime(true);
+        cpu.ime_scheduled = false;
+    }
 
     return instruction_handlers[in.instruction](in);
 }

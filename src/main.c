@@ -33,12 +33,6 @@ int main(int argc, char **argv)
 
         handle_interrupts();
 
-        if (cpu.ime_scheduled) {
-            interrupt_set_ime(true);
-            cpu.ime_scheduled = false;
-            timer_ticks(CYCLE_TICKS);
-        }
-
         if (options->blargg) {
             test_rom_update();
             test_rom_print();

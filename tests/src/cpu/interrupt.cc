@@ -12,6 +12,8 @@ extern "C" {
 #include <CPU/instruction.h>
 #include <CPU/interrupt.h>
 #include <CPU/memory.h>
+#include <CPU/stack.h>
+#include <options.h>
 #include <utils/error.h>
 #include <utils/macro.h>
 }
@@ -43,24 +45,41 @@ using IME = InterrupTest;
 
 TEST_F(IME, Modify)
 {
-    interrupt_set_ime(false);
-
-    // EI: Enable ime
-    call(0xFB);
-    ASSERT_TRUE(interrupt_get_ime());
+    get_options()->trace = true;
 
     // DI: Disable ime
     call(0xF3);
     ASSERT_FALSE(interrupt_get_ime());
 
+    // EI: Enable ime (delayed by 1 instruction)
+    call(0xFB);
+    ASSERT_TRUE(cpu.ime_scheduled);
+    ASSERT_FALSE(interrupt_get_ime());
+
+    // Delay
+    call(0x00);
+    ASSERT_TRUE(interrupt_get_ime());
+
     // RETI: Enable ime + return
     // push pc
     const u16 pc = cpu.registers.pc;
-    write_memory(++cpu.registers.sp, MSB(cpu.registers.pc));
-    write_memory(++cpu.registers.sp, LSB(cpu.registers.pc));
+    stack_push_16bit(cpu.registers.pc++);
     call(0xD9);
     ASSERT_EQ(cpu.registers.pc, pc);
     ASSERT_TRUE(interrupt_get_ime());
+}
+
+TEST_F(IME, HaltBug)
+{
+    get_options()->trace = true;
+
+    interrupt_set_ime(false);
+
+    // EI: Enable ime
+    call(0xFB);
+    ASSERT_TRUE(cpu.ime_scheduled);
+    call(0xF3);
+    ASSERT_FALSE(interrupt_get_ime());
 }
 
 class InterruptRequest : public InterrupTest,

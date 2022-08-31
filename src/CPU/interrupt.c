@@ -78,6 +78,7 @@ bool interrupt_get_ime()
 
 void interrupt_set_ime(bool value)
 {
+    log_info("%s ime", value ? "Set" : "Unset");
     ime = value;
 }
 
