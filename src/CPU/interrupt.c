@@ -37,7 +37,7 @@ const struct interrupt interrupt_table[] = {
 #define CHECK_INTERRUPT(_i)                                                 \
     do {                                                                    \
         if (val_ie & val_if & interrupt_table[(_i)].flag) {                 \
-            log_info("Handling interrupt: %s", NAME(_i));                   \
+            log_trace("Handling interrupt: %s", NAME(_i));                  \
             /* jump to the corresponding vector */                          \
             stack_push_16bit(read_register_16bit(REG_PC));                  \
             write_register_16bit(REG_PC, interrupt_table[(_i)].vector);     \
@@ -78,7 +78,7 @@ bool interrupt_get_ime()
 
 void interrupt_set_ime(bool value)
 {
-    log_info("%s ime", value ? "Set" : "Unset");
+    log_trace("%s ime", value ? "Set" : "Unset");
     ime = value;
 }
 
@@ -87,5 +87,5 @@ void interrupt_request(interrupt_vector interrupt)
     u8 val_if = read_memory(IF_ADDRESS);
     write_memory(IF_ADDRESS, val_if | interrupt_table[interrupt].flag);
 
-    log_info("Requested interrupt: %s", NAME(interrupt));
+    // log_trace("Requested interrupt: %s", NAME(interrupt));
 }

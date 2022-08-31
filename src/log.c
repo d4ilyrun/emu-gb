@@ -22,8 +22,13 @@ void log_print(log_level level, const char *fmt, ...)
     const struct options *opt = get_options();
 
     // Don't output if the importance level is lower than the one requested
-    if (level < opt->log_level)
+    // Except if expecially specified (traces)
+    if (level == LOG_TRACE) {
+        if (!get_options()->trace)
+            return;
+    } else if (level < opt->log_level) {
         return;
+    }
 
     va_list args;
     va_start(args, fmt);
