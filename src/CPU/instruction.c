@@ -83,10 +83,11 @@ INSTRUCTION(ld)
         write_register_16bit(in.reg1, read_register_16bit(in.reg2));
     else if (IS_DST_REGISTER(in))
         write_register_16bit(in.reg1, in.data);
+    else if (in.type == D16_REL_SP)
+        write_memory_16bit(in.address, in.data);
     else if (in.type == HL_REL_D8) // load immediate value from operands
         write_memory(in.address, in.data);
     else { // load value from 8bit register source
-        // printf("0x%04X <- 0x%2X\n", in.address, read_register(in.reg1));
         write_memory(in.address, read_register(in.reg1));
     }
     return in.cycle_count;
@@ -325,21 +326,21 @@ INSTRUCTION(sub)
 
 INSTRUCTION(sbc)
 {
-    u16 val = read_register_16bit(in.reg1);
+    u8 val = read_register(in.reg1);
     u16 subbed = (in.type == A_HL_REL || in.type == A_D8)
                    ? in.data
                    : read_register_16bit(in.reg2);
 
-    i8 half_borrow = (val & 0xF) - (subbed & 0xF) - get_flag(FLAG_C);
-    i16 borrow = val - subbed - get_flag(FLAG_C);
+    u8 h = (val & 0xF) - (subbed & 0xF) - (get_flag(FLAG_C));
+    u16 c = (val) - (subbed) - (get_flag(FLAG_C));
 
     val -= subbed + get_flag(FLAG_C);
     write_register(in.reg1, val);
 
-    set_flag(FLAG_Z, val == 0);
-    set_flag(FLAG_H, half_borrow < 0);
-    set_flag(FLAG_C, borrow < 0);
     set_flag(FLAG_N, true);
+    set_flag(FLAG_Z, val == 0);
+    set_flag(FLAG_H, h & 0x10);
+    set_flag(FLAG_C, c & 0x100);
 
     return in.cycle_count;
 }

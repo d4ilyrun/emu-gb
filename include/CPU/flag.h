@@ -24,7 +24,7 @@ ALWAYS_INLINE void set_all_flags(bool z, bool n, bool h, bool c)
 
 ALWAYS_INLINE bool get_flag(u16 flag)
 {
-    return cpu.registers.f & flag;
+    return cpu.registers.f & flag ? 1 : 0;
 }
 
 ALWAYS_INLINE u16 get_all_flags()
