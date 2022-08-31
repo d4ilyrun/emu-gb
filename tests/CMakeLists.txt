@@ -106,6 +106,10 @@ NewTest(NAME "sra" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/shift/sra.cc"
         DEPS cpu cartridge)
 
+NewTest(NAME "rla" PREFIX "cpu/instructions"
+        SRCS "src/cpu/instructions/shift/rla.cc"
+        DEPS cpu cartridge)
+
 
 # CARTRIDGES
 NewTest(NAME "rom"  PREFIX "cartridge" SRCS "src/cartridges/rom.cc" DEPS cartridge cpu)

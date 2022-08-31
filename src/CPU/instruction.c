@@ -400,22 +400,32 @@ INSTRUCTION(rla)
 {
     u8 a = read_register(REG_A);
     u8 c = get_flag(FLAG_C);
+
     set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
-    write_register(REG_A, (a << 1) + c);
+
+    a = (a << 1) + c;
+    write_register(REG_A, a);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, a == 0);
+
     return in.cycle_count;
 }
 
 INSTRUCTION(rlca)
 {
     u8 a = read_register(REG_A);
-    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit form A to carry flag
-    write_register(REG_A, (a << 1) + get_flag(FLAG_C));
+
+    set_flag(FLAG_C, BIT(a, 7)); // Copy 7th bit from A to carry flag
+
+    a = (a << 1) + BIT(a, 7);
+    write_register(REG_A, a);
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
+    set_flag(FLAG_Z, a == 0);
+
     return in.cycle_count;
 }
 
