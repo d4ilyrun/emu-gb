@@ -62,8 +62,6 @@ TEST_P(SRA_Register, RightRotate)
     if (reg != REG_A)
         instr[1] = 0x28 + (reg - REG_B);
 
-    get_options()->trace = false;
-
     InstructionTest::Load((void *)instr);
 
     for (u16 val = 0; val <= 0xFF; ++val) {

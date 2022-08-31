@@ -124,13 +124,14 @@ CB_INSTRUCTION(sla)
 
 CB_INSTRUCTION(sra)
 {
-    u8 val = (in.is_address) ? read_memory(in.address) : read_register(in.reg);
+    u8 val = (in.is_address) ? read_memory(read_register_16bit(REG_HL))
+                             : read_register(in.reg);
 
     set_flag(FLAG_C, val & 0x1);
     val = (val >> 1) | (val & 0x80);
 
     if (in.is_address)
-        write_memory(in.address, val);
+        write_memory(read_register_16bit(REG_HL), val);
     else
         write_register(in.reg, val);
 
