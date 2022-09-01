@@ -111,16 +111,16 @@ TEST_F(TimerTIMA, Overflow)
     write_memory(TIMER_TMA, tma);
     write_memory(TIMER_TAC, tac);
     write_memory(TIMER_TIMA, 0xFF);
+    write_memory(IF_ADDRESS, 0x00);
 
     timer_ticks(16);
 
-    const u8 if_reg = read_memory(IF_ADDRESS);
     ASSERT_EQ(read_timer(TIMER_TIMA), 0);
-    ASSERT_FALSE(BIT(if_reg, 2)); // Delayed
+    ASSERT_FALSE(interrupt_is_set(IV_TIMA)); // Delayed
 
-    timer_tick();
+    timer_tick(); // Set value after overflow
     ASSERT_EQ(read_timer(TIMER_TIMA), tma);
-    ASSERT_TRUE(BIT(if_reg, 2)); // should be set now
+    ASSERT_TRUE(interrupt_is_set(IV_TIMA));
 }
 
 } // namespace cpu_tests
