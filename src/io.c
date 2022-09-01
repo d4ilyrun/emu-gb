@@ -7,7 +7,7 @@
 
 void write_io(u16 address, u8 data)
 {
-    if (IN_RANGE(address, TIMER_DIV, TIMER_TAC)) {
+    if (BETWEEN(address, TIMER_DIV, TIMER_TAC)) {
         write_timer(address, data);
         return;
     }
@@ -18,13 +18,13 @@ void write_io(u16 address, u8 data)
         break;
 
     default:
-        log_err("IO write: " HEX, address);
+        log_err("Unsupported IO write: " HEX, address);
     }
 }
 
 u8 read_io(u16 address)
 {
-    if (IN_RANGE(address, TIMER_DIV, TIMER_TAC)) {
+    if (BETWEEN(address, TIMER_DIV, TIMER_TAC)) {
         return read_timer(address);
     }
 
@@ -33,7 +33,7 @@ u8 read_io(u16 address)
         return read_interrupt(IF_ADDRESS);
 
     default:
-        log_err("IO write: " HEX, address);
+        log_err("Unsupported IO read: " HEX, address);
         return 0;
     }
 }
