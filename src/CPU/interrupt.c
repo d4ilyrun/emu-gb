@@ -74,34 +74,30 @@ static inline bool interrupt_is_enabled(interrupt_vector interrupt)
     return ie_reg & FLAG(interrupt);
 }
 
-#define CHECK_INTERRUPT(_i)                                                   \
-    do {                                                                      \
-        if (interrupt_is_set(_i) & interrupt_is_enabled(_i)) {                \
-            /* log_trace("Handling interrupt: %s", NAME(_i)); */              \
-            /* jump to the corresponding vector */                            \
-            stack_push_16bit(read_register_16bit(REG_PC));                    \
-            write_register_16bit(REG_PC, _i);                                 \
-                                                                              \
-            /* clear interrupt flags and deactivate halt mode */              \
-            write_memory(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(_i)); \
-            cpu.halt = false;                                                 \
-                                                                              \
-            return 5;                                                         \
-        }                                                                     \
-    } while (0);
-
 // TODO: verify clock cycles
 u8 handle_interrupts()
 {
-    if (!ime)
-        return 0;
+    for (interrupt_vector i = 0; i <= IV_JOYPAD; ++i) {
+        if (interrupt_is_set(i) & interrupt_is_enabled(i)) {
+            /* Exit halt mode */
+            cpu.halt = false;
 
-    // Faster to unroll the for loop by hand than going through it
-    CHECK_INTERRUPT(IV_VBLANK);
-    CHECK_INTERRUPT(IV_LCD);
-    CHECK_INTERRUPT(IV_TIMA);
-    CHECK_INTERRUPT(IV_SERIAL);
-    CHECK_INTERRUPT(IV_JOYPAD);
+            /* Interrupts disabled */
+            if (!ime)
+                return 0;
+
+            /* log_trace("Handling interrupt: %s", NAME(_i)); */
+            /* jump to the corresponding vector */
+            stack_push_16bit(read_register_16bit(REG_PC));
+            write_register_16bit(REG_PC, i);
+
+            /* clear interrupt flags and deactivate halt mode */
+            write_memory(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(i));
+            cpu.halt = false;
+
+            return 5;
+        }
+    }
 
     return 0;
 }
