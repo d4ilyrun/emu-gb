@@ -18,7 +18,7 @@ struct {
 
 void reset_timer()
 {
-    write_memory_16bit(TIMER_DIV - 1, TIMER_DIV_DEFAULT);
+    timer.div = TIMER_DIV_DEFAULT;
 }
 
 void write_timer(u16 address, u8 data)

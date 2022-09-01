@@ -48,7 +48,7 @@ using TimerTAC = TimerTest;
 
 TEST_F(TimerDIV, DefaultValue)
 {
-    ASSERT_EQ(read_timer(TIMER_DIV), 0xAC);
+    ASSERT_EQ(read_timer(TIMER_DIV), 0xAB);
 }
 
 TEST_F(TimerDIV, Tick)
@@ -82,8 +82,9 @@ TEST_F(TimerTIMA, Tick)
 
     write_memory(TIMER_TAC, tac);
     write_memory(TIMER_TIMA, 0);
+    write_memory(TIMER_DIV, 0);
 
-    for (u16 i = 0; i <= 0xFF; ++i) {
+    for (u16 i = 1; i <= 0xFF; ++i) {
         timer_tick();
         ASSERT_EQ(read_timer(TIMER_TIMA), i / 16);
     }
