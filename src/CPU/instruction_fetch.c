@@ -128,6 +128,7 @@ struct in_type opcodes[] = {
     [0x0F] = {IN_RRCA, NO_OPERAND, 1},
 
     // 0x1
+    [0x10] = {IN_STOP, NO_OPERAND, 1},
     [0x11] = {IN_LD, R16_D16, 3},
     [0x12] = {IN_LD, R16_REL_A, 2},
     [0x13] = {IN_INC, R16, 2},

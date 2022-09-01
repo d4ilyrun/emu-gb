@@ -2,7 +2,7 @@
 
 #include "CPU/interrupt.h"
 #include "CPU/timer.h"
-#include "utils/error.h"
+#include "utils/log.h"
 #include "utils/macro.h"
 
 void write_io(u16 address, u8 data)
@@ -18,7 +18,7 @@ void write_io(u16 address, u8 data)
         break;
 
     default:
-        not_implemented("IO write: " HEX, address);
+        log_err("IO write: " HEX, address);
     }
 }
 
@@ -33,7 +33,7 @@ u8 read_io(u16 address)
         return read_interrupt(IF_ADDRESS);
 
     default:
-        not_implemented("IO write: " HEX, address);
+        log_err("IO write: " HEX, address);
         return 0;
     }
 }

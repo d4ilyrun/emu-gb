@@ -5,6 +5,7 @@
 #include "CPU/flag.h"
 #include "CPU/interrupt.h"
 #include "CPU/stack.h"
+#include "CPU/timer.h"
 #include "options.h"
 #include "utils/error.h"
 #include "utils/log.h"
@@ -469,6 +470,7 @@ INSTRUCTION(rrca)
 
 INSTRUCTION(stop)
 {
+    write_memory(TIMER_DIV, 0); // reset DIV
     not_implemented(__FUNCTION__);
     return in.cycle_count;
 }
