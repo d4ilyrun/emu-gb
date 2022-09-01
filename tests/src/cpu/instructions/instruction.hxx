@@ -21,6 +21,13 @@ struct timer {
     u8 tac;
 };
 
+struct in_type {
+    in_name name;
+    operand_type type;
+    u8 cycle_count;
+    u8 cycle_count_false; // For conditional jumps
+};
+
 extern struct timer timer;
 
 class InstructionTest : public ::testing::Test
@@ -59,10 +66,23 @@ class InstructionTest : public ::testing::Test
 
     void Load(void *instruction)
     {
-        memcpy(&cartridge.rom[cpu.registers.pc], instruction, size_);
+        static u8 codes[256] = {
+            1, 3, 2, 2, 2, 2, 2, 1, 5, 2, 2, 2, 2, 2, 2, 1, 1, 3, 2, 2, 2, 2,
+            2, 1, 3, 2, 2, 2, 2, 2, 2, 1, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2,
+            2, 2, 2, 1, 2, 3, 2, 2, 2, 2, 3, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1,
+            1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
+            2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1,
+            1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1,
+            1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 3, 3, 4, 3, 4,
+            2, 0, 2, 4, 3, 1, 3, 6, 2, 4, 2, 3, 3, 0, 3, 4, 2, 4, 2, 4, 3, 0,
+            3, 0, 2, 4, 3, 3, 2, 0, 0, 4, 2, 4, 4, 1, 4, 0, 0, 0, 2, 4, 3, 3,
+            2, 1, 0, 4, 2, 4, 4, 2, 4, 1, 0, 0, 2, 4,
+        };
 
-        const auto pc = cpu.registers.pc;
-        cycles_ = fetch_instruction(fetch_opcode()).cycle_count;
+        memcpy(&cartridge.rom[cpu.registers.pc], instruction, size_);
+        cycles_ = codes[*((u8 *)instruction)];
         loaded_ = true;
         timer.div = 0;
     }

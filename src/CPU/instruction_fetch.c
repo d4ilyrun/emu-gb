@@ -329,7 +329,7 @@ struct in_type opcodes[] = {
 
     // 0xC
     [0xC0] = {IN_RET, FLAG, 5, 2},
-    [0xC1] = {IN_POP, R16, 4},
+    [0xC1] = {IN_POP, R16, 3},
     [0xC2] = {IN_JP, FLAG_A16, 4, 3},
     [0xC3] = {IN_JP, A16, 4},
     [0xC4] = {IN_CALL, FLAG_A16, 6, 3},
@@ -346,7 +346,7 @@ struct in_type opcodes[] = {
 
     // OxD
     [0xD0] = {IN_RET, FLAG, 5, 2},
-    [0xD1] = {IN_POP, R16, 4},
+    [0xD1] = {IN_POP, R16, 3},
     [0xD2] = {IN_JP, FLAG_A16, 4, 3},
     [0xD4] = {IN_CALL, FLAG_A16, 6, 3},
     [0xD5] = {IN_PUSH, R16, 4},
@@ -361,7 +361,7 @@ struct in_type opcodes[] = {
 
     // 0xE
     [0xE0] = {IN_LDH, D8_REL_A, 3},
-    [0xE1] = {IN_POP, R16, 4},
+    [0xE1] = {IN_POP, R16, 3},
     [0xE2] = {IN_LDH, C_REL_A, 2},
     [0xE5] = {IN_PUSH, R16, 4},
     [0xE6] = {IN_AND, A_D8, 2},
@@ -374,7 +374,7 @@ struct in_type opcodes[] = {
 
     // 0xF
     [0xF0] = {IN_LDH, A_D8_REL, 3},
-    [0xF1] = {IN_POP, R16, 4},
+    [0xF1] = {IN_POP, R16, 3},
     [0xF2] = {IN_LDH, A_C_REL, 2},
     [0xF3] = {IN_DI, NO_OPERAND, 1},
     [0xF5] = {IN_PUSH, R16, 4},
@@ -470,17 +470,20 @@ struct instruction fetch_instruction(u8 opcode)
 
     case R8_HL_REL:
         in.reg1 = find_register(OPCODE_Y(opcode));
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         break;
 
     case A_R16_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory_16bit(
             read_register_16bit(find_register_16bit(OPCODE_P(opcode))));
         break;
 
     case A_D16_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory_16bit(read_16bit_data());
         break;
 
@@ -510,11 +513,13 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_C_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register(REG_C) + 0xFF00);
         break;
 
     case A_D8_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_8bit_data() + 0xFF00);
         break;
 

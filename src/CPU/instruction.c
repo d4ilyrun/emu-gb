@@ -115,7 +115,7 @@ INSTRUCTION(ld)
         break;
 
     case D16_REL_SP:
-        timer_ticks(2);
+        timer_ticks(2); // write 2 bytes
         write_memory_16bit(in.address, in.data);
         break;
 
@@ -139,10 +139,8 @@ INSTRUCTION(ld)
 INSTRUCTION(ldh)
 {
     if (IS_DST_REGISTER(in)) {
-        timer_tick(); // read from address during fetch
         write_register(in.reg1, in.data);
     } else {
-        timer_tick();
         write_memory(in.address, read_register_16bit(in.data));
     }
     return in.cycle_count;
