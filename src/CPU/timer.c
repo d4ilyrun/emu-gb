@@ -7,6 +7,15 @@
 #include "utils/log.h"
 #include "utils/macro.h"
 
+#define CLOCKS_PER_CYCLE 4
+
+struct {
+    u16 div;
+    u8 tima;
+    u8 tma;
+    u8 tac;
+} timer;
+
 void reset_timer()
 {
     write_memory_16bit(TIMER_DIV - 1, TIMER_DIV_DEFAULT);
@@ -18,18 +27,22 @@ void write_timer(u16 address, u8 data)
     // DIV can be written but its value resets to 0 no matter what the written
     // value is.
     case TIMER_DIV:
-        write_memory_16bit(address, 0x0000);
+        timer.div = 0x0000; // Reset the whole DIV
         break;
     case TIMER_TAC:
-        write_memory(address, data & 0x07); // Only the lower 3 bites are R/W
+        // Only the lower 3 bites are R/W
+        timer.tac = (timer.tac & ~0b111) | (data & 0b111);
         break;
     case TIMER_TMA:
-    case TIMER_TIMA:
-        write_memory(address, data);
+        timer.tma = data;
         break;
+    case TIMER_TIMA:
+        timer.tima = data;
+        break;
+
+    default:
     case TIMER_UNKNOWN:
-        log_err("Timer: trying to write into an unknown register (" HEX ")\n",
-                address);
+        log_warn("Invalid timer write: (" HEX16 "). Skipping", address);
         break;
     }
 }
@@ -38,39 +51,37 @@ u8 read_timer(u16 address)
 {
     switch ((timer_registers)address) {
     case TIMER_TAC:
-        return read_memory(address) & 0x07; // Only the lower 3 bites are R/W
+        return timer.tac & 0b111; // Only the lower 3 bites are R/W
     case TIMER_DIV:
+        return MSB(timer.div);
     case TIMER_TMA:
+        return timer.tma;
     case TIMER_TIMA:
-        return read_memory(address);
+        return timer.tima;
+
     default:
     case TIMER_UNKNOWN:
-        log_err("Timer: trying to read from an unknown register (" HEX ")\n",
-                address);
+        log_warn("Invalid timer read: (" HEX16 "). Skipping", address);
         return 0;
     }
 }
 
-// The frequency at which we update TMA depends on the 2 lower bits of TAC
+// Number of clocks at which we update TIMA
+// The frequency at which we update TIMA depends on the 2 lower bits of TAC
 static u16 freq_divider[] = {1024, 16, 64, 256};
 
 void timer_ticks(u8 ticks)
 {
-    u16 div = read_memory_16bit(TIMER_DIV - 1);
+    u16 div = timer.div;
     u8 tac = read_timer(TIMER_TAC);
 
     // update DIV's 16bit value
-    write_memory_16bit(TIMER_DIV - 1, div + ticks);
+    timer.div += ticks;
 
-    // We only update the timer's value at certain frequencies
-    // The frequency depends on the 2 lower bits of TAC and is stored in
-    // freq_divider
+    // We only update the timer's value at certain frequencies (freq_divider)
+    // We compute the number of 'freq' between the old div and the new div
     u16 freq = freq_divider[tac & 0x03];
-    u8 increase_tima = 0;
-    while (ticks > 0) {
-        increase_tima +=
-            (div + ticks--) & (freq >> 1) && !((div + ticks) & (freq >> 1));
-    }
+    u8 increase_tima = ((div + ticks) / freq) - (div / freq);
 
     // If bit 2 of TAC is set to 0 then the timer is disabled
     if (increase_tima && tac & 0x4) {
