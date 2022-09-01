@@ -335,6 +335,7 @@ struct in_type opcodes[] = {
     [0xC4] = {IN_CALL, FLAG_A16, 6, 3},
     [0xC5] = {IN_PUSH, R16, 4},
     [0xC6] = {IN_ADD, A_D8, 2},
+    [0xC7] = {IN_RST, RST, 4},
     [0xC8] = {IN_RET, FLAG, 5, 2},
     [0xC9] = {IN_RET, NO_OPERAND, 4},
     [0xCA] = {IN_JP, FLAG_A16, 4, 3},
@@ -447,7 +448,7 @@ struct instruction fetch_instruction(u8 opcode)
         break;
 
     case RST:
-        in.data = OPCODE_Y(opcode);
+        in.data = OPCODE_Y(opcode) << 3;
         break;
 
     case D8:
