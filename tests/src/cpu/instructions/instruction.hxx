@@ -1,11 +1,11 @@
 // REG_ERR is also defined inside gtest ...
-#include "CPU/instruction.h"
 #define REG_ERR REG_ERR_
 #include <gtest/gtest.h>
 #undef REG_ERR
 
 extern "C" {
 #include <CPU/flag.h>
+#include <CPU/instruction.h>
 #include <CPU/timer.h>
 #include <options.h>
 }
@@ -53,7 +53,23 @@ class InstructionTest : public ::testing::Test
             return;
 
         ASSERT_EQ(cpu.registers.pc, start_pc_ + size_);
-        ASSERT_EQ(timer.div, cycles_);
+
+        if (!cb_ && test_timer_)
+            ASSERT_EQ(timer.div, cycles_);
+    }
+
+    void execute_instruction()
+    {
+        if (!loaded_)
+            return;
+
+        const u8 div = timer.div;
+        ::execute_instruction();
+
+        if (!cb_) {
+            ASSERT_EQ(timer.div, div + cycles_);
+            test_timer_ = false;
+        }
     }
 
   private:
@@ -63,6 +79,8 @@ class InstructionTest : public ::testing::Test
   protected:
     u8 cycles_ = 0;
     bool loaded_ = false;
+    bool test_timer_ = true;
+    bool cb_ = false;
 
     void Load(void *instruction)
     {
@@ -81,9 +99,13 @@ class InstructionTest : public ::testing::Test
             2, 1, 0, 4, 2, 4, 4, 2, 4, 1, 0, 0, 2, 4,
         };
 
+        const auto opcode = ((u8 *)instruction)[0];
+
         memcpy(&cartridge.rom[cpu.registers.pc], instruction, size_);
-        cycles_ = codes[*((u8 *)instruction)];
+        cycles_ = codes[opcode];
+        cb_ = opcode == 0xCB;
         loaded_ = true;
+
         timer.div = 0;
     }
 };

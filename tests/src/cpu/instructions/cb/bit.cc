@@ -52,7 +52,7 @@ TEST_P(Bit, IsSet)
         for (u16 val = 0; val <= 0xFF; ++val) {
             cpu.registers.pc = pc;
             write_register(reg, val);
-            execute_instruction();
+            this->execute_instruction();
             ASSERT_TRUE(get_flag(FLAG_H));
             ASSERT_FALSE(get_flag(FLAG_N));
             ASSERT_FALSE(get_flag(FLAG_C));
@@ -77,7 +77,7 @@ TEST_P(Bit, Set)
         inst[1] = opcode | (bit << 3);
         Load((void *)inst);
         write_register(reg, 0);
-        execute_instruction();
+        this->execute_instruction();
         ASSERT_TRUE(BIT(read_register(reg), bit));
     }
 }
@@ -97,7 +97,7 @@ TEST_P(BitRelative, SetRelative)
 
         write_register_16bit(REG_HL, address);
         write_memory(address, 0);
-        execute_instruction();
+        this->execute_instruction();
 
         ASSERT_TRUE(BIT(read_memory(address), bit));
     }
@@ -119,7 +119,7 @@ TEST_P(Bit, Reset)
         inst[1] = opcode | (bit << 3);
         Load((void *)inst);
         write_register(reg, 0xFF);
-        execute_instruction();
+        this->execute_instruction();
         ASSERT_FALSE(BIT(read_register(reg), bit));
     }
 }
@@ -137,7 +137,7 @@ TEST_P(Swap, SwapNibbles)
     for (u16 val = 0; val <= 0xFF; ++val) {
         cpu.registers.pc = pc;
         write_register(reg, val);
-        execute_instruction();
+        this->execute_instruction();
 
         const auto res = read_register(reg);
         ASSERT_EQ(res & 0xF, (val & 0xF0) >> 4);

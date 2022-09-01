@@ -28,6 +28,7 @@ using RLCA = RLA;
     cpu.registers.pc = pc;                                   \
     set_flag(FLAG_C, (c_));                                  \
     write_register(reg, val);                                \
+    timer.div = 0;                                           \
     execute_instruction();                                   \
     ASSERT_EQ(get_flag(FLAG_C), BIT(val, 7) ? 1 : 0);        \
     ASSERT_EQ(read_register(reg) & 0xFE, (val << 1) & 0xFE); \
