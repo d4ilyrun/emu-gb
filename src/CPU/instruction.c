@@ -16,8 +16,7 @@ typedef u8 (*in_handler)(struct instruction);
 
 INSTRUCTION(invalid)
 {
-    fatal_error("\nInvalid instruction. (code: " HEX8 ")\n",
-                read_memory(in.pc));
+    fatal_error("\nInvalid instruction: " HEX8, read_memory(in.pc));
     exit(-1);
 }
 
@@ -30,6 +29,8 @@ INSTRUCTION(jp)
 {
     if (!in.condition)
         return in.cycle_count_false;
+
+    timer_tick();
     write_register_16bit(REG_PC, in.address);
     return in.cycle_count;
 }
@@ -43,6 +44,7 @@ INSTRUCTION(jr)
     if (!in.condition)
         return in.cycle_count_false;
 
+    timer_tick();
     write_register_16bit(REG_PC, read_register_16bit(REG_PC) + (i8)in.data);
     return in.cycle_count_false;
 }
@@ -51,6 +53,7 @@ INSTRUCTION(call)
 {
     if (!in.condition)
         return in.cycle_count_false;
+    timer_tick();
     stack_push_16bit(read_register_16bit(REG_PC));
     write_register_16bit(REG_PC, in.address);
     return in.cycle_count;
@@ -58,28 +61,34 @@ INSTRUCTION(call)
 
 INSTRUCTION(ret)
 {
+    // Branch condition only when testing
+    if (in.type != NO_OPERAND)
+        timer_tick();
+
     if (!in.condition)
         return in.cycle_count_false;
-    write_register_16bit(REG_PC, stack_pop_16bit());
+    const u16 pc = stack_pop_16bit();
+    timer_tick();
+    write_register_16bit(REG_PC, pc);
     return in.cycle_count;
 }
 
 INSTRUCTION(reti)
 {
-    cpu.registers.pc = stack_pop_16bit();
+    const u16 pc = stack_pop_16bit();
+    timer_tick();
+    write_register_16bit(REG_PC, pc);
     interrupt_set_ime(true);
     return in.cycle_count;
 }
 
 INSTRUCTION(rst)
 {
+    timer_tick();
     stack_push_16bit(read_register_16bit(REG_PC));
     write_register_16bit(REG_PC, in.data);
     return in.cycle_count;
 }
-
-// for 0xF8
-INSTRUCTION(add);
 
 INSTRUCTION(ld)
 {
@@ -87,6 +96,7 @@ INSTRUCTION(ld)
         u16 val = read_register_16bit(REG_SP);
         i8 data = in.data;
 
+        timer_tick(); // internal
         write_register_16bit(REG_HL, val + data);
 
         set_all_flags(0, 0, 0, 0);
@@ -97,25 +107,30 @@ INSTRUCTION(ld)
     }
 
     switch (in.type) {
-    case R8_R8:
     case SP_HL:
+        timer_tick(); // internal
+        __attribute__((fallthrough));
+    case R8_R8:
         write_register_16bit(in.reg1, read_register_16bit(in.reg2));
         break;
 
     case D16_REL_SP:
+        timer_ticks(2);
         write_memory_16bit(in.address, in.data);
         break;
 
     case HL_REL_D8: // load immediate value from operands
+        timer_tick();
         write_memory(in.address, in.data);
         break;
 
     default:
         if (IS_DST_REGISTER(in))
             write_register_16bit(in.reg1, in.data);
-        else // load value from 8bit register source
+        else { // load value from 8bit register source
+            timer_tick();
             write_memory(in.address, read_register(in.reg1));
-        break;
+        }
     }
 
     return in.cycle_count;
@@ -123,10 +138,13 @@ INSTRUCTION(ld)
 
 INSTRUCTION(ldh)
 {
-    if (IS_DST_REGISTER(in))
+    if (IS_DST_REGISTER(in)) {
+        timer_tick(); // read from address during fetch
         write_register(in.reg1, in.data);
-    else
+    } else {
+        timer_tick();
         write_memory(in.address, read_register_16bit(in.data));
+    }
     return in.cycle_count;
 }
 
@@ -199,6 +217,7 @@ INSTRUCTION(cpl)
 
 INSTRUCTION(push)
 {
+    timer_tick(); // internal
     stack_push_16bit(read_register_16bit(in.reg1));
     return in.cycle_count;
 }
@@ -223,10 +242,14 @@ INSTRUCTION(inc)
     u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
                                        : read_register_16bit(in.reg1);
 
-    if (in.type == HL_REL)
+    if (in.type == HL_REL) {
+        timer_ticks(2);
         write_memory(in.address, read_memory(in.address) + 1);
-    else
+    } else {
+        if (IS_16BIT(in.reg1))
+            timer_tick();
         write_register_16bit(in.reg1, read_register_16bit(in.reg1) + 1);
+    }
 
     // INC on 16bit registers doesn't affect condition bits.
     if (in.type == R16)
@@ -251,10 +274,14 @@ INSTRUCTION(dec)
     u16 base_val = (in.type == HL_REL) ? read_memory(in.address)
                                        : read_register_16bit(in.reg1);
 
-    if (in.type == HL_REL)
+    if (in.type == HL_REL) {
+        timer_ticks(2);
         write_memory(in.address, read_memory(in.address) - 1);
-    else
+    } else {
+        if (IS_16BIT(in.reg1))
+            timer_tick();
         write_register_16bit(in.reg1, read_register_16bit(in.reg1) - 1);
+    }
 
     // DEC on 16bit registers doesn't affect condition bits.
     if (in.type == R16)

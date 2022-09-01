@@ -12,7 +12,7 @@
 
 static bool tima_overflow = false;
 
-struct {
+struct timer {
     u16 div;
     u8 tima;
     u8 tma;

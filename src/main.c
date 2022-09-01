@@ -20,16 +20,13 @@ int main(int argc, char **argv)
     reset_cpu();
     reset_timer();
 
-    u8 cycles;
-
     while (cpu.is_running) {
         if (cpu.halt) {
-            cycles = 1;
+            timer_tick();
         } else {
-            cycles = execute_instruction();
+            execute_instruction();
         }
 
-        timer_ticks(cycles);
         handle_interrupts();
 
         if (options->blargg) {

@@ -13,10 +13,20 @@ extern "C" {
 #include <CPU/interrupt.h>
 #include <CPU/memory.h>
 #include <CPU/stack.h>
+#include <CPU/timer.h>
 #include <options.h>
 #include <utils/error.h>
 #include <utils/macro.h>
 }
+
+struct timer {
+    u16 div;
+    u8 tima;
+    u8 tma;
+    u8 tac;
+};
+
+extern struct timer timer;
 
 namespace cpu_tests
 {
@@ -124,6 +134,20 @@ TEST_P(InterruptRequest, Execute)
     ASSERT_EQ(read_memory(IF), 0);
     ASSERT_EQ(read_memory(IE), 1 << bit); // Don't reset IE
     ASSERT_EQ(cpu.registers.pc, interrupt);
+}
+
+TEST_P(InterruptRequest, Timing)
+{
+    const auto interrupt = GetParam();
+    const u8 bit = interrupt_bit(interrupt);
+
+    timer.div = 0;
+    write_memory(IF, 1 << bit);
+    write_memory(IE, 1 << bit);
+
+    const auto cycles = handle_interrupts();
+
+    ASSERT_EQ(timer.div, 5);
 }
 
 TEST_P(InterruptRequest, ExecuteDisabledIME)

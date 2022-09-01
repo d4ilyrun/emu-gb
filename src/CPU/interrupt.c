@@ -3,6 +3,7 @@
 #include "CPU/cpu.h"
 #include "CPU/memory.h"
 #include "CPU/stack.h"
+#include "CPU/timer.h"
 #include "utils/log.h"
 
 #define FLAG(int_) (1 << ((int_)-0x40) / 8)
@@ -74,26 +75,30 @@ static inline bool interrupt_is_enabled(interrupt_vector interrupt)
     return ie_reg & FLAG(interrupt);
 }
 
+static inline void handle_interrupt(interrupt_vector interrupt)
+{
+    timer_ticks(2);
+    stack_push_16bit(read_register_16bit(REG_PC)); // 2 timer ticks
+    timer_tick();
+    write_register_16bit(REG_PC, interrupt);
+}
+
 // TODO: verify clock cycles
 u8 handle_interrupts()
 {
     for (interrupt_vector i = 0; i <= IV_JOYPAD; ++i) {
         if (interrupt_is_set(i) & interrupt_is_enabled(i)) {
-            /* Exit halt mode */
+            /* Exit halt mode regardless of the value inside IME */
             cpu.halt = false;
 
             /* Interrupts disabled */
             if (!ime)
                 return 0;
 
-            /* log_trace("Handling interrupt: %s", NAME(_i)); */
-            /* jump to the corresponding vector */
-            stack_push_16bit(read_register_16bit(REG_PC));
-            write_register_16bit(REG_PC, i);
+            handle_interrupt(i);
 
             /* clear interrupt flags and deactivate halt mode */
             write_memory(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(i));
-            cpu.halt = false;
 
             return 5;
         }

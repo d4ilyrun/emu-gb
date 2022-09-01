@@ -3,6 +3,7 @@
 #include "CPU/flag.h"
 #include "CPU/instruction.h"
 #include "CPU/memory.h"
+#include "CPU/timer.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 
@@ -13,16 +14,17 @@ struct in_type {
     u8 cycle_count_false; // For conditional jumps
 };
 
-static u16 read_16bit_data()
-{
-    u16 data = read_memory_16bit(read_register_16bit(REG_PC));
-    write_register_16bit(REG_PC, read_register_16bit(REG_PC) + 2);
-    return data;
-}
-
 static u8 read_8bit_data()
 {
+    timer_tick();
     return read_memory(cpu.registers.pc++);
+}
+
+static u16 read_16bit_data()
+{
+    u8 lsb = read_8bit_data();
+    u8 msb = read_8bit_data();
+    return (msb << 8) | lsb;
 }
 
 /*
@@ -494,12 +496,14 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_HLD:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) - 1);
         break;
 
     case A_HLI:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) + 1);
         break;
@@ -526,6 +530,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_HL_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         break;
 
