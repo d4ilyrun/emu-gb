@@ -29,8 +29,7 @@ int main(int argc, char **argv)
             cycles = execute_instruction();
         }
 
-        timer_ticks(cycles * CYCLE_TICKS);
-
+        timer_ticks(cycles);
         handle_interrupts();
 
         if (options->blargg) {

@@ -1,7 +1,9 @@
 #include "io.h"
 
+#include "CPU/cpu.h"
 #include "CPU/interrupt.h"
 #include "CPU/timer.h"
+#include "options.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -18,7 +20,8 @@ void write_io(u16 address, u8 data)
         break;
 
     default:
-        log_err("Unsupported IO write: " HEX, address);
+        // log_err("Unsupported IO write: " HEX, address);
+        cpu.memory[address] = data;
     }
 }
 
@@ -33,7 +36,7 @@ u8 read_io(u16 address)
         return read_interrupt(IF_ADDRESS);
 
     default:
-        log_err("Unsupported IO read: " HEX, address);
-        return 0;
+        // log_err("Unsupported IO read: " HEX, address);
+        return cpu.memory[address];
     }
 }
