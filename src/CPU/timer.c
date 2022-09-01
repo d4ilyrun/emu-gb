@@ -2,12 +2,15 @@
 
 #include <stdio.h>
 
+#include "CPU/cpu.h"
 #include "CPU/interrupt.h"
 #include "CPU/memory.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
 #define CLOCKS_PER_CYCLE 4
+
+static bool tima_overflow = false;
 
 struct {
     u16 div;
@@ -78,6 +81,19 @@ void timer_ticks(u8 ticks)
     // update DIV's 16bit value
     timer.div += ticks;
 
+    // delayed IE
+    if (cpu.ime_scheduled) {
+        interrupt_set_ime(true);
+        cpu.ime_scheduled = false;
+    }
+
+    // TIMA overflowed during the last cycle
+    if (tima_overflow) {
+        tima_overflow = false;
+        write_timer(TIMER_TIMA, read_timer(TIMER_TMA));
+        interrupt_request(IV_TIMA);
+    }
+
     // We only update the timer's value at certain frequencies (freq_divider)
     // We compute the number of 'freq' between the old div and the new div
     u16 freq = freq_divider[tac & 0x03];
@@ -88,8 +104,11 @@ void timer_ticks(u8 ticks)
         u8 tima = read_timer(TIMER_TIMA);
 
         if (tima == 0xFF) { // overflow
-            write_timer(TIMER_TIMA, read_timer(TIMER_TMA));
-            interrupt_request(IV_TIMA);
+            // Timer interrupt is delayed 1 cycle (4 clocks) from the TIMA
+            // overflow. The TMA reload to TIMA is also delayed. For one cycle,
+            // after overflowing TIMA, the value in TIMA is 00h, not TMA.
+            write_timer(TIMER_TIMA, 0x00);
+            tima_overflow = true;
         } else {
             write_timer(TIMER_TIMA, tima + increase_tima);
         }

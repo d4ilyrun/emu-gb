@@ -8,4 +8,5 @@ add_library(
     interrupt.c
     memory.c
     timer.c
+    ../io.c
     )

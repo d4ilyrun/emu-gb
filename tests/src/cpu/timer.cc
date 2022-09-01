@@ -115,10 +115,11 @@ TEST_F(TimerTIMA, Overflow)
     timer_ticks(16);
 
     const u8 if_reg = read_memory(IF_ADDRESS);
-    ASSERT_EQ(read_timer(TIMER_TIMA), tma);
+    ASSERT_EQ(read_timer(TIMER_TIMA), 0);
     ASSERT_FALSE(BIT(if_reg, 2)); // Delayed
 
     timer_tick();
+    ASSERT_EQ(read_timer(TIMER_TIMA), tma);
     ASSERT_TRUE(BIT(if_reg, 2)); // should be set now
 }
 

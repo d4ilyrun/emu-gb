@@ -528,10 +528,5 @@ u8 execute_instruction()
     u8 opcode = fetch_opcode();
     struct instruction in = fetch_instruction(opcode);
 
-    if (cpu.ime_scheduled) {
-        interrupt_set_ime(true);
-        cpu.ime_scheduled = false;
-    }
-
     return instruction_handlers[in.instruction](in);
 }

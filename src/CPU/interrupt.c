@@ -5,70 +5,52 @@
 #include "CPU/stack.h"
 #include "utils/log.h"
 
-// clang-format off
-
-struct interrupt {
-    u8 flag;
-    interrupt_vector vector;
-};
+#define FLAG(int_) (1 << ((int_)-0x40) / 8)
+#define NAME(int_) interrupt_names[((int_)-0x40) / 8]
 
 const char *interrupt_names[6] = {
-    "IV_VBLANK",
-    "IV_LCD",
-    "IV_TIMA",
-    "IV_SERIAL",
-    "IV_JOYPAD",
-    "IV_NONE",
+    "IV_VBLANK", "IV_LCD", "IV_TIMA", "IV_SERIAL", "IV_JOYPAD", "IV_NONE",
 };
 
-#define NAME(int_) \
-    interrupt_names[((int_) - 0x40) / 8]
-
-const struct interrupt interrupt_table[] = {
-    [IV_VBLANK] = {0x01, IV_VBLANK},
-    [IV_LCD]    = {0x02, IV_LCD},
-    [IV_TIMA]   = {0x04, IV_TIMA},
-    [IV_SERIAL] = {0x08, IV_SERIAL},
-    [IV_JOYPAD] = {0x10, IV_JOYPAD}
+struct interrupt_regsiter {
+    bool vblank;
+    bool lcd;
+    bool tima;
+    bool serial;
+    bool joypad;
 };
 
-// clang-format on
-
-#define CHECK_INTERRUPT(_i)                                                 \
-    do {                                                                    \
-        if (val_ie & val_if & interrupt_table[(_i)].flag) {                 \
-            log_trace("Handling interrupt: %s", NAME(_i));                  \
-            /* jump to the corresponding vector */                          \
-            stack_push_16bit(read_register_16bit(REG_PC));                  \
-            write_register_16bit(REG_PC, interrupt_table[(_i)].vector);     \
-                                                                            \
-            /* clear interrupt flags and deactivate halt mode */            \
-            write_memory(IF_ADDRESS, val_if & ~interrupt_table[(_i)].flag); \
-            cpu.halt = false;                                               \
-                                                                            \
-            return 5;                                                       \
-        }                                                                   \
-    } while (0);
-
+static u8 if_reg;
+static u8 ie_reg;
 static bool ime = true;
 
-// TODO: verify clock cycles
-u8 handle_interrupts()
+u8 read_interrupt(u16 address)
 {
-    if (!ime)
-        return 0;
+    if (address == IF_ADDRESS)
+        return if_reg;
+    else if (address == IE_ADDRESS)
+        return ie_reg;
 
-    u8 val_ie = read_memory(IE_ADDRESS);
-    u8 val_if = read_memory(IF_ADDRESS);
-
-    // Faster to unroll the for loop by hand than going through it
-    CHECK_INTERRUPT(IV_VBLANK);
-    CHECK_INTERRUPT(IV_LCD);
-    CHECK_INTERRUPT(IV_TIMA);
-    CHECK_INTERRUPT(IV_SERIAL);
-    CHECK_INTERRUPT(IV_JOYPAD);
+    log_err("Reading invalid interrupt register: " HEX ". Skipping", address);
 
     return 0;
+}
+
+void write_interrupt(u16 address, u8 val)
+{
+    if (address == IF_ADDRESS)
+        if_reg = val;
+    else if (address == IE_ADDRESS)
+        ie_reg = val;
+    else
+        log_err("Writing invalid interrupt register: " HEX ". Skipping",
+                address);
+}
+
+void interrupt_request(interrupt_vector interrupt)
+{
+    if_reg = if_reg | FLAG(interrupt);
+    // log_trace("Requested [%s, %02X]", NAME(interrupt), FLAG(interrupt));
 }
 
 bool interrupt_get_ime()
@@ -78,14 +60,48 @@ bool interrupt_get_ime()
 
 void interrupt_set_ime(bool value)
 {
-    log_trace("%s ime", value ? "Set" : "Unset");
+    log_trace("%s IME", value ? "Set" : "Unset");
     ime = value;
 }
 
-void interrupt_request(interrupt_vector interrupt)
+bool interrupt_is_set(interrupt_vector interrupt)
 {
-    u8 val_if = read_memory(IF_ADDRESS);
-    write_memory(IF_ADDRESS, val_if | interrupt_table[interrupt].flag);
+    return if_reg & FLAG(interrupt);
+}
 
-    // log_trace("Requested interrupt: %s", NAME(interrupt));
+static inline bool interrupt_is_enabled(interrupt_vector interrupt)
+{
+    return ie_reg & FLAG(interrupt);
+}
+
+#define CHECK_INTERRUPT(_i)                                                   \
+    do {                                                                      \
+        if (interrupt_is_set(_i) & interrupt_is_enabled(_i)) {                \
+            /* log_trace("Handling interrupt: %s", NAME(_i)); */              \
+            /* jump to the corresponding vector */                            \
+            stack_push_16bit(read_register_16bit(REG_PC));                    \
+            write_register_16bit(REG_PC, _i);                                 \
+                                                                              \
+            /* clear interrupt flags and deactivate halt mode */              \
+            write_memory(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(_i)); \
+            cpu.halt = false;                                                 \
+                                                                              \
+            return 5;                                                         \
+        }                                                                     \
+    } while (0);
+
+// TODO: verify clock cycles
+u8 handle_interrupts()
+{
+    if (!ime)
+        return 0;
+
+    // Faster to unroll the for loop by hand than going through it
+    CHECK_INTERRUPT(IV_VBLANK);
+    CHECK_INTERRUPT(IV_LCD);
+    CHECK_INTERRUPT(IV_TIMA);
+    CHECK_INTERRUPT(IV_SERIAL);
+    CHECK_INTERRUPT(IV_JOYPAD);
+
+    return 0;
 }

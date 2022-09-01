@@ -12,6 +12,12 @@
 #define MSB(_x) ((_x) >> 8)
 #define LSB(_x) ((_x)&0x00FF)
 
+// value is between a and b
+#define BETWEEN(x_, a_, b_) ((x_) >= (a_) && (x_) <= (b_))
+
+// value is in interval [a;b[
+#define IN_RANGE(x_, a_, b_) ((x_) >= (a_) && (x_) < ((b_)-1))
+
 // display code for 8/16-bit hexadecimal numbers
 #define HEX8 "0x%02X"
 #define HEX16 "0x%04X"

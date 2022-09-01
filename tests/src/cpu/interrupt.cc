@@ -21,10 +21,10 @@ extern "C" {
 namespace cpu_tests
 {
 
-class TimerTest : public ::testing::Test
+class InterrupTest : public ::testing::Test
 {
   public:
-    TimerTest()
+    InterrupTest()
     {
         const auto cart = CartridgeGenerator<1 << 18>(ROM_ONLY);
         cartridge = cart.GetCart();
@@ -37,7 +37,7 @@ class TimerTest : public ::testing::Test
     }
 };
 
-using IME = TimerTest;
+using IME = InterrupTest;
 
 #define call(opcode_)                          \
     write_memory(cpu.registers.pc, (opcode_)); \
@@ -82,7 +82,7 @@ TEST_F(IME, HaltBug)
     ASSERT_FALSE(interrupt_get_ime());
 }
 
-class InterruptRequest : public TimerTest,
+class InterruptRequest : public InterrupTest,
                          public ::testing::WithParamInterface<interrupt_vector>
 {
 };
