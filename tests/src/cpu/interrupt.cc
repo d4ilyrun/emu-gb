@@ -189,4 +189,22 @@ TEST_P(InterruptRequest, Priority)
 INSTANTIATE_TEST_SUITE_P(Interrupts, InterruptRequest,
                          ::testing::ValuesIn(interrupts));
 
+using InterrupRW = InterrupTest;
+
+TEST_F(InterrupRW, IF)
+{
+    for (u16 i = 0; i <= 0xFF; ++i) {
+        write_memory(IF, i);
+        ASSERT_EQ(read_memory(IF), i);
+    }
+}
+
+TEST_F(InterrupRW, IE)
+{
+    for (u16 i = 0; i <= 0xFF; ++i) {
+        write_memory(IE, i);
+        ASSERT_EQ(read_memory(IE), i);
+    }
+}
+
 } // namespace cpu_tests

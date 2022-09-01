@@ -51,7 +51,7 @@ void write_interrupt(u16 address, u8 val)
 void interrupt_request(interrupt_vector interrupt)
 {
     if_reg = if_reg | FLAG(interrupt);
-    // log_trace("Requested [%s, %02X]", NAME(interrupt), FLAG(interrupt));
+    log_trace("Requested [%s, %02X]", NAME(interrupt), FLAG(interrupt));
 }
 
 bool interrupt_get_ime()
@@ -77,6 +77,8 @@ static inline bool interrupt_is_enabled(interrupt_vector interrupt)
 
 static inline void handle_interrupt(interrupt_vector interrupt)
 {
+    log_trace("Handling interrupt: %s", NAME(interrupt));
+
     timer_ticks(2);
     stack_push_16bit(read_register_16bit(REG_PC)); // 2 timer ticks
     timer_tick();
@@ -97,8 +99,8 @@ u8 handle_interrupts()
 
             handle_interrupt(i);
 
-            /* clear interrupt flags and deactivate halt mode */
-            write_memory(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(i));
+            /* clear interrupt flag */
+            write_interrupt(IF_ADDRESS, read_interrupt(IF_ADDRESS) & ~FLAG(i));
 
             return 5;
         }

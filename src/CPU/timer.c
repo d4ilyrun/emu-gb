@@ -5,6 +5,7 @@
 #include "CPU/cpu.h"
 #include "CPU/interrupt.h"
 #include "CPU/memory.h"
+#include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -90,13 +91,14 @@ void timer_ticks(u8 ticks)
     // TIMA overflowed during the last cycle
     if (tima_overflow) {
         tima_overflow = false;
-        write_timer(TIMER_TIMA, read_timer(TIMER_TMA));
         interrupt_request(IV_TIMA);
+        timer.tima = timer.tma;
     }
 
     // We only update the timer's value at certain frequencies (freq_divider)
-    // We compute the number of 'freq' between the old div and the new div
-    u16 freq = freq_divider[tac & 0x03];
+    // Here we compute the number of 'freq' between the old div and the new div
+    // (in clocks, no cycles ! Hence we divide by 4)
+    u16 freq = freq_divider[tac & 0x03] / 4;
     u8 increase_tima = ((div + ticks) / freq) - (div / freq);
 
     // If bit 2 of TAC is set to 0 then the timer is disabled

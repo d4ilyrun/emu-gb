@@ -86,7 +86,7 @@ TEST_F(TimerTIMA, Tick)
 
     for (u16 i = 1; i <= 0xFF; ++i) {
         timer_tick();
-        ASSERT_EQ(read_timer(TIMER_TIMA), i / 16);
+        ASSERT_EQ(read_timer(TIMER_TIMA), i / (16 / 4));
     }
 }
 
@@ -98,22 +98,32 @@ TEST_F(TimerTIMA, MultipleTicks)
     write_memory(TIMER_TAC, tac);
     write_memory(TIMER_TIMA, 0);
 
-    timer_ticks(16 * 4);
+    timer_ticks(16);
     ASSERT_EQ(read_timer(TIMER_TIMA), 4);
 }
 
-TEST_F(TimerTIMA, Overflow)
+class OverflowTIMA : public TimerTIMA, public ::testing::WithParamInterface<u8>
 {
-    // Enabled + freq = 16 clock cycle
-    const u8 tac = 0b101;
-    const u8 tma = 0x15;
+};
 
+TEST_P(OverflowTIMA, Overflow)
+{
+    static u16 freq_divider[] = {1024, 16, 64, 256};
+
+    const u8 tma = 0x15;
+    const u8 tac = GetParam();
+
+    write_memory(IE_ADDRESS, 0x04);
+    write_memory(IF_ADDRESS, 0x00);
     write_memory(TIMER_TMA, tma);
+    write_memory(TIMER_DIV, 0);
+
     write_memory(TIMER_TAC, tac);
     write_memory(TIMER_TIMA, 0xFF);
-    write_memory(IF_ADDRESS, 0x00);
 
-    timer_ticks(16);
+    const auto freq = freq_divider[tac & 0b11] / 4; // use clocks !
+    for (auto i = 0; i < freq; ++i)
+        timer_tick();
 
     ASSERT_EQ(read_timer(TIMER_TIMA), 0);
     ASSERT_FALSE(interrupt_is_set(IV_TIMA)); // Delayed
@@ -122,5 +132,8 @@ TEST_F(TimerTIMA, Overflow)
     ASSERT_EQ(read_timer(TIMER_TIMA), tma);
     ASSERT_TRUE(interrupt_is_set(IV_TIMA));
 }
+
+INSTANTIATE_TEST_SUITE_P(Overflow, OverflowTIMA,
+                         ::testing::Range<u8>(0b100, 0b1000, 1));
 
 } // namespace cpu_tests
