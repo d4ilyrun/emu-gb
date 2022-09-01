@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CPU/cpu.h"
+#include "CPU/timer.h"
 #include "memory.h"
 #include "utils/macro.h"
 #include "utils/types.h"
@@ -12,6 +13,7 @@ u8 execute_instruction();
 
 static ALWAYS_INLINE u8 fetch_opcode()
 {
+    timer_tick();
     return read_memory(cpu.registers.pc++);
 }
 

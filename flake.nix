@@ -42,7 +42,7 @@
             '';
 
             buildPhase = ''
-              make -j4 emu-gb
+              make -j12 emu-gb
             '';
 
             installPhase = ''
@@ -65,7 +65,7 @@
             '';
 
             buildPhase = ''
-              make -j4
+              make -j12
             '';
 
             installPhase = ''

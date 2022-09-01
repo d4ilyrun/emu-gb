@@ -24,6 +24,9 @@ static struct cb_instruction fetch_cb_instruction()
     else
         cb.reg = (z == 0x7) ? REG_A : REG_B + z;
 
+    if (cb.is_address)
+        timer_tick(); // Red from address
+
     cb.bit = OPCODE_Y(opcode);
     cb.type = OPCODE_X(opcode);
 
@@ -36,16 +39,18 @@ CB_INSTRUCTION(rlc)
     set_flag(FLAG_C, BIT(val, 7)); // Copy 7th bit from value to carry flag
     val = (val << 1) + get_flag(FLAG_C);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(rrc)
@@ -54,16 +59,18 @@ CB_INSTRUCTION(rrc)
     set_flag(FLAG_C, BIT(val, 0));
     val = (val >> 1) + (get_flag(FLAG_C) << 7);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(rl)
@@ -73,16 +80,18 @@ CB_INSTRUCTION(rl)
     set_flag(FLAG_C, BIT(val, 7)); // Copy 7th bit from value to carry flag
     val = (val << 1) + c;
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(rr)
@@ -92,16 +101,18 @@ CB_INSTRUCTION(rr)
     set_flag(FLAG_C, BIT(val, 0));
     val = (val >> 1) + (c << 7);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(sla)
@@ -110,16 +121,18 @@ CB_INSTRUCTION(sla)
     set_flag(FLAG_C, BIT(val, 7)); // Copy 7th bit from value to carry flag
     val = (val << 1);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(sra)
@@ -130,16 +143,18 @@ CB_INSTRUCTION(sra)
     set_flag(FLAG_C, val & 0x1);
     val = (val >> 1) | (val & 0x80);
 
-    if (in.is_address)
-        write_memory(read_register_16bit(REG_HL), val);
-    else
+    if (in.is_address) {
+        timer_tick();
+        write_memory(in.address, val);
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(swap)
@@ -147,17 +162,19 @@ CB_INSTRUCTION(swap)
     u8 val = (in.is_address) ? read_memory(in.address) : read_register(in.reg);
     val = ((val & 0xF0) >> 4) | ((val & 0x0F) << 4);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_C, false);
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(srl)
@@ -166,16 +183,18 @@ CB_INSTRUCTION(srl)
     set_flag(FLAG_C, BIT(val, 0));
     val = (val >> 1);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
     set_flag(FLAG_H, false);
     set_flag(FLAG_N, false);
     set_flag(FLAG_Z, val == 0);
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(bit)
@@ -195,12 +214,14 @@ CB_INSTRUCTION(res)
 
     val = val & ~(1 << in.bit);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 CB_INSTRUCTION(set)
@@ -209,12 +230,14 @@ CB_INSTRUCTION(set)
 
     val = val | (1 << in.bit);
 
-    if (in.is_address)
+    if (in.is_address) {
+        timer_tick();
         write_memory(in.address, val);
-    else
+    } else {
         write_register(in.reg, val);
+    }
 
-    return 1 + in.is_address;
+    return 1 + 2 * in.is_address;
 }
 
 static cb_handler rot_list[] = {rlc, rrc, rl, rr, sla, sra, swap, srl};

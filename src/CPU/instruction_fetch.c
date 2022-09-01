@@ -3,6 +3,7 @@
 #include "CPU/flag.h"
 #include "CPU/instruction.h"
 #include "CPU/memory.h"
+#include "CPU/timer.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 
@@ -13,16 +14,17 @@ struct in_type {
     u8 cycle_count_false; // For conditional jumps
 };
 
-static u16 read_16bit_data()
-{
-    u16 data = read_memory_16bit(read_register_16bit(REG_PC));
-    write_register_16bit(REG_PC, read_register_16bit(REG_PC) + 2);
-    return data;
-}
-
 static u8 read_8bit_data()
 {
+    timer_tick();
     return read_memory(cpu.registers.pc++);
+}
+
+static u16 read_16bit_data()
+{
+    u8 lsb = read_8bit_data();
+    u8 msb = read_8bit_data();
+    return (msb << 8) | lsb;
 }
 
 /*
@@ -114,33 +116,34 @@ struct in_type opcodes[] = {
     [0x01] = {IN_LD, R16_D16, 3},
     [0x02] = {IN_LD, R16_REL_A, 2},
     [0x03] = {IN_INC, R16, 2},
-    [0x04] = {IN_INC, R8, 2},
-    [0x05] = {IN_DEC, R8, 2},
+    [0x04] = {IN_INC, R8, 1},
+    [0x05] = {IN_DEC, R8, 1},
     [0x06] = {IN_LD, R8_D8, 2},
     [0x07] = {IN_RLCA, NO_OPERAND, 1},
     [0x08] = {IN_LD, D16_REL_SP, 5},
     [0x09] = {IN_ADD, HL_R16, 2},
     [0x0A] = {IN_LD, A_R16_REL, 2},
     [0x0B] = {IN_DEC, R16, 2},
-    [0x0C] = {IN_INC, R8, 2},
-    [0x0D] = {IN_DEC, R8, 2},
+    [0x0C] = {IN_INC, R8, 1},
+    [0x0D] = {IN_DEC, R8, 1},
     [0x0E] = {IN_LD, R8_D8, 2},
     [0x0F] = {IN_RRCA, NO_OPERAND, 1},
 
     // 0x1
+    [0x10] = {IN_STOP, NO_OPERAND, 1},
     [0x11] = {IN_LD, R16_D16, 3},
     [0x12] = {IN_LD, R16_REL_A, 2},
     [0x13] = {IN_INC, R16, 2},
-    [0x14] = {IN_INC, R8, 2},
-    [0x15] = {IN_DEC, R8, 2},
+    [0x14] = {IN_INC, R8, 1},
+    [0x15] = {IN_DEC, R8, 1},
     [0x16] = {IN_LD, R8_D8, 2},
     [0x17] = {IN_RLA, NO_OPERAND, 1},
     [0x18] = {IN_JR, S8, 3},
     [0x19] = {IN_ADD, HL_R16, 2},
     [0x1A] = {IN_LD, A_R16_REL, 2},
     [0x1B] = {IN_DEC, R16, 2},
-    [0x1C] = {IN_INC, R8, 2},
-    [0x1D] = {IN_DEC, R8, 2},
+    [0x1C] = {IN_INC, R8, 1},
+    [0x1D] = {IN_DEC, R8, 1},
     [0x1E] = {IN_LD, R8_D8, 2},
     [0x1F] = {IN_RRA, NO_OPERAND, 1},
 
@@ -149,16 +152,16 @@ struct in_type opcodes[] = {
     [0x21] = {IN_LD, R16_D16, 3},
     [0x22] = {IN_LD, HLI_A, 2},
     [0x23] = {IN_INC, R16, 2},
-    [0x24] = {IN_INC, R8, 2},
-    [0x25] = {IN_DEC, R8, 2},
+    [0x24] = {IN_INC, R8, 1},
+    [0x25] = {IN_DEC, R8, 1},
     [0x26] = {IN_LD, R8_D8, 2},
     [0x27] = {IN_DAA, NO_OPERAND, 1},
     [0x28] = {IN_JR, FLAG_S8, 3, 2},
     [0x29] = {IN_ADD, HL_R16, 2},
     [0x2A] = {IN_LD, A_HLI, 2},
     [0x2B] = {IN_DEC, R16, 2},
-    [0x2C] = {IN_INC, R8, 2},
-    [0x2D] = {IN_DEC, R8, 2},
+    [0x2C] = {IN_INC, R8, 1},
+    [0x2D] = {IN_DEC, R8, 1},
     [0x2E] = {IN_LD, R8_D8, 2},
     [0x2F] = {IN_CPL, NO_OPERAND, 1},
 
@@ -167,16 +170,16 @@ struct in_type opcodes[] = {
     [0x31] = {IN_LD, R16_D16, 3},
     [0x32] = {IN_LD, HLD_A, 2},
     [0x33] = {IN_INC, R16, 2},
-    [0x34] = {IN_INC, HL_REL, 2},
-    [0x35] = {IN_DEC, HL_REL, 2},
+    [0x34] = {IN_INC, HL_REL, 3},
+    [0x35] = {IN_DEC, HL_REL, 3},
     [0x36] = {IN_LD, HL_REL_D8, 3},
     [0x37] = {IN_SCF, NO_OPERAND, 1},
     [0x38] = {IN_JR, FLAG_S8, 3, 2},
     [0x39] = {IN_ADD, HL_R16, 2},
     [0x3A] = {IN_LD, A_HLD, 2},
     [0x3B] = {IN_DEC, R16, 2},
-    [0x3C] = {IN_INC, R8, 2},
-    [0x3D] = {IN_DEC, R8, 2},
+    [0x3C] = {IN_INC, R8, 1},
+    [0x3D] = {IN_DEC, R8, 1},
     [0x3E] = {IN_LD, R8_D8, 2},
     [0x3F] = {IN_CCF, NO_OPERAND, 1},
 
@@ -326,7 +329,7 @@ struct in_type opcodes[] = {
 
     // 0xC
     [0xC0] = {IN_RET, FLAG, 5, 2},
-    [0xC1] = {IN_POP, R16, 4},
+    [0xC1] = {IN_POP, R16, 3},
     [0xC2] = {IN_JP, FLAG_A16, 4, 3},
     [0xC3] = {IN_JP, A16, 4},
     [0xC4] = {IN_CALL, FLAG_A16, 6, 3},
@@ -343,7 +346,7 @@ struct in_type opcodes[] = {
 
     // OxD
     [0xD0] = {IN_RET, FLAG, 5, 2},
-    [0xD1] = {IN_POP, R16, 4},
+    [0xD1] = {IN_POP, R16, 3},
     [0xD2] = {IN_JP, FLAG_A16, 4, 3},
     [0xD4] = {IN_CALL, FLAG_A16, 6, 3},
     [0xD5] = {IN_PUSH, R16, 4},
@@ -358,7 +361,7 @@ struct in_type opcodes[] = {
 
     // 0xE
     [0xE0] = {IN_LDH, D8_REL_A, 3},
-    [0xE1] = {IN_POP, R16, 4},
+    [0xE1] = {IN_POP, R16, 3},
     [0xE2] = {IN_LDH, C_REL_A, 2},
     [0xE5] = {IN_PUSH, R16, 4},
     [0xE6] = {IN_AND, A_D8, 2},
@@ -371,7 +374,7 @@ struct in_type opcodes[] = {
 
     // 0xF
     [0xF0] = {IN_LDH, A_D8_REL, 3},
-    [0xF1] = {IN_POP, R16, 4},
+    [0xF1] = {IN_POP, R16, 3},
     [0xF2] = {IN_LDH, A_C_REL, 2},
     [0xF3] = {IN_DI, NO_OPERAND, 1},
     [0xF5] = {IN_PUSH, R16, 4},
@@ -467,17 +470,20 @@ struct instruction fetch_instruction(u8 opcode)
 
     case R8_HL_REL:
         in.reg1 = find_register(OPCODE_Y(opcode));
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         break;
 
     case A_R16_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory_16bit(
             read_register_16bit(find_register_16bit(OPCODE_P(opcode))));
         break;
 
     case A_D16_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory_16bit(read_16bit_data());
         break;
 
@@ -493,23 +499,27 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_HLD:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) - 1);
         break;
 
     case A_HLI:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         write_register_16bit(REG_HL, read_register_16bit(REG_HL) + 1);
         break;
 
     case A_C_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register(REG_C) + 0xFF00);
         break;
 
     case A_D8_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_8bit_data() + 0xFF00);
         break;
 
@@ -525,6 +535,7 @@ struct instruction fetch_instruction(u8 opcode)
 
     case A_HL_REL:
         in.reg1 = REG_A;
+        timer_tick();
         in.data = read_memory(read_register_16bit(REG_HL));
         break;
 

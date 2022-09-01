@@ -16,10 +16,10 @@ extern "C" {
 namespace cpu_tests
 {
 
-class LDD : public InstructionTest
+class LDI : public InstructionTest
 {
   public:
-    LDD() : InstructionTest(1) {}
+    LDI() : InstructionTest(1) {}
 
     void SetUp() override
     {
@@ -38,7 +38,7 @@ class LDD : public InstructionTest
     const u16 address = 0x1234;
 };
 
-TEST_F(LDD, ToHL)
+TEST_F(LDI, ToHL)
 {
     const u8 instruction[1] = {0x22};
     cpu.registers.a = 0x42;
@@ -46,7 +46,7 @@ TEST_F(LDD, ToHL)
     execute_instruction();
 }
 
-TEST_F(LDD, FromHL)
+TEST_F(LDI, FromHL)
 {
     const u8 instruction[1] = {0x2A};
     write_memory(address, 0x42);
