@@ -8,8 +8,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "CPU/interrupt.h"
-#include "CPU/memory.h"
+#include "cpu/interrupt.h"
+#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
 #include "utils/error.h"

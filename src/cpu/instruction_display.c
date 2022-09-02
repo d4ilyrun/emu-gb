@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "CPU/instruction.h"
+#include "cpu/instruction.h"
 #include "options.h"
 #include "utils/log.h"
 #include "utils/macro.h"

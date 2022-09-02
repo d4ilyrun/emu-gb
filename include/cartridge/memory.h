@@ -56,9 +56,9 @@ extern struct chip_registers_t {
 
 // Cartridge register addresses
 #define RAM_GATE 0x2000
-#define ROM_BANK 0x4000 ///< \see CPU/memory
+#define ROM_BANK 0x4000 ///< \see cpu/memory
 #define ROM_BANK2 0x6000
-#define ROM_BANK_SWITCHABLE 0x8000 ///< \see CPU/memory.
+#define ROM_BANK_SWITCHABLE 0x8000 ///< \see cpu/memory.
 
 // MEMORY ACCESS API DECLARATION
 

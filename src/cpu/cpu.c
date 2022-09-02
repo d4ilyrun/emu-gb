@@ -1,4 +1,4 @@
-#include "CPU/cpu.h"
+#include "cpu/cpu.h"
 
 #include "utils/macro.h"
 

@@ -1,9 +1,9 @@
-#include "CPU/interrupt.h"
+#include "cpu/interrupt.h"
 
-#include "CPU/cpu.h"
-#include "CPU/memory.h"
-#include "CPU/stack.h"
-#include "CPU/timer.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
+#include "cpu/stack.h"
+#include "cpu/timer.h"
 #include "utils/log.h"
 
 #define FLAG(int_) (1 << ((int_)-0x40) / 8)

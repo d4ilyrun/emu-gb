@@ -1,4 +1,4 @@
-#include "CPU/memory.h"
+#include "cpu/memory.h"
 
 #include <assert.h>
 

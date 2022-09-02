@@ -14,8 +14,8 @@
 
 #include <assert.h>
 
-#include "CPU/cpu.h"
-#include "CPU/memory.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
 #include "utils/error.h"

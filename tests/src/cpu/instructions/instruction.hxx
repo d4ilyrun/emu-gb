@@ -4,9 +4,9 @@
 #undef REG_ERR
 
 extern "C" {
-#include <CPU/flag.h>
-#include <CPU/instruction.h>
-#include <CPU/timer.h>
+#include <cpu/flag.h>
+#include <cpu/instruction.h>
+#include <cpu/timer.h>
 #include <options.h>
 }
 

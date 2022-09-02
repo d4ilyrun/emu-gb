@@ -5,8 +5,8 @@
 #undef REG_ERR
 
 extern "C" {
-#include <CPU/cpu.h>
-#include <CPU/memory.h>
+#include <cpu/cpu.h>
+#include <cpu/memory.h>
 #include <cartridge/cartridge.h>
 #include <cartridge/memory.h>
 }

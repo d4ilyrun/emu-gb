@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "CPU/memory.h"
+#include "cpu/memory.h"
 #include "cartridge/memory.h"
 #include "utils/error.h"
 #include "utils/log.h"

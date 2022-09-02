@@ -1,6 +1,6 @@
 #include "test_rom.h"
 
-#include "CPU/memory.h"
+#include "cpu/memory.h"
 #include "utils/log.h"
 
 static char output[1024] = {0};

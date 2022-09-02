@@ -4,6 +4,6 @@ add_library(
     options.c
     )
 
-add_subdirectory(CPU)
+add_subdirectory(cpu)
 add_subdirectory(cartridge)
 

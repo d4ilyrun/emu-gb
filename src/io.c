@@ -1,8 +1,8 @@
 #include "io.h"
 
-#include "CPU/cpu.h"
-#include "CPU/interrupt.h"
-#include "CPU/timer.h"
+#include "cpu/cpu.h"
+#include "cpu/interrupt.h"
+#include "cpu/timer.h"
 #include "options.h"
 #include "utils/log.h"
 #include "utils/macro.h"

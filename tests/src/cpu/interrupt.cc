@@ -8,12 +8,12 @@
 #include "../cartridges/cartridge.hxx"
 
 extern "C" {
-#include <CPU/cpu.h>
-#include <CPU/instruction.h>
-#include <CPU/interrupt.h>
-#include <CPU/memory.h>
-#include <CPU/stack.h>
-#include <CPU/timer.h>
+#include <cpu/cpu.h>
+#include <cpu/instruction.h>
+#include <cpu/interrupt.h>
+#include <cpu/memory.h>
+#include <cpu/stack.h>
+#include <cpu/timer.h>
 #include <options.h>
 #include <utils/error.h>
 #include <utils/macro.h>

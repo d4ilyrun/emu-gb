@@ -1,9 +1,9 @@
 #include <stdlib.h>
 
-#include "CPU/flag.h"
-#include "CPU/instruction.h"
-#include "CPU/memory.h"
-#include "CPU/timer.h"
+#include "cpu/flag.h"
+#include "cpu/instruction.h"
+#include "cpu/memory.h"
+#include "cpu/timer.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 

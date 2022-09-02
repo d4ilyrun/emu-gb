@@ -1,5 +1,5 @@
-#include "CPU/flag.h"
-#include "CPU/instruction.h"
+#include "cpu/flag.h"
+#include "cpu/instruction.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 

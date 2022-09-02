@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CPU/cpu.h"
-#include "CPU/memory.h"
-#include "CPU/timer.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
+#include "cpu/timer.h"
 #include "utils/macro.h"
 
 ALWAYS_INLINE void stack_push(u8 data)

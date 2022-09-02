@@ -8,7 +8,7 @@
 #include <algorithm>
 
 extern "C" {
-#include "CPU/cpu.h"
+#include "cpu/cpu.h"
 #include "utils/macro.h"
 }
 

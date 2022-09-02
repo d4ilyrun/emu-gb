@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "CPU/cpu.h"
-#include "CPU/instruction.h"
-#include "CPU/interrupt.h"
-#include "CPU/timer.h"
+#include "cpu/cpu.h"
+#include "cpu/instruction.h"
+#include "cpu/interrupt.h"
+#include "cpu/timer.h"
 #include "cartridge/cartridge.h"
 #include "options.h"
 #include "test_rom.h"

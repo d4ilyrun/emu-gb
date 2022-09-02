@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CPU/cpu.h"
-#include "CPU/timer.h"
+#include "cpu/cpu.h"
+#include "cpu/timer.h"
 #include "memory.h"
 #include "utils/macro.h"
 #include "utils/types.h"

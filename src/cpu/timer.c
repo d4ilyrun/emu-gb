@@ -1,10 +1,10 @@
-#include "CPU/timer.h"
+#include "cpu/timer.h"
 
 #include <stdio.h>
 
-#include "CPU/cpu.h"
-#include "CPU/interrupt.h"
-#include "CPU/memory.h"
+#include "cpu/cpu.h"
+#include "cpu/interrupt.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"

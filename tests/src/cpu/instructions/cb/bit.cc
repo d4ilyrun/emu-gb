@@ -7,8 +7,8 @@
 #undef REG_ERR
 
 extern "C" {
-#include <CPU/cpu.h>
-#include <CPU/instruction.h>
+#include <cpu/cpu.h>
+#include <cpu/instruction.h>
 #include <utils/macro.h>
 #include <utils/types.h>
 }

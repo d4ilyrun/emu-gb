@@ -29,7 +29,7 @@ endfunction()
 
 # CPU
 NewTest(NAME "registers" PREFIX "cpu" SRCS "src/cpu/registers.cc" DEPS cpu)
-NewTest(NAME "interrupts" PREFIX "cpu" SRCS "src/cpu/interrupt.cc" "../src/CPU/timer.c" DEPS cpu cartridge)
+NewTest(NAME "interrupts" PREFIX "cpu" SRCS "src/cpu/interrupt.cc" "../src/cpu/timer.c" DEPS cpu cartridge)
 NewTest(NAME "timer" PREFIX "cpu" SRCS "src/cpu/timer.cc" DEPS cpu cartridge)
 
 # CPU Instruction set

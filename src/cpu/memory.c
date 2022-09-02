@@ -1,7 +1,7 @@
-#include "CPU/memory.h"
+#include "cpu/memory.h"
 
-#include "CPU/cpu.h"
-#include "CPU/interrupt.h"
+#include "cpu/cpu.h"
+#include "cpu/interrupt.h"
 #include "cartridge/cartridge.h"
 #include "io.h"
 #include "utils/log.h"
