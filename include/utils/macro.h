@@ -16,7 +16,7 @@
 #define BETWEEN(x_, a_, b_) ((x_) >= (a_) && (x_) <= (b_))
 
 // value is in interval [a;b[
-#define IN_RANGE(x_, a_, b_) ((x_) >= (a_) && (x_) < ((b_)-1))
+#define IN_RANGE(x_, a_, b_) ((x_) >= (a_) && (x_) < ((b_)))
 
 // display code for 8/16-bit hexadecimal numbers
 #define HEX8 "0x%02X"

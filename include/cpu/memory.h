@@ -10,8 +10,6 @@
  *
  * \warning Do not try to access the data in memory. Always access it thorugh
  * the functions defined in this file.
- *
- * \Todo: handle the different cases in memory map
  */
 
 #pragma once
@@ -19,6 +17,7 @@
 #include "utils/types.h"
 
 /// Cartridge memory related constants
+/// Each constant represents the end of an address rang
 #define MEMORY_START 0x0000
 #define ROM_BANK 0x4000
 #define ROM_BANK_SWITCHABLE 0x8000
@@ -29,7 +28,7 @@
 #define WORK_RAM_SWITCHABLE 0xE000
 #define RESERVED_ECHO_RAM 0xFE00
 #define OAM 0xFEA0
-#define RESERVED_UNUSED 0xFF00
+#define RESERVED_UNUSED 0xFF0
 #define IO_PORTS 0xFF80
 #define CPU_HIGH_RAM 0xFFFF
 #define INTERRUPT_ENABLE_FLAGS 0xFFFF
