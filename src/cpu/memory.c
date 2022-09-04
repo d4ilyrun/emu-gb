@@ -4,6 +4,7 @@
 #include "cpu/cpu.h"
 #include "cpu/interrupt.h"
 #include "io.h"
+#include "ppu/ppu.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -13,6 +14,8 @@ void write_memory(u16 address, u8 val)
 {
     if (address < ROM_BANK_SWITCHABLE) {
         write_cartridge(address, val);
+    } else if (address < VIDEO_RAM) {
+        write_vram(address, val);
     }
 
     else if (IN_RANGE(address, RESERVED_UNUSED, IO_PORTS)) {
@@ -39,6 +42,8 @@ u8 read_memory(u16 address)
 {
     if (address < ROM_BANK_SWITCHABLE) {
         return read_cartridge(address);
+    } else if (address < VIDEO_RAM) {
+        return read_vram(address);
     }
 
     if (IN_RANGE(address, RESERVED_UNUSED, IO_PORTS)) {

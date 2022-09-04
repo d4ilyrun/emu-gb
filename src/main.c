@@ -6,6 +6,7 @@
 #include "cpu/interrupt.h"
 #include "cpu/timer.h"
 #include "options.h"
+#include "ppu/ppu.h"
 #include "test_rom.h"
 #include "utils/log.h"
 #include "utils/macro.h"
@@ -18,6 +19,7 @@ int main(int argc, char **argv)
     cartridge_info();
 
     reset_cpu();
+    ppu_init();
     reset_timer();
 
     while (g_cpu.is_running) {
