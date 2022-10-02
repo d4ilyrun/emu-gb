@@ -134,5 +134,5 @@ shade *lcd_get_palette(palette_name palette);
 #define LCD_STAT_OAM_IRS(_lcd) BIT((_lcd).stat), 5)     /// OAM Interrupt source
 #define LCD_STAT_VBLANK_IRS(_lcd) BIT((_lcd).stat), 4)  /// VBlank Interrupt source
 #define LCD_STAT_HBLANK_IRS(_lcd) BIT((_lcd).stat), 3)  /// HBlank Interrupt source
-#define LCD_STAT_LY_FLAG(_lcd) BIT((_lcd).stat, 2)      /// LYC=LY Flag
+#define LCD_STAT_LYC_FLAG(_lcd) BIT((_lcd).stat, 2)     /// LYC=LY Flag
 #define LCD_STAT_MODE_FLAG(_lcd) ((_lcd).stat & 0x3)    /// Mode flag

@@ -6,6 +6,7 @@
 #undef REG_ERR
 
 extern "C" {
+#include "options.h"
 #include "ppu/lcd.h"
 }
 
@@ -28,6 +29,7 @@ class LCDTest : public ::testing::Test
 
     void SetUp() override
     {
+        get_options()->log_level = LOG_WARNING;
         init_lcd();
     }
 };
@@ -51,17 +53,21 @@ TEST_F(Registers, Default)
     ASSERT_EQ(lcd->lyc, 0);
 }
 
-TEST_F(Registers, StatUpdateLY)
+TEST_F(Registers, StatUpdateLYC)
 {
     const auto lcd = get_lcd();
 
-    ASSERT_TRUE(LCD_STAT_LY_FLAG(*lcd));
+    ASSERT_TRUE(LCD_STAT_LYC_FLAG(*lcd));
 
     write_lcd(0xFF45, 1);
-    ASSERT_FALSE(LCD_STAT_LY_FLAG(*lcd));
+    ASSERT_FALSE(LCD_STAT_LYC_FLAG(*lcd));
 
+    // LYC is readonly, should warn us + not update flag
     write_lcd(0xFF44, 1);
-    ASSERT_TRUE(LCD_STAT_LY_FLAG(*lcd));
+    ASSERT_FALSE(LCD_STAT_LYC_FLAG(*lcd));
+
+    write_lcd(0xFF45, 0);
+    ASSERT_TRUE(LCD_STAT_LYC_FLAG(*lcd));
 }
 
 TEST_F(Palette, Default)
@@ -84,7 +90,7 @@ TEST_F(Palette, Default)
 
 TEST_F(Palette, Background)
 {
-    const auto reg = get_lcd()->dmg;
+    const auto reg = &get_lcd()->dmg;
     const auto palette = lcd_get_palette(BG_PALETTE);
 
     write_lcd(0xFF47, 0b11001001);
@@ -94,12 +100,12 @@ TEST_F(Palette, Background)
     ASSERT_EQ(palette[2], default_palette[0b00]);
     ASSERT_EQ(palette[3], default_palette[0b11]);
 
-    ASSERT_EQ(reg.bgp, 0b11001001);
+    ASSERT_EQ(reg->bgp, 0b11001001);
 }
 
 TEST_F(Palette, Sprite)
 {
-    const auto reg = get_lcd()->dmg;
+    const auto reg = &get_lcd()->dmg;
     const auto palette = lcd_get_palette(SPRITE_PALETTE_0);
 
     write_lcd(0xFF48, 0b10110101);
@@ -111,7 +117,7 @@ TEST_F(Palette, Sprite)
     // 2 lower bits are ignored
     ASSERT_EQ(palette[3], default_palette[3]);
 
-    ASSERT_EQ(reg.obp[0], 0b11001001);
+    ASSERT_EQ(reg->obp[0], 0b10110101);
 }
 
 } // namespace ppu_test
