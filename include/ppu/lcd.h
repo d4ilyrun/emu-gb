@@ -106,9 +106,10 @@ typedef u32 shade;
  */
 typedef enum
 {
-    OBJS = 0,
-    SPRITE_0,
-    SPRITE_1,
+    // DMG
+    BG_PALETTE = 0,
+    SPRITE_PALETTE_0,
+    SPRITE_PALETTE_1,
     INVALID
 } palette_name;
 

@@ -120,9 +120,12 @@ NewTest(NAME "bit" PREFIX "cpu/instructions"
         SRCS "src/cpu/instructions/cb/bit.cc"
         DEPS cpu cartridge)
 
-
 # CARTRIDGES
 NewTest(NAME "rom"  PREFIX "cartridge" SRCS "src/cartridges/rom.cc" DEPS cartridge cpu)
 NewTest(NAME "mbc1" PREFIX "cartridge" SRCS "src/cartridges/mbc1.cc" DEPS cartridge cpu)
 NewTest(NAME "mbc2" PREFIX "cartridge" SRCS "src/cartridges/mbc2.cc" DEPS cartridge cpu)
 NewTest(NAME "mbc3" PREFIX "cartridge" SRCS "src/cartridges/mbc3.cc" "${PROJECT_SOURCE_DIR}/src/cartridge/mbc3.c" DEPS cartridge cpu)
+
+# PPU
+NewTest(NAME "lcd"  PREFIX "ppu" SRCS "src/ppu/lcd.cc" DEPS ppu)
+
