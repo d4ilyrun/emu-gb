@@ -136,3 +136,31 @@ shade *lcd_get_palette(palette_name palette);
 #define LCD_STAT_HBLANK_IRS(_lcd) BIT((_lcd).stat), 3)  /// HBlank Interrupt source
 #define LCD_STAT_LYC_FLAG(_lcd) BIT((_lcd).stat, 2)     /// LYC=LY Flag
 #define LCD_STAT_MODE_FLAG(_lcd) ((_lcd).stat & 0x3)    /// Mode flag
+
+/**
+ * \enum lcd_mode
+ * \brief The different states the LCD can be in
+ */
+typedef enum lcd_mode
+{
+    MODE_HBLANK = 0,
+    MODE_VBLANK,
+    MODE_OAM,
+    MODE_TRANSFER
+} lcd_mode;
+
+/**
+ * \function lcd_set_mode
+ * \brief Set the state of the lcd
+ * \param mode The new state of the lcd
+ * \see lcd_mode
+ */
+void lcd_set_mode(lcd_mode mode);
+
+/**
+ * \function lcd_get_mode
+ * \brief Get the current state of the lcd
+ * \return The current state of the lcd
+ * \see lcd_mode
+ */
+lcd_mode lcd_get_mode();

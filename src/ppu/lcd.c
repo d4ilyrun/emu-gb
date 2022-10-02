@@ -197,3 +197,14 @@ static void lcd_update_palette(palette_name name, u8 data)
 
 #undef SHADE
 }
+
+void lcd_set_mode(lcd_mode mode)
+{
+    // Change bits 0-1 of the stat register (mode flag)
+    lcd.stat = (lcd.stat & 0xFC) | (mode & 0x3);
+}
+
+lcd_mode lcd_get_mode()
+{
+    return LCD_STAT_MODE_FLAG(lcd);
+}
