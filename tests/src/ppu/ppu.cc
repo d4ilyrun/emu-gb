@@ -25,6 +25,11 @@ class PPUTest : public ::testing::Test
         ppu_init();
     }
 
+    void TearDown() override
+    {
+        free(ppu_->tile_data);
+    }
+
   protected:
     const struct ppu *ppu_;
 };
@@ -46,17 +51,19 @@ TEST_F(VRAM, Simple)
     ASSERT_EQ(ppu_->tile_maps[1][0x3FF], 42);
     ASSERT_EQ(read_vram(0x9FFF), 42);
 
-    ASSERT_DEATH(write_vram(0x7999, 42), "*");
-    ASSERT_DEATH(write_vram(0xA000, 42), "*");
+    ASSERT_DEATH(write_vram(0x7999, 42), ".*");
+    ASSERT_DEATH(write_vram(0xA000, 42), ".*");
 }
 
 TEST_F(OAM, Simple)
 {
-    write_oam(0xFE45, 42);
-    ASSERT_EQ(ppu_->oam[0x45], 42);
-    ASSERT_EQ(read_vram(0xFE45), 42);
+    const u8 *oam = (const u8 *)ppu_->oam;
 
-    ASSERT_DEATH(write_oam(0xFE10, 42), "*");
+    write_oam(0xFE45, 42);
+    ASSERT_EQ(oam[0x45], 42);
+    ASSERT_EQ(read_oam(0xFE45), 42);
+
+    ASSERT_DEATH(write_oam(0xFEA0, 42), ".*");
 }
 
 } // namespace ppu_test

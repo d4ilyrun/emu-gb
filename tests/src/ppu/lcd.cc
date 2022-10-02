@@ -22,10 +22,10 @@ static palette default_palette = {
     0xFF000000, // Black
 };
 
-class LCDTest : public ::testing::Test
+class VRAMTest : public ::testing::Test
 {
   public:
-    LCDTest() {}
+    VRAMTest() {}
 
     void SetUp() override
     {
@@ -34,9 +34,9 @@ class LCDTest : public ::testing::Test
     }
 };
 
-using Registers = LCDTest;
-using Palette = LCDTest;
-using OAM = LCDTest;
+using Registers = VRAMTest;
+using Palette = VRAMTest;
+using OAM = VRAMTest;
 
 TEST_F(Registers, Default)
 {

@@ -20,7 +20,7 @@
 
 static struct ppu ppu;
 
-#define TILE_DATA 0x97FF
+#define TILE_MAPS 0x9800
 
 const struct ppu *ppu_get()
 {
@@ -40,7 +40,12 @@ u8 read_vram(u16 address)
     assert_msg(IN_RANGE(address, ROM_BANK_SWITCHABLE, VIDEO_RAM),
                "VRAM: Read out of range: " HEX, address);
 
-    return ppu.tile_data[address - ROM_BANK_SWITCHABLE];
+    if (address >= TILE_MAPS) {
+        const u16 offset = address - TILE_MAPS;
+        return ppu.tile_maps[offset / 0x400][offset % 0x400];
+    } else {
+        return ppu.tile_data[address - ROM_BANK_SWITCHABLE];
+    }
 }
 
 void write_vram(u16 address, u8 value)
@@ -48,7 +53,12 @@ void write_vram(u16 address, u8 value)
     assert_msg(IN_RANGE(address, ROM_BANK_SWITCHABLE, VIDEO_RAM),
                "VRAM: Write out of range: " HEX, address);
 
-    ppu.tile_data[address - ROM_BANK_SWITCHABLE] = value;
+    if (address >= TILE_MAPS) {
+        const u16 offset = address - TILE_MAPS;
+        ppu.tile_maps[offset / 0x400][offset % 0x400] = value;
+    } else {
+        ppu.tile_data[address - ROM_BANK_SWITCHABLE] = value;
+    }
 }
 
 u8 read_oam(u16 address)
@@ -57,7 +67,7 @@ u8 read_oam(u16 address)
                "OAM: Read out of range: " HEX, address);
 
     // TODO: this only works during the HBlank and VBlank periods.
-    return ppu.oam[address - RESERVED_ECHO_RAM];
+    return ((u8 *)ppu.oam)[address - RESERVED_ECHO_RAM];
 }
 
 void write_oam(u16 address, u8 value)
@@ -66,5 +76,5 @@ void write_oam(u16 address, u8 value)
                "OAM: Write out of range: " HEX, address);
 
     // TODO: this only works during the HBlank and VBlank periods.
-    ppu.oam[address - RESERVED_ECHO_RAM] = value;
+    ((u8 *)ppu.oam)[address - RESERVED_ECHO_RAM] = value;
 }
