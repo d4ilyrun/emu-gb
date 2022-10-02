@@ -49,28 +49,28 @@ TEST_F(Palette, Default)
 
 TEST_F(Palette, Background)
 {
-    const auto bg_palette = lcd_get_palette(BG_PALETTE);
+    const auto palette = lcd_get_palette(BG_PALETTE);
 
     write_lcd(0xFF47, 0b11001001);
 
-    ASSERT_EQ(bg_palette[0], default_palette[0b11]);
-    ASSERT_EQ(bg_palette[1], default_palette[0b00]);
-    ASSERT_EQ(bg_palette[2], default_palette[0b10]);
-    ASSERT_EQ(bg_palette[3], default_palette[0b01]);
+    ASSERT_EQ(palette[0], default_palette[0b01]);
+    ASSERT_EQ(palette[1], default_palette[0b10]);
+    ASSERT_EQ(palette[2], default_palette[0b00]);
+    ASSERT_EQ(palette[3], default_palette[0b11]);
 }
 
 TEST_F(Palette, Sprite)
 {
-    const auto bg_palette = lcd_get_palette(BG_PALETTE);
+    const auto palette = lcd_get_palette(SPRITE_PALETTE_0);
 
-    write_lcd(0xFF47, 0b10110101);
+    write_lcd(0xFF48, 0b10110101);
 
-    ASSERT_EQ(bg_palette[0], default_palette[0b10]);
-    ASSERT_EQ(bg_palette[1], default_palette[0b11]);
-    ASSERT_EQ(bg_palette[2], default_palette[0b01]);
+    ASSERT_EQ(palette[0], default_palette[0b01]);
+    ASSERT_EQ(palette[1], default_palette[0b01]);
+    ASSERT_EQ(palette[2], default_palette[0b11]);
 
     // 2 lower bits are ignored
-    ASSERT_EQ(bg_palette[3], default_palette[0b11]);
+    ASSERT_EQ(palette[3], default_palette[3]);
 }
 
 } // namespace ppu_test
