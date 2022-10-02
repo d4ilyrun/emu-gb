@@ -28,13 +28,18 @@
 #define WORK_RAM_SWITCHABLE 0xE000
 #define RESERVED_ECHO_RAM 0xFE00
 #define OAM 0xFEA0
-#define RESERVED_UNUSED 0xFF0
+#define RESERVED_UNUSED 0xFF00
 #define IO_PORTS 0xFF80
 #define CPU_HIGH_RAM 0xFFFF
 #define INTERRUPT_ENABLE_FLAGS 0xFFFF
 
 /**
  * \brief write an 8bit value into memory.
+ *
+ * \warning This function acts as if the CPU is accessing the memory. Some write
+ * calls may be ignored under certain conditions (i.g. writes to VRAM ignored
+ * when the LCD is in TRANSFER mode). It might be necessary to call the lower
+ * level write functions in such cases.
  *
  * \param address 16bit memory address
  * \param val 8bit value
@@ -54,6 +59,11 @@ void write_memory_16bit(u16 address, u16 val);
 
 /**
  * \brief read an 8bit value from memory.
+ *
+ * \warning This function acts as if the CPU is accessing the memory. Some read
+ * calls may be ignored under certain conditions (i.g. reads to VRAM ignored
+ * when the LCD is in TRANSFER mode). It might be necessary to call the lower
+ * level read functions in such cases.
  *
  * \param address 16bit memory address
  * \return the 8bit value at the address

@@ -14,6 +14,7 @@
 
 #include "cpu/cpu.h"
 #include "cpu/memory.h"
+#include "ppu/lcd.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 #include "utils/types.h"
@@ -33,6 +34,8 @@ void ppu_init()
     ppu.tile_data = calloc(0x1800, sizeof(u8));
 
     memset(ppu.oam, 0, sizeof(ppu.oam));
+
+    lcd_set_mode(MODE_OAM);
 }
 
 u8 read_vram(u16 address)
@@ -66,7 +69,6 @@ u8 read_oam(u16 address)
     assert_msg(IN_RANGE(address, RESERVED_ECHO_RAM, OAM),
                "OAM: Read out of range: " HEX, address);
 
-    // TODO: this only works during the HBlank and VBlank periods.
     return ((u8 *)ppu.oam)[address - RESERVED_ECHO_RAM];
 }
 
@@ -75,6 +77,5 @@ void write_oam(u16 address, u8 value)
     assert_msg(IN_RANGE(address, RESERVED_ECHO_RAM, OAM),
                "OAM: Write out of range: " HEX, address);
 
-    // TODO: this only works during the HBlank and VBlank periods.
     ((u8 *)ppu.oam)[address - RESERVED_ECHO_RAM] = value;
 }

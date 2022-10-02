@@ -4,6 +4,9 @@
 #include "cpu/interrupt.h"
 #include "cpu/timer.h"
 #include "options.h"
+#include "ppu/lcd.h"
+#include "ppu/ppu.h"
+#include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
@@ -15,6 +18,13 @@ void write_io(u16 address, u8 data)
     }
 
     switch (address) {
+    // CGB Background palette
+    case 0xFF68:
+    case 0xFF69:
+        if (lcd_get_mode() != MODE_TRANSFER)
+            not_implemented("CGB Background palette");
+        break;
+
     case IF_ADDRESS:
         write_interrupt(IF_ADDRESS, data);
         break;
@@ -32,6 +42,13 @@ u8 read_io(u16 address)
     }
 
     switch (address) {
+    // CGB Background palette
+    case 0xFF68:
+    case 0xFF69:
+        if (lcd_get_mode() != MODE_TRANSFER)
+            not_implemented("CGB Background palette");
+        return 0xFF;
+
     case IF_ADDRESS:
         return read_interrupt(IF_ADDRESS);
 

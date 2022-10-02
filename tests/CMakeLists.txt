@@ -124,5 +124,5 @@ NewTest(NAME "mbc3" PREFIX "cartridge" SRCS "src/cartridges/mbc3.cc" "${PROJECT_
 
 # PPU
 NewTest(NAME "lcd"  PREFIX "ppu" SRCS "src/ppu/lcd.cc" DEPS ppu)
-NewTest(NAME "ppu"  PREFIX "ppu" SRCS "src/ppu/ppu.cc" DEPS ppu)
+NewTest(NAME "ppu"  PREFIX "ppu" SRCS "src/ppu/ppu.cc" DEPS ppu cpu cartridge)
 
