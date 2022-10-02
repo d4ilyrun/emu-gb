@@ -22,6 +22,11 @@ static struct ppu ppu;
 
 #define TILE_DATA 0x97FF
 
+const struct ppu *ppu_get()
+{
+    return &ppu;
+}
+
 void ppu_init()
 {
     // TODO: Doubled in CGB mode (two ram banks)
@@ -33,12 +38,7 @@ void ppu_init()
 u8 read_vram(u16 address)
 {
     assert_msg(IN_RANGE(address, ROM_BANK_SWITCHABLE, VIDEO_RAM),
-               "Read vram out of range: " HEX, address);
-
-    if (address >= TILE_DATA) {
-        log_warn("Unsupported VRAM read: " HEX16, address);
-        return 0xFF;
-    }
+               "VRAM: Read out of range: " HEX, address);
 
     return ppu.tile_data[address - ROM_BANK_SWITCHABLE];
 }
@@ -46,13 +46,7 @@ u8 read_vram(u16 address)
 void write_vram(u16 address, u8 value)
 {
     assert_msg(IN_RANGE(address, ROM_BANK_SWITCHABLE, VIDEO_RAM),
-               "Write vram out of range: " HEX, address);
-
-    if (address >= TILE_DATA) {
-        log_warn("Unsupported VRAM write: " HEX16, address);
-        cpu.memory[address] = value;
-        return;
-    }
+               "VRAM: Write out of range: " HEX, address);
 
     ppu.tile_data[address - ROM_BANK_SWITCHABLE] = value;
 }
@@ -60,7 +54,7 @@ void write_vram(u16 address, u8 value)
 u8 read_oam(u16 address)
 {
     assert_msg(IN_RANGE(address, RESERVED_ECHO_RAM, OAM),
-               "Read OAM out of range: " HEX, address);
+               "OAM: Read out of range: " HEX, address);
 
     // TODO: this only works during the HBlank and VBlank periods.
     return ppu.oam[address - RESERVED_ECHO_RAM];
@@ -69,7 +63,7 @@ u8 read_oam(u16 address)
 void write_oam(u16 address, u8 value)
 {
     assert_msg(IN_RANGE(address, RESERVED_ECHO_RAM, OAM),
-               "Write OAM out of range: " HEX, address);
+               "OAM: Write out of range: " HEX, address);
 
     // TODO: this only works during the HBlank and VBlank periods.
     ppu.oam[address - RESERVED_ECHO_RAM] = value;

@@ -36,7 +36,7 @@ class LCDTest : public ::testing::Test
 
 using Registers = LCDTest;
 using Palette = LCDTest;
-using DMA = LCDTest;
+using OAM = LCDTest;
 
 TEST_F(Registers, Default)
 {

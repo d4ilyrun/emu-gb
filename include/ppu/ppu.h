@@ -19,7 +19,7 @@ struct ppu {
      * $9800-$9BFF and $9C00-$9FFF. Any of these maps can be used to display the
      * Background or the Window.
      */
-    u8 tile_maps[2][0x4000];
+    u8 tile_maps[2][0x400];
 
     /**
      * \brief VRAM Sprite Attribute Table
@@ -30,6 +30,13 @@ struct ppu {
      */
     u8 oam[0x80];
 };
+
+/**
+ * \function ppu_get
+ * \brief Get the emulator's actual ppu instance
+ * \return A pointer to the static ppu struct used by the emulator.
+ */
+const struct ppu *ppu_get();
 
 /**
  * \function ppu_init
