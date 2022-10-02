@@ -76,6 +76,10 @@ void init_lcd()
     memcpy(palettes.dmg.bg, default_palette, sizeof(palette));
     memcpy(palettes.dmg.obj[0], default_palette, sizeof(palette));
     memcpy(palettes.dmg.obj[1], default_palette, sizeof(palette));
+
+    // Stat
+    lcd.stat = 0;
+    lcd.stat |= (1 << 2); // Set LYC
 }
 
 void write_lcd(u16 address, u8 value)
@@ -108,18 +112,28 @@ void write_lcd(u16 address, u8 value)
     default:
         if (address <= 0xFF4B) {
             lcd_ptr[address - 0xFF40] = value;
-        } else {
+        } else if (BETWEEN(address, 0xFF68, 0xFF6B)) {
             // CGB 0xFF68-6B
             u8 *cgb_lcd_ptr = (u8 *)&lcd.cgb_colors;
             cgb_lcd_ptr[address - 0xFF68] = value;
+        } else {
+            log_warn("LCD: Invalid write address: " HEX ". Skipping.", address);
         }
+    }
+
+    // If changed LY or LYC, update LYC flag inside STAT
+    if (BETWEEN(address, 0xFF44, 0xFF45)) {
+        if (lcd.ly == lcd.lyc)
+            lcd.stat |= (1 << 2); // Set LYC flag
+        else
+            lcd.stat &= ~(1 << 2); // Clear LYC flag
     }
 }
 
 u8 read_lcd(u16 address)
 {
-    assert_msg(address >= 0xFF40 && address <= 0xFF4A,
-               "Invalid LCD read address: %d", address);
+    assert_msg(BETWEEN(address, 0xFF40, 0xFF4A), "Invalid LCD read address: %d",
+               address);
 
     return ((u8 *)&lcd)[address - 0xFF40];
 }
