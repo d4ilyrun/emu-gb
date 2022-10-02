@@ -49,7 +49,7 @@ static union palettes {
 } palettes;
 
 // Forward definitions
-static void lcd_update_palette(u8 index, u8 data);
+static void lcd_update_palette(palette_name index, u8 data);
 
 const struct lcd *get_lcd()
 {
@@ -126,11 +126,11 @@ u8 read_lcd(u16 address)
 
 shade *lcd_get_palette(palette_name index)
 {
-    assert_msg(index == INVALID, "LCD: Invalid palette index %d.", index);
+    assert_msg(index < INVALID, "LCD: Invalid palette index %d.", index);
 
     // Get palette from index
-    shade *palette_at_index = palettes.dmg.bg;
-    palette_at_index += index * sizeof(palette);
+    void *palette_at_index = palettes.dmg.bg;
+    palette_at_index += sizeof(palette);
 
     return palette_at_index;
 }
@@ -167,21 +167,18 @@ shade *lcd_get_palette(palette_name index)
  * \param index The index of the palette
  * \param data The indexes used for udpating
  */
-static void lcd_update_palette(u8 index, u8 data)
+static void lcd_update_palette(palette_name name, u8 data)
 {
-    // TODO: GBC
-    assert_msg(index < 4, "LCD: Invalid palette index %d.", index);
+    shade *palette = lcd_get_palette(name);
 
-    shade *palette = lcd_get_palette(index);
-
-#define SHADE(_data, _index) default_palette[((_data) >> (2 * index)) & 0b11]
+#define SHADE(_data, _index) default_palette[((_data) >> (2 * (_index))) & 0b11]
 
     palette[0] = SHADE(data, 0);
     palette[1] = SHADE(data, 1);
     palette[2] = SHADE(data, 2);
 
     // Lower 2 bits ignored when updating OBJS
-    if (index == 0)
+    if (name == BG_PALETTE)
         palette[3] = SHADE(data, 3);
 
 #undef SHADE
