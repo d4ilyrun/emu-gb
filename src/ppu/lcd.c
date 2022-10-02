@@ -59,7 +59,7 @@ const struct lcd *get_lcd()
 void init_lcd()
 {
     // registers
-    lcd.lcdc = 0x86;
+    lcd.lcdc = 0x91;
     lcd.scx = 0;
     lcd.scy = 0;
     lcd.wx = 0;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/macro.h"
 #include "utils/types.h"
 
 /// Width of the LCD screen in pixels
@@ -126,3 +127,12 @@ typedef enum
  * \see palette_name
  */
 shade *lcd_get_palette(palette_name palette);
+
+/// LCD STAT REGISTER RELATED MACROS
+
+#define LCD_STAT_LYC_IRS(_lcd) BIT((_lcd).stat), 6)     /// LYC=LY Interrupt source
+#define LCD_STAT_OAM_IRS(_lcd) BIT((_lcd).stat), 5)     /// OAM Interrupt source
+#define LCD_STAT_VBLANK_IRS(_lcd) BIT((_lcd).stat), 4)  /// VBlank Interrupt source
+#define LCD_STAT_HBLANK_IRS(_lcd) BIT((_lcd).stat), 3)  /// HBlank Interrupt source
+#define LCD_STAT_LY_FLAG(_lcd) BIT((_lcd).stat, 2)      /// LYC=LY Flag
+#define LCD_STAT_MODE_FLAG(_lcd) ((_lcd).stat & 0x3)    /// Mode flag
