@@ -75,8 +75,8 @@ struct cartridge_header {
      */
     u8 old_license_code;
 
-    u8 rom_version; ///< In case multiple versions of the game were released.
-    u8 header_checksum;  ///< Checksum to ensure the intergrity of the ROM.
+    u8 rom_version;     ///< In case multiple versions of the game were released.
+    u8 header_checksum; ///< Checksum to ensure the intergrity of the ROM.
     u16 global_checksum; ///< Not verified in the Game Boy
 };
 
@@ -131,8 +131,7 @@ struct cartridge {
  * For example, all rom versions lesser or equal to MBC1 will be considered of
  * type MBC1.
  */
-typedef enum cartridge_type
-{
+typedef enum cartridge_type {
     ROM_ONLY = 0x0,
     MBC1 = 0x03,
     MBC2 = 0x06,

@@ -14,10 +14,10 @@
 
 #include <assert.h>
 
-#include "cpu/cpu.h"
-#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 

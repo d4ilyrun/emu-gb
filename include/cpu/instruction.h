@@ -17,8 +17,7 @@ static ALWAYS_INLINE u8 fetch_opcode()
     return read_memory(cpu.registers.pc++);
 }
 
-typedef enum instruction_name
-{
+typedef enum instruction_name {
     IN_ADC,
     IN_ADD,
     IN_AND,
@@ -76,8 +75,7 @@ typedef enum instruction_name
  * Prefixes:
  * - REL: relative addressing
  */
-typedef enum operand_type
-{
+typedef enum operand_type {
     ERR_OPERAND,
     NO_OPERAND,
 
@@ -125,7 +123,7 @@ typedef enum operand_type
 } operand_type;
 
 #define IS_DST_REGISTER(_in) ((_in).type >= R8_R8 && (_in).type < HL_REL_R8)
-#define IS_ONE_OPERAND(_in) (in.type < FLAG_A16)
+#define IS_ONE_OPERAND(_in)  (in.type < FLAG_A16)
 
 #define HAS_CONDITION(_in) ((_in).type == FLAG_S8 || (_in).type == FLAG_A16)
 
@@ -165,11 +163,11 @@ struct instruction {
  * q = y modulo 2 (i.e. bit 3)
  */
 
-#define OPCODE_X(_opcode) ((_opcode) >> 6)
-#define OPCODE_Y(_opcode) (((_opcode) >> 3) & 0x07)
-#define OPCODE_Z(_opcode) ((_opcode)&0x07)
-#define OPCODE_Q(_opcode) (((_opcode) >> 3) & 0x01)
-#define OPCODE_P(_opcode) (((_opcode) >> 4) & 0x03)
+#define OPCODE_X(_opcode)    ((_opcode) >> 6)
+#define OPCODE_Y(_opcode)    (((_opcode) >> 3) & 0x07)
+#define OPCODE_Z(_opcode)    ((_opcode)&0x07)
+#define OPCODE_Q(_opcode)    (((_opcode) >> 3) & 0x01)
+#define OPCODE_P(_opcode)    (((_opcode) >> 4) & 0x03)
 #define OPCODE_FLAG(_opcode) (OPCODE_Y(_opcode) & 0x03)
 
 struct instruction fetch_instruction(u8 opcode);
@@ -181,8 +179,7 @@ void display_instruction(struct instruction in);
  * opcode starting with CB.
  */
 
-typedef enum
-{
+typedef enum {
     CB_ROT,
     CB_TEST,
     CB_RES,

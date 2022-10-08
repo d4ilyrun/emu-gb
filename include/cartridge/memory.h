@@ -55,9 +55,9 @@ extern struct chip_registers_t {
 } chip_registers;
 
 // Cartridge register addresses
-#define RAM_GATE 0x2000
-#define ROM_BANK 0x4000 ///< \see cpu/memory
-#define ROM_BANK2 0x6000
+#define RAM_GATE            0x2000
+#define ROM_BANK            0x4000 ///< \see cpu/memory
+#define ROM_BANK2           0x6000
 #define ROM_BANK_SWITCHABLE 0x8000 ///< \see cpu/memory.
 
 // MEMORY ACCESS API DECLARATION
@@ -66,7 +66,7 @@ extern struct chip_registers_t {
 #define WRITE_16_FUNCTION(_type) \
     void write_##_type##_16bit(u16 address, u16 data)
 
-#define READ_FUNCTION(_type) u8 read_##_type(u16 address)
+#define READ_FUNCTION(_type)    u8 read_##_type(u16 address)
 #define READ_16_FUNCTION(_type) u16 read_##_type##_16bit(u16 address)
 
 #define DUMP_FUNCTION(_type) void dump_##_type()

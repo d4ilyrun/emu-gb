@@ -2,8 +2,7 @@
 
 #include "utils/types.h"
 
-typedef enum
-{
+typedef enum {
     // 8 bit registers
     REG_A = 0x0,
     REG_F,
@@ -30,7 +29,7 @@ typedef enum
 
 extern char *register_names[];
 
-#define IS_16BIT(_reg) ((_reg) >= REG_PC)
+#define IS_16BIT(_reg)  ((_reg) >= REG_PC)
 #define IS_PAIRED(_reg) ((_reg) >= REG_AF)
 
 struct cpu_registers {

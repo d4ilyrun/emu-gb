@@ -8,8 +8,7 @@
 #define TIMER_DIV_DEFAULT 0xABCC
 
 // Addresses of the different timer registers
-typedef enum timer_registers
-{
+typedef enum timer_registers {
     TIMER_UNKNOWN = 0x0000,
     TIMER_DIV = 0xFF04,
     TIMER_TIMA = 0xFF05,

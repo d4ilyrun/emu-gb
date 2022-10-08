@@ -19,9 +19,9 @@
 #define IN_RANGE(x_, a_, b_) ((x_) >= (a_) && (x_) < ((b_)))
 
 // display code for 8/16-bit hexadecimal numbers
-#define HEX8 "0x%02X"
+#define HEX8  "0x%02X"
 #define HEX16 "0x%04X"
-#define HEX HEX16
+#define HEX   HEX16
 
 // force GCC to compile inline functions even without optmization
 #define ALWAYS_INLINE inline __attribute__((always_inline))

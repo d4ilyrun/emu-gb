@@ -8,10 +8,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "cpu/interrupt.h"
-#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "cpu/interrupt.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 
@@ -43,7 +43,7 @@ struct mbc3_rtc_register {
 
 #define RTC_SECONDS 0
 #define RTC_MINUTES 1
-#define RTC_HOURS 2
+#define RTC_HOURS   2
 #define RTC_DAYS_LO 3 // Low byte for the day counter (0-255)
 
 // - Upper 1 bit of the day counter (bit 0)
@@ -52,7 +52,7 @@ struct mbc3_rtc_register {
 #define RTC_DAYS_HI 4
 
 #define DAY_UPPER_BIT 0
-#define DAY_CARRY 7
+#define DAY_CARRY     7
 #define RTC_HALT_FLAG 6
 
 /*
@@ -74,8 +74,8 @@ static void update_rtc()
     diff += (time_t)rtc.writable[RTC_MINUTES] * 60;
     diff += (time_t)rtc.writable[RTC_HOURS] * 3600;
     diff += (time_t)rtc.writable[RTC_DAYS_LO] * 3600 * 24;
-    diff +=
-        BIT((time_t)rtc.writable[RTC_DAYS_HI], DAY_UPPER_BIT) * 3600 * 24 * 256;
+    diff += BIT((time_t)rtc.writable[RTC_DAYS_HI], DAY_UPPER_BIT) * 3600 * 24
+          * 256;
 
     rtc.writable[RTC_SECONDS] = diff % 60;
     diff /= 60;
@@ -87,8 +87,8 @@ static void update_rtc()
     diff /= 256;
 
     // Set upper bit of the day counter, aka bit 0 of the RTC_DAYS_HI counter
-    rtc.writable[RTC_DAYS_HI] =
-        (rtc.writable[RTC_DAYS_HI] & 0xFE) | BIT(diff, 1);
+    rtc.writable[RTC_DAYS_HI] = (rtc.writable[RTC_DAYS_HI] & 0xFE)
+                              | BIT(diff, 1);
 
     // Set day cary flag. Cannot be unset unless clearly asked.
     rtc.writable[RTC_DAYS_HI] |= (diff > 0) << DAY_CARRY;

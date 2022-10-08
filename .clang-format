@@ -4,28 +4,58 @@ Language: Cpp
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
+ColumnLimit: 81
+MaxEmptyLinesToKeep: 1
 
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Left
 AlignOperands: AlignAfterOperator
+AlignConsecutiveMacros: Consecutive
+AlignConsecutiveBitFields: Consecutive
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
-AlwaysBreakBeforeMultilineStrings: false
-BinPackArguments: true
+PointerAlignment: Right
+ReferenceAlignment: Right
+# QualifierAlignment: Left
 
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortEnumsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: Never
 
 BreakBeforeBraces: Linux
+BreakBeforeBinaryOperators: All
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: true
+
+PenaltyBreakAssignment: 21
+PenaltyBreakBeforeFirstCallParameter: 1
+
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInParentheses: false
 
+BinPackArguments: true
+BitFieldColonSpacing: Both
+IndentExternBlock: Indent
+ReflowComments: true
+# InsertTrailingCommas: Wrapped
+# SeparateDefinitionBlocks: Always
+
+SortIncludes: CaseInsensitive
 IncludeBlocks: Regroup
 IncludeCategories:
     - Regex: '<.*>'
       Priority: 1
-    - Regex: '.*'
+    - Regex: '<.*/.*>'
       Priority: 2
+    - Regex: '.*'
+      Priority: 3

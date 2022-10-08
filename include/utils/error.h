@@ -12,10 +12,9 @@
         exit(1);              \
     } while (0);
 
-#define assert_not_reached()                                         \
-    do {                                                             \
-        fatal_error("Unreachable code reached: %s:%s", __FUNCTION__, \
-                    __LINE__);                                       \
+#define assert_not_reached()                                                    \
+    do {                                                                        \
+        fatal_error("Unreachable code reached: %s:%s", __FUNCTION__, __LINE__); \
     } while (0);
 
 #define assert_msg(cond_, ...)        \

@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cpu/memory.h"
 #include "cartridge/memory.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
@@ -141,8 +141,8 @@ static void print_nintendo_logo()
     for (int y = 0; y < 8; ++y) {
         int i = ((y / 2) % 2) + (y / 4) * 24;
         for (int x = 0; x < 12; ++x, i += 2) {
-            const uint8_t n =
-                (y % 2) ? (nintendo_logo[i] & 0xF) : (nintendo_logo[i] >> 4);
+            const uint8_t n = (y % 2) ? (nintendo_logo[i] & 0xF)
+                                      : (nintendo_logo[i] >> 4);
             for (int b = 4; b--;)
                 putchar(((n >> b) & 1) ? '*' : ' ');
         }

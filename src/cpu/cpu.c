@@ -81,6 +81,6 @@ u16 read_register_16bit(cpu_register_name reg)
     else if (reg == REG_SP)
         return cpu.registers.sp;
 
-    return (*(REGISTERS + 2 * (reg % REG_AF)) << 8) +
-         *(REGISTERS + 2 * (reg % REG_AF) + 1);
+    return (*(REGISTERS + 2 * (reg % REG_AF)) << 8)
+         + *(REGISTERS + 2 * (reg % REG_AF) + 1);
 }
