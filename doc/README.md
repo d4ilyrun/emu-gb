@@ -7,3 +7,4 @@
 - [Interactive opcode table](https://izik1.github.io/gbops/index.html)
 - [gbdev Pandocs](https://gbdev.io/pandocs/)
 - [Useful guides](https://project-awesome.org/gbdev/awesome-gbdev#emulator-development)
+- [PPU Fifo](https://blog.tigris.fr/2019/09/15/writing-an-emulator-the-first-pixel)

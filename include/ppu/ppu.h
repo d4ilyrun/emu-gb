@@ -19,7 +19,7 @@ typedef union {
 
         /**
          * __Bit7__   BG and Window over OBJ
-         *       __ (0=No, 1=BG and Window colors 1-3 over the OBJ) <br>
+         *            (0=No, 1=BG and Window colors 1-3 over the OBJ) <br>
          * __Bit6__   Y flip          (0=Normal, 1=Vertically mirrored) <br>
          * __Bit5__   X flip          (0=Normal, 1=Horizontally mirrored) <br>
          * __Bit4__   Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
@@ -50,7 +50,7 @@ struct ppu {
     /**
      * \brief VRAM Tile Maps
      *
-     * The Game Boy contains two 32x32 tile maps in VRAM at the memory areas
+     * The Game Boy contains two 31x32 tile maps in VRAM at the memory areas
      * $9800-$9BFF and $9C00-$9FFF. Any of these maps can be used to display the
      * Background or the Window.
      */
@@ -62,9 +62,15 @@ struct ppu {
      * Sprite attributes reside in the Sprite Attribute Table (OAM - Object
      * Attribute Memory) at $FE00-FE9F. Each of the 40 entries consists of four
      * bytes with a specific meaning.
+     *
+     * \see oam_data
      */
     oam_data oam[40];
 };
+
+#define TILE_DATA  0x8000
+#define TILE_MAP_0 0x9800
+#define TILE_MAP_1 0x9C00
 
 /**
  * \function ppu_get

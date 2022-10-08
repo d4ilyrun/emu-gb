@@ -16,6 +16,15 @@ struct lcd {
      *
      * Located at 0xFF40.
      *
+     * Bit 7 - LCD and PPU enable               0=Off, 1=On
+     * Bit 6 - Window tile map area             0=9800-9BFF, 1=9C00-9FFF
+     * Bit 5 - Window enable                    0=Off, 1=On
+     * Bit 4 - BG and Window tile data area     0=8800-97FF, 1=8000-8FFF
+     * Bit 3 - BG tile map area                 0=9800-9BFF, 1=9C00-9FFF
+     * Bit 2 - OBJ size                         0=8x8, 1=8x16
+     * Bit 1 - OBJ enable                       0=Off, 1=On
+     * Bit 0 - BG and Window enable/priority	0=Off, 1=On
+     *
      * \ref https://gbdev.io/pandocs/LCDC.html#ff40---lcdc-lcd-control-rw
      */
     u8 lcdc;
@@ -62,6 +71,32 @@ struct lcd {
     } cgb_colors;
 };
 
+/// LCD LCDC REGISTER RELATED MACROS
+
+#define LCD_ENABLED(_lcd)        BIT((_lcd).lcdc, 7)
+#define LCD_WINDOW_ENABLED(_lcd) BIT((_lcd).lcdc, 5)
+
+#define LCD_WINDOW_TILE_MAP(_lcd)  (0x9800 & (BIT((_lcd).lcdc, 6) << 10))
+#define LCD_WINDOW_TILE_DATA(_lcd) (0x8000 & ((~BIT((_lcd).lcdc, 4)) << 11))
+
+#define LCD_BG_TILE_MAP(_lcd)  (0x9800 & (BIT((_lcd).lcdc, 3) << 10))
+#define LCD_BG_TILE_DATA(_lcd) LCD_BG_TILE_DATA(_lcd)
+
+#define LCD_OBJ_SIZE(_lcd)   ((1 << 6) | (BIT((_lcd).lcdc, 2) << 7))
+#define LCD_OBJ_ENABLE(_lcd) BIT((_lcd).lcdc, 1)
+
+#define LCD_BG_WINDOW_ENABLED(_lcd)  BIT((_lcd).lcdc, 0)
+#define LCD_BG_WINDOW_PRIORITY(_lcd) BIT((_lcd).lcdc, 0)
+
+/// LCD STAT REGISTER RELATED MACROS
+
+#define LCD_STAT_LYC_IRS(_lcd)    BIT((_lcd).stat, 6) ///< LYC=LY Interrupt source
+#define LCD_STAT_OAM_IRS(_lcd)    BIT((_lcd).stat, 5) ///< Interrupt source
+#define LCD_STAT_VBLANK_IRS(_lcd) BIT((_lcd).stat, 4) ///< Interrupt source
+#define LCD_STAT_HBLANK_IRS(_lcd) BIT((_lcd).stat, 3) ///< Interrupt source
+#define LCD_STAT_LYC_FLAG(_lcd)   BIT((_lcd).stat, 2) ///< LYC=LY Flag
+#define LCD_STAT_MODE_FLAG(_lcd)  ((_lcd).stat & 0x3) ///< Mode flag
+
 /**
  * \function get_lcd
  * \brief Get a pointer to the current LCD variable (registers and status)
@@ -105,8 +140,7 @@ typedef u32 shade;
  *  - The GBC has 8 palettes of 4 colors for backgrounds and 8 palettes of 3
  *    colors for sprites (color 0 is transparent).
  */
-typedef enum
-{
+typedef enum {
     // DMG
     BG_PALETTE = 0,
     SPRITE_PALETTE_0,
@@ -128,25 +162,15 @@ typedef enum
  */
 shade *lcd_get_palette(palette_name palette);
 
-/// LCD STAT REGISTER RELATED MACROS
-
-#define LCD_STAT_LYC_IRS(_lcd) BIT((_lcd).stat), 6)     /// LYC=LY Interrupt source
-#define LCD_STAT_OAM_IRS(_lcd) BIT((_lcd).stat), 5)     /// OAM Interrupt source
-#define LCD_STAT_VBLANK_IRS(_lcd) BIT((_lcd).stat), 4)  /// VBlank Interrupt source
-#define LCD_STAT_HBLANK_IRS(_lcd) BIT((_lcd).stat), 3)  /// HBlank Interrupt source
-#define LCD_STAT_LYC_FLAG(_lcd) BIT((_lcd).stat, 2)     /// LYC=LY Flag
-#define LCD_STAT_MODE_FLAG(_lcd) ((_lcd).stat & 0x3)    /// Mode flag
-
 /**
  * \enum lcd_mode
  * \brief The different states the LCD can be in
  */
-typedef enum lcd_mode
-{
+typedef enum lcd_mode {
     MODE_HBLANK = 0,
-    MODE_VBLANK,
-    MODE_OAM,
-    MODE_TRANSFER
+    MODE_VBLANK = 1,
+    MODE_OAM = 2,
+    MODE_TRANSFER = 3
 } lcd_mode;
 
 /**
