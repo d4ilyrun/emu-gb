@@ -208,3 +208,8 @@ lcd_mode lcd_get_mode()
 {
     return LCD_STAT_MODE_FLAG(lcd);
 }
+
+void lcd_increment_ly()
+{
+    lcd.ly = (lcd.ly + 1) % 153; // 144 PIXELS + 9 VBLANK SCANLINES
+}

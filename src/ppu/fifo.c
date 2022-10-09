@@ -34,10 +34,8 @@
  * The two FIFOs are mixed only when popping items.
  */
 
-/*
-static struct pixel_fetcher fifo_bg = {0};
-static struct pixel_fetcher fifo_oam = {0};
-*/
+struct pixel_fetcher fifo_bg = {0};
+struct pixel_fetcher fifo_oam = {0};
 
 #pragma region fifo
 
@@ -199,7 +197,7 @@ static void fetcher_push_row(struct pixel_fetcher *fetcher)
     }
 }
 
-void fetcher_process(struct pixel_fetcher *fetcher)
+void fetcher_tick(struct pixel_fetcher *fetcher)
 {
     // Run at half the PPU's speed: every 2 clock cycles
     if (fetcher->tick++ % 2)
@@ -236,6 +234,11 @@ void fetcher_process(struct pixel_fetcher *fetcher)
         log_err("Unknown pixel fetcher step: %d", fetcher->step);
         break;
     }
+}
+
+pixel fetcher_pop_pixel(struct pixel_fetcher *fetcher)
+{
+    return fifo_pop(&fetcher->fifo);
 }
 
 #pragma endregion fetcher

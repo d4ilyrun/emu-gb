@@ -38,6 +38,11 @@ typedef union {
 } oam_data;
 
 struct ppu {
+    /// PPU STATE
+    u16 ticks;
+
+    /// MEMORY AREAS
+
     /**
      * \brief The ppu's vram area for Tile data.
      *
@@ -122,3 +127,11 @@ u8 read_oam(u16 address);
  * \see write_memory
  */
 void write_oam(u16 address, u8 value);
+
+/**
+ * \function ppu_tick
+ * \brief emulate a single PPU tick
+ *
+ * A ppu tick is equivalent to 2 cpu clocks (or 1/2 cpu tick).
+ */
+void ppu_tick();

@@ -14,6 +14,7 @@
 
 #include "cpu/cpu.h"
 #include "cpu/memory.h"
+#include "ppu/fifo.h"
 #include "ppu/lcd.h"
 #include "utils/error.h"
 #include "utils/macro.h"
@@ -36,6 +37,7 @@ void ppu_init()
     memset(ppu.oam, 0, sizeof(ppu.oam));
 
     lcd_set_mode(MODE_OAM);
+    ppu.ticks = 0;
 }
 
 u8 read_vram(u16 address)
@@ -78,4 +80,58 @@ void write_oam(u16 address, u8 value)
                "OAM: Write out of range: " HEX, address);
 
     ((u8 *)ppu.oam)[address - RESERVED_ECHO_RAM] = value;
+}
+
+void ppu_tick()
+{
+    const struct lcd *lcd = get_lcd();
+
+    switch (LCD_STAT_MODE_FLAG(*lcd)) {
+    case MODE_OAM:
+        // TODO: OAM SEARCH
+        // OAM SEARCH always takes 20 ticks
+        if (ppu.ticks == 40) {
+            fetcher_reset(&fifo_bg);
+            lcd_set_mode(MODE_TRANSFER);
+        }
+        break;
+
+    case MODE_TRANSFER:
+        fetcher_tick(&fifo_bg);
+        // Pixel fifo has to contain at least 8 pixels
+        if (fifo_bg.fifo.count > 8)
+            fetcher_pop_pixel(&fifo_bg);
+        if (fifo_bg.scanline_x == 160) // End of line
+            lcd_set_mode(MODE_HBLANK);
+        break;
+
+    case MODE_HBLANK:
+        // A full scanline takes 456 ticks to complete
+        if (ppu.ticks == 456) {
+            ppu.ticks = 0;      // Reset for next scanline
+            lcd_increment_ly(); // Next line
+            // Switch to vblank once done with all visible scanlines
+            if (lcd->ly == 144) // reached last line
+                lcd_set_mode(MODE_VBLANK);
+            else // Restart with next scanline
+                lcd_set_mode(MODE_OAM);
+        }
+        break;
+
+    case MODE_VBLANK:
+        // A full scanline takes 456 ticks to complete
+        if (ppu.ticks == 456) {
+            ppu.ticks = 0;      // Reset for next scanline
+            lcd_increment_ly(); // Next line
+            if (lcd->ly == 0)   // looped back to first line
+                lcd_set_mode(MODE_OAM);
+        }
+        break;
+
+    default:
+        log_err("PPU: Unsupported state: %d", LCD_STAT_MODE_FLAG(*lcd));
+        break;
+    }
+
+    ppu.ticks += 1;
 }

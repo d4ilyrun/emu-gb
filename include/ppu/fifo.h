@@ -138,3 +138,13 @@ void fetcher_reset(struct pixel_fetcher *fetcher);
  * \param fetcher The fetcher for which to simulate a tick
  */
 void fetcher_tick(struct pixel_fetcher *fetcher);
+
+/**
+ * \function fetcher_pop_pixel
+ * \brief Pop a single pixel from the fetcher's FIFO
+ * \return The next pixel to show on screen
+ */
+pixel fetcher_pop_pixel(struct pixel_fetcher *fetcher);
+
+extern struct pixel_fetcher fifo_bg;
+extern struct pixel_fetcher fifo_oam;

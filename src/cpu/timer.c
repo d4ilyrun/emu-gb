@@ -5,6 +5,7 @@
 #include "cpu/cpu.h"
 #include "cpu/interrupt.h"
 #include "cpu/memory.h"
+#include "ppu/ppu.h"
 #include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
@@ -97,7 +98,7 @@ void timer_ticks(u8 ticks)
 
     // We only update the timer's value at certain frequencies (freq_divider)
     // Here we compute the number of 'freq' between the old div and the new div
-    // (in clocks, no cycles ! Hence we divide by 4)
+    // (in clocks, not cycles ! Hence we divide by 4)
     u16 freq = freq_divider[tac & 0x03] / 4;
     u8 increase_tima = ((div + ticks) / freq) - (div / freq);
 
@@ -114,5 +115,10 @@ void timer_ticks(u8 ticks)
         } else {
             write_timer(TIMER_TIMA, tima + increase_tima);
         }
+    }
+
+    while (ticks--) {
+        ppu_tick();
+        ppu_tick();
     }
 }

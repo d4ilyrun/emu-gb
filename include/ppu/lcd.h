@@ -76,10 +76,10 @@ struct lcd {
 #define LCD_ENABLED(_lcd)        BIT((_lcd).lcdc, 7)
 #define LCD_WINDOW_ENABLED(_lcd) BIT((_lcd).lcdc, 5)
 
-#define LCD_WINDOW_TILE_MAP(_lcd)  (0x9800 & (BIT((_lcd).lcdc, 6) << 10))
-#define LCD_WINDOW_TILE_DATA(_lcd) (0x8000 & ((~BIT((_lcd).lcdc, 4)) << 11))
+#define LCD_WINDOW_TILE_MAP(_lcd)  (0x9800 | (BIT((_lcd).lcdc, 6) << 10))
+#define LCD_WINDOW_TILE_DATA(_lcd) (0x8000 | ((~BIT((_lcd).lcdc, 4)) << 11))
 
-#define LCD_BG_TILE_MAP(_lcd)  (0x9800 & (BIT((_lcd).lcdc, 3) << 10))
+#define LCD_BG_TILE_MAP(_lcd)  (0x9800 | (BIT((_lcd).lcdc, 3) << 10))
 #define LCD_BG_TILE_DATA(_lcd) LCD_BG_TILE_DATA(_lcd)
 
 #define LCD_OBJ_SIZE(_lcd)   ((1 << 6) | (BIT((_lcd).lcdc, 2) << 7))
@@ -188,3 +188,12 @@ void lcd_set_mode(lcd_mode mode);
  * \see lcd_mode
  */
 lcd_mode lcd_get_mode();
+
+/**
+ * \function lcd_increment_ly
+ * \brief Increment LY register (readonly otherwise)
+ *
+ * \warning The value inside LY can only be between [0-153] and will loop back to
+ * 0 when overpassing this limit.
+ */
+void lcd_increment_ly();
