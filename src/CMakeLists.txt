@@ -6,5 +6,6 @@ add_library(
 
 add_subdirectory(ppu)
 add_subdirectory(cpu)
+add_subdirectory(gui)
 add_subdirectory(cartridge)
 

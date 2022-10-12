@@ -27,7 +27,7 @@
         defaultPackage = packages.emu-gb;
 
         packages = let
-          nativeBuildInputs = with pkgs; [ gcc cmake ];
+          nativeBuildInputs = with pkgs; [ gcc cmake SDL2 SDL2.dev ];
         in {
           emu-gb = stdenv.mkDerivation {
             pname = "emu-gb";
