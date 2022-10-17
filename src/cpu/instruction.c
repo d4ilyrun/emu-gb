@@ -555,5 +555,7 @@ u8 execute_instruction()
     u8 opcode = fetch_opcode();
     struct instruction in = fetch_instruction(opcode);
 
+    display_instruction(in);
+
     return instruction_handlers[in.instruction](in);
 }

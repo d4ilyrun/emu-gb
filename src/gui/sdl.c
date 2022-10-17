@@ -83,6 +83,7 @@ void *gui_main(void *arg)
             break;
 
         default:
+            gui_update_screen();
             continue;
         };
     }

@@ -6,9 +6,9 @@ SCRIPTPATH=`dirname $SCRIPT`
 cd $SCRIPTPATH/..
 
 MAKE=$(which make)
-TARGET=all
+TARGET=emu-gb
 
-$MAKE $TARGET > /dev/null
+nix build .#emu-gb
 
 if [ $? -ne 0 ]; then
     echo "Project '$TARGET' cannot be built."

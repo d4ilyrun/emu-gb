@@ -21,6 +21,7 @@ inline struct options *get_options(void)
         .trace = false,
         .blargg = false,
         .exit_infinite_loop = false,
+        .gui = true,
     };
 
     return &options;
@@ -59,6 +60,10 @@ static error_t parse_opt(int key, char *value, struct argp_state *state)
         }
         break;
 
+    case 'g':
+        arguments->gui = (STR_EQ(value, "yes") || STR_EQ(value, "y"));
+        break;
+
     case ARGP_KEY_ARG:
         // Too many arguments, if your program expects only one argument.
         if (state->arg_num > GBEMU_NB_ARGS)
@@ -83,19 +88,23 @@ static char args_doc[] = "CARTRIDGE";
 
 #define LOG_GROUP     0
 #define RUNTIME_GROUP 1
+#define EXEC_GROUP 2
 
 static struct argp_option long_options[] = {
-  // Log related
+    // Log related
     {"trace",                           't', 0, 0, "Output traces during execution", LOG_GROUP},
     {"log-level",                                'l', "LEVEL", 0, "Do not output logs of lower importance",
      LOG_GROUP},
     {"silent", 's', 0, 0, "Do not show any log", LOG_GROUP},
 
- // Runtime
+    // Runtime
     {"blargg",                                 'b', 0, 0, "Display the result of blargg's test roms",
      RUNTIME_GROUP},
     {"exit-infinite-loop",'x', 0, 0,
      "Stop execution when encountering an infinite JR loop", RUNTIME_GROUP},
+
+    // Execution
+    {"gui", 'g', "y|n", 0, "Display screen", EXEC_GROUP},
 
     {0                               },
 };

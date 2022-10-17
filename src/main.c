@@ -24,9 +24,10 @@ int main(int argc, char **argv)
     load_cartridge(options->args[0]);
     cartridge_info();
 
-    gui_init(options->args[0]);
-
-    pthread_create(&gui_thread, NULL, gui_main, NULL);
+    if (options->gui) {
+        gui_init(options->args[0]);
+        pthread_create(&gui_thread, NULL, gui_main, NULL);
+    }
 
     reset_cpu();
     ppu_init();

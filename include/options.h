@@ -13,6 +13,7 @@ struct options {
     log_level log_level;
     bool exit_infinite_loop;
     bool blargg;
+    bool gui;
 };
 
 /**
