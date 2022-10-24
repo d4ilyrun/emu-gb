@@ -75,11 +75,29 @@
               done
             '';
           };
+
+          pre-commit = stdenv.mkDerivation {
+            pname = "pre-commit";
+            version = "1.0.0";
+            src = self;
+
+            buildInputs = with pkgs; [ pre-commit shellcheck clang-tools ];
+
+            installPhase =
+            let
+              run_pre_commit = pkgs.writeShellScript "run_pre_commit" ''
+                ${pkgs.pre-commit}/bin/pre-commit run
+              '';
+            in ''
+              ${pkgs.pre-commit}/bin/pre-commit install --install-hooks
+              mv ${run_pre_commit} $out/bin
+            '';
+          };
         };
 
         devShell = pkgs.mkShell {
           name = "emu-gb";
-          inputsFrom = [ packages.emu-gb ];
+          inputsFrom = [ packages.emu-gb packages.pre-commit ];
           buildInputs = with pkgs; [ doxygen valgrind gtest ];
         };
       }

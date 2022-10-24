@@ -1,23 +1,39 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
+default_stages: [ commit, prepare-commit-msg ]
+
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
+    rev: "v4.3.0"
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-added-large-files
+      - id: check-shebang-scripts-are-executable
+      - id: check-merge-conflict
+        stages: [ merge-commit ]
 
-  - repo: local
+  - repo: "https://github.com/nix-community/nixpkgs-fmt"
+    rev: "master"
+    hooks:
+      - id: nixpkgs-fmt
+        name: Format nix flake
+
+  - repo: "local"
     hooks:
       - id: build
         name: Build project to ensure the changes didn't break it
-        entry: bash scripts/pre-commit-build.sh
-        stages: [ commit ]
         language: system
+        entry: nix build .#emu-gb
+        stages: [ push ]
+        pass_filenames: false
 
-      - id: clang-format
-        name: Make sure all source files are correctly formatted
-        entry: bash scripts/pre-commit-clang-format.sh
-        stages: [ commit ]
+      - id: clang-tidy
+        name: Check for C coding style errors     (Run with FIX_CSTYLE=1 to apply fixes)
+        language: script
+        entry: scripts/check-coding-style.sh
+        types_or: [ c++, c ]
+
+      - id: shell-check
+        name: Check for bash coding style errors
         language: system
+        entry: shellcheck
+        files: "(.*)\\.sh"
