@@ -69,8 +69,6 @@ struct lcd {
         u8 obpi; /// OBJ color palette index, 0xFF6A
         u8 obpd; /// OBJ color palette data, 0xFF6B
     } cgb_colors;
-
-    u32 video_buffer[LCD_HEIGHT][LCD_WIDTH];
 };
 
 /// LCD LCDC REGISTER RELATED MACROS

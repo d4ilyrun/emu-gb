@@ -16,6 +16,7 @@
 #include "cpu/memory.h"
 #include "ppu/fifo.h"
 #include "ppu/lcd.h"
+#include "gui/sdl.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 #include "utils/types.h"
@@ -91,6 +92,7 @@ void ppu_tick()
         // TODO: OAM SEARCH
         // OAM SEARCH always takes 20 ticks
         if (ppu.ticks == 40) {
+            ppu.pipeline.pushed = 0;
             fetcher_reset(&fifo_bg);
             lcd_set_mode(MODE_TRANSFER);
         }
@@ -99,8 +101,10 @@ void ppu_tick()
     case MODE_TRANSFER:
         fetcher_tick(&fifo_bg);
         // Pixel fifo has to contain at least 8 pixels
-        if (fifo_bg.fifo.count > 8)
-            fetcher_pop_pixel(&fifo_bg);
+        if (fifo_bg.fifo.count > 8) {
+            const pixel px = fetcher_pop_pixel(&fifo_bg);
+            gui_push_pixel(px.raw, ppu.pipeline.pushed++, fifo_bg.scanline_y + fifo_bg.tile_y);
+        }
         if (fifo_bg.scanline_x == 160) // End of line
             lcd_set_mode(MODE_HBLANK);
         break;

@@ -41,6 +41,10 @@ struct ppu {
     /// PPU STATE
     u16 ticks;
 
+    struct {
+        u8 pushed; ///< Number of pixels already pushed during the current scanline
+    } pipeline;
+
     /// MEMORY AREAS
 
     /**

@@ -1,14 +1,14 @@
 #include "gui/sdl.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_keycode.h>
 
 #include "cpu/cpu.h"
 #include "ppu/lcd.h"
 #include "utils/error.h"
 #include "utils/log.h"
 
-#define SCREEN_WIDTH  1024
-#define SCREEN_HEIGHT 768
+extern u32 video_buffer[LCD_HEIGHT][LCD_WIDTH];
 
 struct gui {
     SDL_Renderer *renderer;
@@ -49,7 +49,6 @@ static void gui_update_screen()
     static u8 scale_width = (SCREEN_WIDTH / LCD_WIDTH);
     static u8 scale_height = (SCREEN_HEIGHT / LCD_HEIGHT);
 
-    const struct lcd* lcd = get_lcd();
     SDL_Rect pixel;
 
     pixel.w = scale_width;
@@ -58,13 +57,17 @@ static void gui_update_screen()
     for (u8 i = 0; i < LCD_HEIGHT; ++i) {
         pixel.y = i * scale_height;
         for (u8 j = 0; j < LCD_WIDTH; ++j) {
-            u32 raw_pixel = lcd->video_buffer[i][j];
+            u32 raw_pixel = video_buffer[i][j];
             pixel.x = j * scale_height;
             SDL_FillRect(gui.screen, &pixel, raw_pixel);
         }
+
     }
 
+    //SDL_UpdateTexture(gui.texture, NULL, screen->pixels, screen->pitch);
     SDL_RenderClear(gui.renderer);
+    SDL_RenderCopy(gui.renderer, gui.texture, NULL, NULL);
+    SDL_RenderPresent(gui.renderer);
 }
 
 void *gui_main(void *arg)
@@ -82,8 +85,16 @@ void *gui_main(void *arg)
             cpu.is_running = false;
             break;
 
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_LEFT)
+                log_info("Pressed LEFT");
+            else if (event.key.keysym.sym == SDLK_RIGHT)
+                log_info("Pressed RIGHT");
+            break;
+
+
         default:
-            gui_update_screen();
+            (void) gui_update_screen();
             continue;
         };
     }
