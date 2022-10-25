@@ -11,11 +11,13 @@ repos:
       - id: check-merge-conflict
         stages: [ merge-commit ]
 
-  - repo: "https://github.com/nix-community/nixpkgs-fmt"
-    rev: "master"
+  - repo: "https://github.com/d4ilyrun/pre-commit-hooks"
+    rev: "v1.0.5"
     hooks:
-      - id: nixpkgs-fmt
-        name: Format nix flake
+      - id: check-clang-format
+      - id: check-clang-tidy
+      - id: shellcheck
+      - id: apply-nixpkgs-fmt
 
   - repo: "local"
     hooks:
@@ -25,15 +27,3 @@ repos:
         entry: nix build .#emu-gb
         stages: [ push ]
         pass_filenames: false
-
-      - id: clang-tidy
-        name: Check for C coding style errors     (Run with FIX_CSTYLE=1 to apply fixes)
-        language: script
-        entry: scripts/check-coding-style.sh
-        types_or: [ c++, c ]
-
-      - id: shell-check
-        name: Check for bash coding style errors
-        language: system
-        entry: shellcheck
-        files: "(.*)\\.sh"
