@@ -47,7 +47,7 @@
           };
 
           unit-tests = stdenv.mkDerivation {
-            pname = "emu-gb";
+            pname = "unit-tests";
             version = "0.1.0";
             src = self;
 
@@ -58,6 +58,13 @@
               "-DENABLE_INSTALL=ON"
               "-DENABLE_TESTING=ON"
             ];
+
+            installPhase = ''
+              for test in $(find tests -type f -and -executable); do
+                mkdir -p "$out/$(dirname $test)"
+                mv $test "$out/$test"
+              done
+            '';
           };
 
           pre-commit = pkgs.writeShellApplication {
@@ -72,12 +79,25 @@
 
         checks = {
           inherit (packages) pre-commit;
+
+          test-suite =
+            let
+              run-tests = pkgs.writeShellScriptBin "run-tests"
+                (builtins.readFile ./scripts/run-tests.sh);
+            in
+            pkgs.writeShellApplication {
+              name = "test-suite";
+              runtimeInputs = [ packages.unit-tests ];
+              text = ''
+                ${run-tests}/bin/run-tests ${packages.unit-tests}
+              '';
+            };
         };
 
         devShell = pkgs.mkShell {
           name = "emu-gb";
-          inputsFrom = [ packages.emu-gb ];
-          buildInputs = with pkgs; [ doxygen gdb ] ++ nativeBuildInputs ++ checksInputs;
+          inputsFrom = with packages; [ emu-gb unit-tests ];
+          buildInputs = with pkgs; [ doxygen gdb ] ++ preCommitInputs;
         };
       }
     );
