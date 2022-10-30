@@ -1,0 +1,29 @@
+name: code-quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Ensure code quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure
+        run: |
+          sudo addgroup --system nixbld
+          sudo adduser --home /home/nix --disabled-password --gecos "" --shell /bin/bash nix && \
+          sudo adduser nix nixbld
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v17
+        with:
+          nix_conf: experimental-features = nix-command flakes
+
+      - name: Prepare pre-commit
+        run: nix build .#pre-commit
+
+      - name: Run pre-commit
+        run: ./result/bin/pre-commit
