@@ -1,13 +1,13 @@
 #include "cpu/memory.h"
 
+#include "cartridge/cartridge.h"
 #include "cpu/cpu.h"
 #include "cpu/interrupt.h"
-#include "cartridge/cartridge.h"
 #include "io.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
-bool ram_access = false;
+bool g_ram_access = false;
 
 void write_memory(u16 address, u8 val)
 {
@@ -25,7 +25,7 @@ void write_memory(u16 address, u8 val)
 
     else {
         // log_warn("Writing to an unsupported range: " HEX16, address);
-        cpu.memory[address] = val;
+        g_cpu.memory[address] = val;
     }
 }
 
@@ -41,17 +41,17 @@ u8 read_memory(u16 address)
         return read_cartridge(address);
     }
 
-    else if (IN_RANGE(address, RESERVED_UNUSED, IO_PORTS)) {
+    if (IN_RANGE(address, RESERVED_UNUSED, IO_PORTS)) {
         return read_io(address);
     }
 
-    else if (address == INTERRUPT_ENABLE_FLAGS) {
+    if (address == INTERRUPT_ENABLE_FLAGS) {
         return read_interrupt(address);
     }
 
     // log_warn("Reading from an unsupported range: " HEX16, address);
 
-    return cpu.memory[address];
+    return g_cpu.memory[address];
 }
 
 u16 read_memory_16bit(u16 address)
@@ -60,5 +60,5 @@ u16 read_memory_16bit(u16 address)
         return read_cartridge_16bit(address);
     }
 
-    return cpu.memory[address] + (cpu.memory[address + 1] << 8);
+    return g_cpu.memory[address] + (g_cpu.memory[address + 1] << 8);
 }

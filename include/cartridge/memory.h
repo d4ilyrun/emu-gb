@@ -52,7 +52,7 @@ extern struct chip_registers_t {
      * 0= ROM_BANK2 only affects accesses to 0x4000-0x7FFF
      */
     bool mode;
-} chip_registers;
+} g_chip_registers;
 
 // Cartridge register addresses
 #define RAM_GATE 0x2000

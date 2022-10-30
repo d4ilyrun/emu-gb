@@ -4,12 +4,13 @@
 #include "cpu/memory.h"
 #include "cpu/stack.h"
 #include "cpu/timer.h"
+#include "utils/error.h"
 #include "utils/log.h"
 
-#define FLAG(int_) (1 << ((int_)-0x40) / 8)
-#define NAME(int_) interrupt_names[((int_)-0x40) / 8]
+#define FLAG(_int) (1 << ((_int)-0x40) / 8)
+#define NAME(_int) g_interrupt_names[((_int)-0x40) / 8]
 
-const char *interrupt_names[6] = {
+const char *g_interrupt_names[6] = {
     "IV_VBLANK", "IV_LCD", "IV_TIMA", "IV_SERIAL", "IV_JOYPAD", "IV_NONE",
 };
 
@@ -21,16 +22,16 @@ struct interrupt_regsiter {
     bool joypad;
 };
 
-static u8 if_reg;
-static u8 ie_reg;
-static bool ime = true;
+static u8 g_if_reg;
+static u8 g_ie_reg;
+static bool g_ime = true;
 
 u8 read_interrupt(u16 address)
 {
     if (address == IF_ADDRESS)
-        return if_reg;
-    else if (address == IE_ADDRESS)
-        return ie_reg;
+        return g_if_reg;
+    if (address == IE_ADDRESS)
+        return g_ie_reg;
 
     log_err("Reading invalid interrupt register: " HEX ". Skipping", address);
 
@@ -40,9 +41,9 @@ u8 read_interrupt(u16 address)
 void write_interrupt(u16 address, u8 val)
 {
     if (address == IF_ADDRESS)
-        if_reg = val;
+        g_if_reg = val;
     else if (address == IE_ADDRESS)
-        ie_reg = val;
+        g_ie_reg = val;
     else
         log_err("Writing invalid interrupt register: " HEX ". Skipping",
                 address);
@@ -50,29 +51,29 @@ void write_interrupt(u16 address, u8 val)
 
 void interrupt_request(interrupt_vector interrupt)
 {
-    if_reg = if_reg | FLAG(interrupt);
+    g_if_reg = g_if_reg | FLAG(interrupt);
     log_trace("Requested [%s, %02X]", NAME(interrupt), FLAG(interrupt));
 }
 
 bool interrupt_get_ime()
 {
-    return ime;
+    return g_ime;
 }
 
 void interrupt_set_ime(bool value)
 {
     log_trace("%s IME", value ? "Set" : "Unset");
-    ime = value;
+    g_ime = value;
 }
 
 bool interrupt_is_set(interrupt_vector interrupt)
 {
-    return if_reg & FLAG(interrupt);
+    return g_if_reg & FLAG(interrupt);
 }
 
 static inline bool interrupt_is_enabled(interrupt_vector interrupt)
 {
-    return ie_reg & FLAG(interrupt);
+    return g_ie_reg & FLAG(interrupt);
 }
 
 static inline void handle_interrupt(interrupt_vector interrupt)
@@ -88,13 +89,13 @@ static inline void handle_interrupt(interrupt_vector interrupt)
 // TODO: verify clock cycles
 u8 handle_interrupts()
 {
-    for (interrupt_vector i = 0; i <= IV_JOYPAD; ++i) {
-        if (interrupt_is_set(i) & interrupt_is_enabled(i)) {
+    for (interrupt_vector i = IV_VBLANK; i <= IV_JOYPAD; i += 0x8) {
+        if (interrupt_is_set(i) && interrupt_is_enabled(i)) {
             /* Exit halt mode regardless of the value inside IME */
-            cpu.halt = false;
+            g_cpu.halt = false;
 
             /* Interrupts disabled */
-            if (!ime)
+            if (!g_ime)
                 return 0;
 
             handle_interrupt(i);

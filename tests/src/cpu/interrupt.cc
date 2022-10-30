@@ -26,7 +26,7 @@ struct timer {
     u8 tac;
 };
 
-extern struct timer timer;
+extern struct timer g_timer;
 
 namespace cpu_tests
 {
@@ -49,8 +49,8 @@ class InterrupTest : public ::testing::Test
 
 using IME = InterrupTest;
 
-#define call(opcode_)                          \
-    write_memory(cpu.registers.pc, (opcode_)); \
+#define call(opcode_)                            \
+    write_memory(g_cpu.registers.pc, (opcode_)); \
     execute_instruction();
 
 TEST_F(IME, Modify)
@@ -63,7 +63,7 @@ TEST_F(IME, Modify)
 
     // EI: Enable ime (delayed by 1 instruction)
     call(0xFB);
-    ASSERT_TRUE(cpu.ime_scheduled);
+    ASSERT_TRUE(g_cpu.ime_scheduled);
     ASSERT_FALSE(interrupt_get_ime());
 
     // Delay
@@ -72,10 +72,10 @@ TEST_F(IME, Modify)
 
     // RETI: Enable ime + return
     // push pc
-    const u16 pc = cpu.registers.pc;
-    stack_push_16bit(cpu.registers.pc++);
+    const u16 pc = g_cpu.registers.pc;
+    stack_push_16bit(g_cpu.registers.pc++);
     call(0xD9);
-    ASSERT_EQ(cpu.registers.pc, pc);
+    ASSERT_EQ(g_cpu.registers.pc, pc);
     ASSERT_TRUE(interrupt_get_ime());
 }
 
@@ -87,7 +87,7 @@ TEST_F(IME, HaltBug)
 
     // EI: Enable ime
     call(0xFB);
-    ASSERT_TRUE(cpu.ime_scheduled);
+    ASSERT_TRUE(g_cpu.ime_scheduled);
     call(0xF3);
     ASSERT_FALSE(interrupt_get_ime());
 }
@@ -133,7 +133,7 @@ TEST_P(InterruptRequest, Execute)
     ASSERT_EQ(cycles, 5);
     ASSERT_EQ(read_memory(IF), 0);
     ASSERT_EQ(read_memory(IE), 1 << bit); // Don't reset IE
-    ASSERT_EQ(cpu.registers.pc, interrupt);
+    ASSERT_EQ(g_cpu.registers.pc, interrupt);
 }
 
 TEST_P(InterruptRequest, Timing)
@@ -141,13 +141,13 @@ TEST_P(InterruptRequest, Timing)
     const auto interrupt = GetParam();
     const u8 bit = interrupt_bit(interrupt);
 
-    timer.div = 0;
+    g_timer.div = 0;
     write_memory(IF, 1 << bit);
     write_memory(IE, 1 << bit);
 
     const auto cycles = handle_interrupts();
 
-    ASSERT_EQ(timer.div, 5);
+    ASSERT_EQ(g_timer.div, 5);
 }
 
 TEST_P(InterruptRequest, ExecuteDisabledIME)
@@ -177,7 +177,7 @@ TEST_P(InterruptRequest, Priority)
         const auto cycles = handle_interrupts();
 
         ASSERT_EQ(cycles, 5);
-        ASSERT_EQ(cpu.registers.pc, std::min(interrupt, other));
+        ASSERT_EQ(g_cpu.registers.pc, std::min(interrupt, other));
 
         if (interrupt != other) {
             const auto if_reg = read_memory(IF);

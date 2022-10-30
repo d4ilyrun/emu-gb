@@ -14,10 +14,10 @@
 
 #include <assert.h>
 
-#include "cpu/cpu.h"
-#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 
@@ -28,22 +28,22 @@ WRITE_FUNCTION(mbc2)
     // READ ONLY
     if (address < ROM_BANK && !BIT(address, 8)) {
         // bits 7-4 are ignored during write
-        chip_registers.ram_g = data & 0xF;
-        ram_access = chip_registers.ram_g == 0xA;
+        g_chip_registers.ram_g = data & 0xF;
+        g_ram_access = g_chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK && BIT(address, 8)) {
         // bits 7-4 are ignored during write
-        chip_registers.rom_bank = data & 0xF;
-        if (!chip_registers.rom_bank) // Can never be null
-            chip_registers.rom_bank = 0b0001;
+        g_chip_registers.rom_bank = data & 0xF;
+        if (!g_chip_registers.rom_bank) // Can never be null
+            g_chip_registers.rom_bank = 0b0001;
     }
 
     // READ/WRITE AREA
-    else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
+    else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && g_ram_access) {
         // Upper 4 bits are ignored
         const u16 physical_address = compute_physical_adress(address);
-        assert_msg(physical_address < cartridge.ram_size,
+        ASSERT_MSG(physical_address < g_cartridge.ram_size,
                    "MBC2: writing outside of RAM bounds");
-        cartridge.ram[physical_address] = data & 0xF;
+        g_cartridge.ram[physical_address] = data & 0xF;
     }
 }
 
@@ -64,39 +64,39 @@ static unsigned compute_physical_adress(u16 address)
         return address & 0x1FFF;
     if (address < ROM_BANK_SWITCHABLE) {
         // Switch to rom bank 1 of set to 0
-        if (!chip_registers.rom_bank)
+        if (!g_chip_registers.rom_bank)
             return (1 << 14) | (address & 0x3FFF);
-        return (chip_registers.rom_bank << 14) + (address & 0x3FFF);
+        return (g_chip_registers.rom_bank << 14) + (address & 0x3FFF);
     }
 
-    assert_not_reached();
-    // fatal_error("MBC2: compute_physical_adress: invalid area");
+    ASSERT_NOT_REACHED();
+    // FATAL_ERROR("MBC2: compute_physical_adress: invalid area");
 }
 
 READ_FUNCTION(mbc2)
 {
     const bool is_ram = VIDEO_RAM <= address && address < EXTERNAL_RAM;
 
-    if (is_ram && !ram_access)
+    if (is_ram && !g_ram_access)
         return 0xFF; // Undefined value
 
     unsigned physical_address = compute_physical_adress(address);
 
     if (is_ram) {
-        assert_msg(physical_address < cartridge.ram_size,
+        ASSERT_MSG(physical_address < g_cartridge.ram_size,
                    "MBC2: Reading outside of RAM bounds");
-        return cartridge.ram[physical_address];
+        return g_cartridge.ram[physical_address];
     }
 
-    assert_msg(physical_address < cartridge.rom_size,
+    ASSERT_MSG(physical_address < g_cartridge.rom_size,
                "MBC2: Reading outside of ROM bounds");
-    return cartridge.rom[physical_address];
+    return g_cartridge.rom[physical_address];
 }
 
 DUMP_FUNCTION(mbc2)
 {
-    u8 num_banks = 2 << (HEADER(cartridge)->rom_size + 1);
-    unsigned buf = 0;
+    u8 num_banks = 2 << (HEADER(g_cartridge)->rom_size + 1);
+    __attribute__((unused)) unsigned buf = 0;
 
     for (u8 bank = 0; bank < num_banks; ++bank) {
         write_mbc1(0x2100, bank);

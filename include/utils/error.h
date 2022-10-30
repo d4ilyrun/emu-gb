@@ -4,23 +4,23 @@
 
 #include "log.h"
 
-#define not_implemented(...) log_err("Not implemented: %s", __VA_ARGS__)
+#define NOT_IMPLEMENTED(...) log_err("Not implemented: %s", __VA_ARGS__)
 
-#define fatal_error(...)      \
+#define FATAL_ERROR(...)      \
     do {                      \
         log_err(__VA_ARGS__); \
         exit(1);              \
-    } while (0);
+    } while (0)
 
-#define assert_not_reached()                                         \
+#define ASSERT_NOT_REACHED()                                         \
     do {                                                             \
-        fatal_error("Unreachable code reached: %s:%s", __FUNCTION__, \
+        FATAL_ERROR("Unreachable code reached: %s:%s", __FUNCTION__, \
                     __LINE__);                                       \
-    } while (0);
+    } while (0)
 
-#define assert_msg(cond_, ...)        \
+#define ASSERT_MSG(cond_, ...)        \
     do {                              \
         if (!(cond_)) {               \
-            fatal_error(__VA_ARGS__); \
+            FATAL_ERROR(__VA_ARGS__); \
         }                             \
-    } while (0);
+    } while (0)

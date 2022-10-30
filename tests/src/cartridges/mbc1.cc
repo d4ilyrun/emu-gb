@@ -4,9 +4,9 @@
 #undef REG_ERR
 
 extern "C" {
-#include <cpu/memory.h>
 #include <cartridge/cartridge.h>
 #include <cartridge/memory.h>
+#include <cpu/memory.h>
 }
 
 #include "cartridge.hxx"
@@ -32,7 +32,7 @@ class MBC1Generator : public CartridgeGenerator<rom, ram>,
   private:
     inline void enable_ram()
     {
-        chip_registers.ram_g = 0xA;
+        g_chip_registers.ram_g = 0xA;
     }
 };
 
@@ -44,23 +44,23 @@ TEST_F(MBC1_Registers, EnableRAM)
 {
     const auto address = 0x0010; // Between 0x0000 and 0x1FFF
 
-    EXPECT_EQ(chip_registers.ram_g, 0x0);
-    ASSERT_FALSE(ram_access);
+    EXPECT_EQ(g_chip_registers.ram_g, 0x0);
+    ASSERT_FALSE(g_ram_access);
 
     // Write to ram register
     // First bits should be ignored, 1A -> A
     write_mbc1(address, 0x1A);
-    ASSERT_TRUE(ram_access);
-    ASSERT_EQ(chip_registers.ram_g, 0xA);
+    ASSERT_TRUE(g_ram_access);
+    ASSERT_EQ(g_chip_registers.ram_g, 0xA);
 
     write_mbc1(address, 0x1B);
-    ASSERT_FALSE(ram_access);
-    ASSERT_EQ(chip_registers.ram_g, 0xB);
+    ASSERT_FALSE(g_ram_access);
+    ASSERT_EQ(g_chip_registers.ram_g, 0xB);
 
     // Write outside of the designated area, shouldn't modify its content
     write_mbc1(0x2000, 0x1A);
-    ASSERT_EQ(chip_registers.ram_g, 0xB);
-    ASSERT_FALSE(ram_access);
+    ASSERT_EQ(g_chip_registers.ram_g, 0xB);
+    ASSERT_FALSE(g_ram_access);
 }
 
 // Update the lower 5 bits of the ROM bank number
@@ -70,20 +70,20 @@ TEST_F(MBC1_Registers, ROMBankNumber)
     const auto address = 0x3113;
 
     // The lower bits can never be set to 0 and should be set to 1 instead
-    ASSERT_TRUE(chip_registers.rom_bank != 0);
+    ASSERT_TRUE(g_chip_registers.rom_bank != 0);
 
-    chip_registers.rom_bank = 1;
+    g_chip_registers.rom_bank = 1;
 
     write_mbc1(address, 0x03);
-    ASSERT_EQ(chip_registers.rom_bank, 0x03);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0x03);
 
     // Higher bits are discarded
     write_mbc1(address, 0xE1);
-    ASSERT_EQ(chip_registers.rom_bank, 0x01);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0x01);
 
     // When writing 0, automatically change it to one
     write_mbc1(address, 0);
-    ASSERT_EQ(chip_registers.rom_bank, 1);
+    ASSERT_EQ(g_chip_registers.rom_bank, 1);
 }
 
 // If the ROM Bank Number is set to a higher value than the number of banks in
@@ -100,16 +100,16 @@ TEST_F(MBC1_Registers, RAMBankNumber)
 {
     const auto address = 0x5025;
 
-    ASSERT_EQ(chip_registers.ram_bank, 0);
+    ASSERT_EQ(g_chip_registers.ram_bank, 0);
 
     write_mbc1(address, 0b0101);
-    ASSERT_EQ(chip_registers.ram_bank, 1);
+    ASSERT_EQ(g_chip_registers.ram_bank, 1);
 
     write_mbc1(address, 0b0011);
-    ASSERT_EQ(chip_registers.ram_bank, 3);
+    ASSERT_EQ(g_chip_registers.ram_bank, 3);
 
     write_mbc1(address, 0xFC);
-    ASSERT_EQ(chip_registers.ram_bank, 0);
+    ASSERT_EQ(g_chip_registers.ram_bank, 0);
 }
 
 // When writing to 0x6000 - 0x7FFF, switch between RAM and ROM banking mode
@@ -118,16 +118,16 @@ TEST_F(MBC1_Registers, BankingModeSelect)
     const auto address = 0x6025;
 
     // default value
-    ASSERT_EQ(chip_registers.mode, 0);
+    ASSERT_EQ(g_chip_registers.mode, 0);
 
     write_mbc1(address, 0);
-    ASSERT_EQ(chip_registers.mode, 0);
+    ASSERT_EQ(g_chip_registers.mode, 0);
 
     write_mbc1(address, 0x15);
-    ASSERT_EQ(chip_registers.mode, 1);
+    ASSERT_EQ(g_chip_registers.mode, 1);
 
     write_mbc1(address, 0x14);
-    ASSERT_EQ(chip_registers.mode, 0);
+    ASSERT_EQ(g_chip_registers.mode, 0);
 }
 
 struct mbc1_rw_param {
@@ -152,13 +152,13 @@ class MBC1RWGenerator : public MBC1Generator<rom, ram>,
     {
         const auto &param = GetParam();
 
-        ram_access = param.ram_access;
-        chip_registers.rom_bank = param.rom_bank;
-        chip_registers.ram_bank = param.ram_bank;
-        chip_registers.mode = param.mode;
+        g_ram_access = param.ram_access;
+        g_chip_registers.rom_bank = param.rom_bank;
+        g_chip_registers.ram_bank = param.ram_bank;
+        g_chip_registers.mode = param.mode;
 
-        if (ram_access)
-            chip_registers.ram_g = 0xA;
+        if (g_ram_access)
+            g_chip_registers.ram_g = 0xA;
 
         // Reset ROM
         memset(this->cart_.rom, 0, this->cart_.rom_size);

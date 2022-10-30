@@ -18,8 +18,8 @@ extern "C" {
 #include <utils/macro.h>
 }
 
-#define call(opcode_)                          \
-    write_memory(cpu.registers.pc, (opcode_)); \
+#define call(opcode_)                            \
+    write_memory(g_cpu.registers.pc, (opcode_)); \
     execute_instruction();
 
 namespace cpu_tests

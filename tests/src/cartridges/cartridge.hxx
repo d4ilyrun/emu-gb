@@ -2,6 +2,11 @@ extern "C" {
 #include <cartridge/cartridge.h>
 }
 
+typedef struct cartridge cartridge_t;
+
+// BW compatibility & LAZY
+#define cartridge g_cartridge // NOLINT
+
 template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
 {
   public:
@@ -37,7 +42,7 @@ template <uint rom_size, uint ram_size = 1> class CartridgeGenerator
 
   protected:
     struct cartridge_header header_;
-    struct cartridge cart_;
+    cartridge_t cart_;
 
     u8 rom_[rom_size]{0};
     u8 ram_[ram_size]{0};

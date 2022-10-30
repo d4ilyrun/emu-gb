@@ -5,9 +5,9 @@ Checks: >
     modernize-*
     bugprone-*,
 
-    readability-identifier-*,
     readability-redundant-*,
     readability-simplify-*,
+    readability-identifier-naming,
     readability-else-after-return,
     readability-function-cognitive-complexity,
     readability-function-size,
@@ -26,10 +26,9 @@ WarningsAsErrors: >
     bugprone-*,
     cert-*,
     clang-analyzer-*,
-    readability-else-after-return,
-    readability-identifier-*,
     readability-redundant-*,
     readability-simplify-*,
+    readability-identifier-naming,
     readability-suspicious-call-argument,
 
 CheckOptions:

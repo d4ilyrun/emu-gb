@@ -5,10 +5,10 @@
 #undef REG_ERR
 
 extern "C" {
-#include <cpu/cpu.h>
-#include <cpu/memory.h>
 #include <cartridge/cartridge.h>
 #include <cartridge/memory.h>
+#include <cpu/cpu.h>
+#include <cpu/memory.h>
 }
 
 #include "cartridge.hxx"
@@ -32,8 +32,8 @@ class MBC2Generator : public CartridgeGenerator<rom, 512>,
   protected:
     inline void enable_ram()
     {
-        chip_registers.ram_g = 0xA;
-        ram_access = false;
+        g_chip_registers.ram_g = 0xA;
+        g_ram_access = false;
     }
 };
 
@@ -44,48 +44,48 @@ TEST_F(MBC2_Registers, RAMEnable)
     // When BIT 8 is clear: control RAM
 
     // RAM is disabled by default
-    ASSERT_FALSE(ram_access);
-    ASSERT_NE(chip_registers.ram_g, 0xA);
+    ASSERT_FALSE(g_ram_access);
+    ASSERT_NE(g_chip_registers.ram_g, 0xA);
 
     // Write 0xA with BIT 8 clear: activate ram access
     write_mbc2(0x200, 0xA);
-    ASSERT_TRUE(ram_access);
+    ASSERT_TRUE(g_ram_access);
 
     write_mbc2(0xFF, 0x1A);
-    ASSERT_TRUE(ram_access);
+    ASSERT_TRUE(g_ram_access);
 
     // Write anything else than 0xA with BIT 8 clear: deactivate
     write_mbc2(0x12FF, 0xB);
-    ASSERT_FALSE(ram_access);
+    ASSERT_FALSE(g_ram_access);
 
     // Write 0xA with BIT 8 set: do not change
-    const auto tmp = chip_registers.rom_bank;
+    const auto tmp = g_chip_registers.rom_bank;
     write_mbc2(0x3FF, 0xA);
-    ASSERT_FALSE(ram_access);
-    chip_registers.rom_bank = tmp;
+    ASSERT_FALSE(g_ram_access);
+    g_chip_registers.rom_bank = tmp;
 }
 
 TEST_F(MBC2_Registers, ROMBankNumber)
 {
     // When BIT 8 is set: control ROM
     // Set to 1 by default
-    ASSERT_EQ(chip_registers.rom_bank, 1);
+    ASSERT_EQ(g_chip_registers.rom_bank, 1);
 
     // The lower 4 bits of the address control the rom bank number
     write_mbc2(0x10F, 0xF);
-    ASSERT_EQ(chip_registers.rom_bank, 0xF);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0xF);
 
     write_mbc2(0x10A, 0x3A);
-    ASSERT_EQ(chip_registers.rom_bank, 0xA);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0xA);
 
     // Similar to MBC1, can never be null and should be replaced by 1
     write_mbc2(0x100, 0x0);
-    ASSERT_EQ(chip_registers.rom_bank, 0x1);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0x1);
 
     // Value shouldn't change when the address' 8th BIT is clear
-    chip_registers.rom_bank = 0xA;
+    g_chip_registers.rom_bank = 0xA;
     write_mbc2(0x20A, 0xF);
-    ASSERT_EQ(chip_registers.rom_bank, 0xA);
+    ASSERT_EQ(g_chip_registers.rom_bank, 0xA);
 }
 
 struct mbc2_rw_param {
@@ -93,7 +93,7 @@ struct mbc2_rw_param {
     u8 value;
 
     // registers
-    bool ram_access;
+    bool g_ram_access;
     u8 rom_bank;
 
     // Expected resulting address
@@ -108,8 +108,8 @@ class MBC2RWGenerator : public MBC2Generator<rom>,
     {
         const auto &param = GetParam();
 
-        chip_registers.rom_bank = param.rom_bank;
-        if (param.ram_access)
+        g_chip_registers.rom_bank = param.rom_bank;
+        if (param.g_ram_access)
             this->enable_ram();
 
         // Reset ROM
@@ -129,7 +129,7 @@ TEST_P(MBC2, Read)
     if (param.address >= 0xA000 && param.address < 0xA200) {
         value |= 0xF;
         cartridge.ram[param.expected] = value;
-        if (!ram_access)
+        if (!g_ram_access)
             value = 0xFF;
     } else {
         cartridge.rom[param.expected] = value;
@@ -145,7 +145,7 @@ TEST_P(MBC2, Write)
     write_mbc2(param.address, param.value);
 
     if (param.address >= 0xA000 && param.address < 0xA200) {
-        if (ram_access)
+        if (g_ram_access)
             ASSERT_EQ(cartridge.ram[param.expected], param.value | 0xF);
         else
             ASSERT_EQ(cartridge.ram[param.expected], 0);

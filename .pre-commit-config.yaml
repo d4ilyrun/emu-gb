@@ -12,10 +12,11 @@ repos:
         stages: [ merge-commit ]
 
   - repo: "https://github.com/d4ilyrun/pre-commit-hooks"
-    rev: "v1.0.5"
+    rev: "v1.0.6"
     hooks:
       - id: check-clang-format
       - id: check-clang-tidy
+        types_or: [ 'c' ] # ignore CPP files in test folder
       - id: shellcheck
       - id: apply-nixpkgs-fmt
 

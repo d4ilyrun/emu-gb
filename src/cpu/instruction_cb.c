@@ -240,12 +240,12 @@ CB_INSTRUCTION(set)
     return 1 + 2 * in.is_address;
 }
 
-static cb_handler rot_list[] = {rlc, rrc, rl, rr, sla, sra, swap, srl};
+static cb_handler g_rot_list[] = {rlc, rrc, rl, rr, sla, sra, swap, srl};
 
 u8 cb_execute_instruction()
 {
     struct cb_instruction in = fetch_cb_instruction();
-    cb_handler handlers[] = {rot_list[in.rot_type], bit, res, set};
+    cb_handler handlers[] = {g_rot_list[in.rot_type], bit, res, set};
 
     return handlers[in.type](in);
 }

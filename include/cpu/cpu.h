@@ -2,8 +2,7 @@
 
 #include "utils/types.h"
 
-typedef enum
-{
+typedef enum {
     // 8 bit registers
     REG_A = 0x0,
     REG_F,
@@ -28,7 +27,7 @@ typedef enum
     REG_ERR,
 } cpu_register_name;
 
-extern char *register_names[];
+extern char *g_register_names[];
 
 #define IS_16BIT(_reg) ((_reg) >= REG_PC)
 #define IS_PAIRED(_reg) ((_reg) >= REG_AF)
@@ -63,9 +62,9 @@ struct gb_cpu {
 };
 
 // The actual CPU of the Game Boy
-extern struct gb_cpu cpu;
+extern struct gb_cpu g_cpu;
 
-#define REGISTERS ((u8 *)&(cpu.registers))
+#define REGISTERS ((u8 *)&(g_cpu.registers))
 
 // Number of timer ticks in a machine cycle
 #define CYCLE_TICKS 4

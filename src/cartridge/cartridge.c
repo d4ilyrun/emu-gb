@@ -4,21 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cpu/memory.h"
 #include "cartridge/memory.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/log.h"
 #include "utils/macro.h"
 
-struct cartridge cartridge;
+struct cartridge g_cartridge;
 
 static bool verify_header_checksum(struct cartridge cart)
 {
     unsigned char sum = 0;
-    int i = 0x0134;
 
-    while (i <= 0x014C)
-        sum -= cart.rom[i++] - 1;
+    for (u16 i = 0; i <= 0x014C; ++i)
+        sum -= cart.rom[i] - 1;
 
     return sum == 0;
 }
@@ -33,27 +32,27 @@ static bool check_multicart()
     int nb_games = 4;
 
     // ALl known multicart cartridges use 8M of ROM
-    if (HEADER(cartridge)->rom_size < 8) {
-        cartridge.multicart = false;
+    if (HEADER(g_cartridge)->rom_size < 8) {
+        g_cartridge.multicart = false;
         return false;
     }
 
     // First assume that it is a multicart
-    cartridge.multicart = true;
+    g_cartridge.multicart = true;
 
     // Set BANK1 to zero
-    u8 bank2 = chip_registers.ram_bank;
-    chip_registers.rom_bank = 0;
-    chip_registers.mode = true;
+    u8 bank2 = g_chip_registers.ram_bank;
+    g_chip_registers.rom_bank = 0;
+    g_chip_registers.mode = true;
 
     // Loop through all four possiblbbe BANK2 values
-    for (chip_registers.ram_bank = 0b00; chip_registers.ram_bank <= 0b11;
-         ++chip_registers.ram_bank) {
+    for (g_chip_registers.ram_bank = 0b00; g_chip_registers.ram_bank <= 0b11;
+         ++g_chip_registers.ram_bank) {
         // Look for the nintendo logo
-        log_info("NEW BANK: %d\n", chip_registers.ram_bank);
-        for (size_t i = 0; i < sizeof(nintendo_logo); ++i) {
-            printf("%x = %x, ", read_cartridge(0x0104 + i), nintendo_logo[i]);
-            if (read_cartridge(0x0104 + i) != nintendo_logo[i]) {
+        log_info("NEW BANK: %d\n", g_chip_registers.ram_bank);
+        for (size_t i = 0; i < sizeof(g_nintendo_logo); ++i) {
+            printf("%x = %x, ", read_cartridge(0x0104 + i), g_nintendo_logo[i]);
+            if (read_cartridge(0x0104 + i) != g_nintendo_logo[i]) {
                 nb_games -= 1;
                 break;
             }
@@ -62,30 +61,36 @@ static bool check_multicart()
     }
 
     log_info("%d\n", nb_games);
-    cartridge.multicart = nb_games;
-    chip_registers.ram_bank = bank2;
-    chip_registers.mode = false; // Always initialized at false
-    return cartridge.multicart;
+    g_cartridge.multicart = nb_games;
+    g_chip_registers.ram_bank = bank2;
+    g_chip_registers.mode = false; // Always initialized at false
+    return g_cartridge.multicart;
 }
 
 bool load_cartridge(char *path)
 {
-    FILE *rom = fopen(path, "r");
+    FILE *rom_ptr = fopen(path, "r");
 
-    if (rom == NULL) {
-        fatal_error("Failed to load cartridge: Invalid file (%s)", path);
+    if (rom_ptr == NULL) {
+        FATAL_ERROR("Failed to load cartridge: Invalid file (%s)", path);
     }
 
     // TODO: check if filename is too long !!!
-    strcpy(cartridge.filename, path);
+    strncpy(g_cartridge.filename, path, ROM_MAX_FILENAME_SIZE - 1);
 
     // Get rom_size and allocate enough space to store the cartridge's rom
-    fseek(rom, 0, SEEK_END);
-    cartridge.rom_size = ftell(rom);
-    cartridge.rom = malloc(cartridge.rom_size);
-    cartridge.multicart = false;
+    if (fseek(rom_ptr, 0, SEEK_END) == -1)
+        FATAL_ERROR("fseek failed");
+    g_cartridge.rom_size = ftell(rom_ptr);
+    g_cartridge.rom = malloc(g_cartridge.rom_size);
+    g_cartridge.multicart = false;
 
-    const struct cartridge_header *header = HEADER(cartridge);
+    // Read the rom file's content into its streuct represenation
+    rewind(rom_ptr);
+    if (fread(g_cartridge.rom, 1, g_cartridge.rom_size, rom_ptr) == 0)
+        FATAL_ERROR("fread failed");
+
+    const struct cartridge_header *header_ptr = HEADER(g_cartridge);
 
     // Do the same for the RAM
     // RAM size equivalent to the code inside the header:
@@ -96,40 +101,37 @@ bool load_cartridge(char *path)
     // $03 = 32 KiB     4 banks of 8 KiB each
     // $04 = 128 KiB    16 banks of 8 KiB each
     // $05 = 64 KiB     8 banks of 8 KiB each
-    const u8 ram_size_code = header->ram_size;
+    const u8 ram_size_code = header_ptr->ram_size;
     switch (ram_size_code) {
     case 2:
-        cartridge.ram_size = 2 << 13;
+        g_cartridge.ram_size = 2 << 13;
         break;
     case 3:
-        cartridge.ram_size = 2 << 15;
+        g_cartridge.ram_size = 2 << 15;
         break;
     case 4:
-        cartridge.ram_size = 2 << 17;
+        g_cartridge.ram_size = 2 << 17;
         break;
     case 5:
-        cartridge.ram_size = 2 << 16;
+        g_cartridge.ram_size = 2 << 16;
         break;
     default:
-        cartridge.ram_size = 0;
+        g_cartridge.ram_size = 0;
         break;
     }
 
     // If is MBC2: 512*4 bit internal RAM, no external RAM
-    if (header->rom_version > MBC1 && header->rom_version <= MBC2) {
-        cartridge.ram_size = 512;
+    if (header_ptr->rom_version > MBC1 && header_ptr->rom_version <= MBC2) {
+        g_cartridge.ram_size = 512;
     }
 
-    cartridge.ram = malloc(cartridge.ram_size ? cartridge.ram_size : 1);
+    g_cartridge.ram = malloc(g_cartridge.ram_size ? g_cartridge.ram_size : 1);
 
-    rewind(rom);
-    fread(cartridge.rom, 1, cartridge.rom_size, rom);
-
-    if (verify_header_checksum(cartridge)) {
-        fatal_error("Failed to load cartridge: Invalid checksum");
+    if (verify_header_checksum(g_cartridge)) {
+        FATAL_ERROR("Failed to load cartridge: Invalid checksum");
     }
 
-    cartridge_type type = HEADER(cartridge)->type;
+    cartridge_type type = HEADER(g_cartridge)->type;
     if (type != ROM_ONLY && type <= MBC1) // If of type MBC1
         check_multicart();
 
@@ -141,8 +143,8 @@ static void print_nintendo_logo()
     for (int y = 0; y < 8; ++y) {
         int i = ((y / 2) % 2) + (y / 4) * 24;
         for (int x = 0; x < 12; ++x, i += 2) {
-            const uint8_t n =
-                (y % 2) ? (nintendo_logo[i] & 0xF) : (nintendo_logo[i] >> 4);
+            const uint8_t n = (y % 2) ? (g_nintendo_logo[i] & 0xF)
+                                      : (g_nintendo_logo[i] >> 4);
             for (int b = 4; b--;)
                 putchar(((n >> b) & 1) ? '*' : ' ');
         }
@@ -150,7 +152,7 @@ static void print_nintendo_logo()
     }
 }
 
-static const char *ROM_TYPES[] = {
+static const char *g_rom_types[] = {
     "ROM ONLY",
     "MBC1",
     "MBC1+RAM",
@@ -190,15 +192,15 @@ static const char *ROM_TYPES[] = {
 
 void cartridge_info()
 {
-    struct cartridge_header *header = HEADER(cartridge);
+    struct cartridge_header *header_ptr = HEADER(g_cartridge);
 
     print_nintendo_logo();
 
     log_info("Cartridge information:");
-    log_info("\tPath      : %s", cartridge.filename);
-    log_info("\tTitle     : %s", header->game_info.game_title);
-    log_info("\tType      : %s", ROM_TYPES[header->rom_version]);
-    log_info("\tROM Size  : %X KB", cartridge.rom_size);
-    log_info("\tRAM Size  : %2.2X KB", cartridge.ram_size);
-    log_info("\tMulticart : %s", cartridge.multicart ? "YES" : "NO");
+    log_info("\tPath      : %s", g_cartridge.filename);
+    log_info("\tTitle     : %s", header_ptr->game_info.game_title);
+    log_info("\tType      : %s", g_rom_types[header_ptr->rom_version]);
+    log_info("\tROM Size  : %X KB", g_cartridge.rom_size);
+    log_info("\tRAM Size  : %2.2X KB", g_cartridge.ram_size);
+    log_info("\tMulticart : %s", g_cartridge.multicart ? "YES" : "NO");
 }

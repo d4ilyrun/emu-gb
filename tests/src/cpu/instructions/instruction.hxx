@@ -14,6 +14,8 @@ extern "C" {
 
 #define CASES(prefix_, struct_) const std::vector<struct_> prefix_##_##struct_
 
+#define cpu g_cpu // NOLINT
+
 struct timer {
     u16 div;
     u8 tima;
@@ -28,7 +30,7 @@ struct in_type {
     u8 cycle_count_false; // For conditional jumps
 };
 
-extern struct timer timer;
+extern struct timer g_timer;
 
 class InstructionTest : public ::testing::Test
 {
@@ -55,7 +57,7 @@ class InstructionTest : public ::testing::Test
         ASSERT_EQ(cpu.registers.pc, start_pc_ + size_);
 
         if (!cb_ && test_timer_)
-            ASSERT_EQ(timer.div, cycles_);
+            ASSERT_EQ(g_timer.div, cycles_);
     }
 
     void execute_instruction()
@@ -63,11 +65,11 @@ class InstructionTest : public ::testing::Test
         if (!loaded_)
             return;
 
-        const u8 div = timer.div;
+        const u8 div = g_timer.div;
         ::execute_instruction();
 
         if (!cb_) {
-            ASSERT_EQ(timer.div, div + cycles_);
+            ASSERT_EQ(g_timer.div, div + cycles_);
             test_timer_ = false;
         }
     }
@@ -112,6 +114,6 @@ class InstructionTest : public ::testing::Test
         cb_ = opcode == 0xCB;
         loaded_ = true;
 
-        timer.div = 0;
+        g_timer.div = 0;
     }
 };
