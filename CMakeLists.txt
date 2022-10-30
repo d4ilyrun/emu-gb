@@ -7,7 +7,8 @@ PROJECT(
     LANGUAGES C CXX
     )
 
-option(BUILD_TESTS "Build unit tests along with the program" OFF)
+option(ENABLE_TESTING "Build unit tests along with the program" OFF)
+option(ENABLE_INSTALL "Install the executable into the bin directory" OFF)
 
 # BUILD OPTIONS
 set(CMAKE_C_STANDARD 99)
@@ -19,7 +20,7 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if (BUILD_TESTS)
+if (ENABLE_TESTING)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUNIT_TEST")
 endif()
 
@@ -37,25 +38,28 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPTI_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEBUG_FLAGS}")
 
-
 # SOURCE DIRECTORIES
 set(CMAKE_SOURCE_DIR src/ include/)
 include_directories(${CMAKE_SOURCE_DIR})
 
 # SUBDIRECTORIES
-add_subdirectory(src/)
+add_subdirectory(src)
 
 # TESTS
-if (BUILD_TESTS)
-    add_subdirectory(tests/)
+if (ENABLE_TESTING)
+    add_subdirectory(tests)
 else ()
-    message("<!> UNIT TESTS NOT BUILT <!>")
-    message("-- If you want to build the unit tests use '-DBUILD_TESTS=ON'")
+    message(WARNING "If you want to build unit tests use '-DENABLE_TESTING=ON'")
 endif()
 
 # PROJECT EXECUTABLE
 add_executable(emu-gb src/main.c src/test_rom.c)
 target_link_libraries(emu-gb PRIVATE utils cpu cartridge)
+
+if (ENABLE_INSTALL)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BUILD_TYPE}")
+    install(TARGETS emu-gb)
+endif()
 
 # DOCUMENTATION
 add_subdirectory(doc)
