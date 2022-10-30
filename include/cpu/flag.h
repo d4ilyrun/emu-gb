@@ -12,22 +12,22 @@
 ALWAYS_INLINE void set_flag(u16 flag, bool value)
 {
     if (value)
-        cpu.registers.f |= flag;
+        g_cpu.registers.f |= flag;
     else
-        cpu.registers.f &= ~flag;
+        g_cpu.registers.f &= ~flag;
 }
 
 ALWAYS_INLINE void set_all_flags(bool z, bool n, bool h, bool c)
 {
-    cpu.registers.f = (z << 7) | (n << 6) | (h << 5) | (c << 4);
+    g_cpu.registers.f = (z << 7) | (n << 6) | (h << 5) | (c << 4);
 }
 
 ALWAYS_INLINE bool get_flag(u16 flag)
 {
-    return cpu.registers.f & flag ? 1 : 0;
+    return g_cpu.registers.f & flag ? 1 : 0;
 }
 
 ALWAYS_INLINE u16 get_all_flags()
 {
-    return cpu.registers.f;
+    return g_cpu.registers.f;
 }

@@ -23,7 +23,7 @@ class TestCPURegisters : public ::testing::TestWithParam<T>
 
     void SetUp()
     {
-        memset(&cpu.registers, 0, sizeof(struct cpu_registers));
+        memset(&g_cpu.registers, 0, sizeof(struct cpu_registers));
     }
 };
 
@@ -72,7 +72,7 @@ TEST_P(CPURegisters8bit, Read)
     const auto &val = GetParam();
 
     memset(expected, val, sizeof(expected));
-    memset(&cpu.registers, val, sizeof(cpu.registers));
+    memset(&g_cpu.registers, val, sizeof(g_cpu.registers));
 
     ASSERT_REGISTERS_EQ(expected);
 }
@@ -82,7 +82,7 @@ TEST_P(CPURegisters8bit, Write)
     SET_8BIT_REG(GetParam());
 
     const auto &val = GetParam();
-    const auto &reg = cpu.registers;
+    const auto &reg = g_cpu.registers;
 
     const auto reg_values = {reg.a, reg.f, reg.b, reg.c,
                              reg.d, reg.e, reg.h, reg.l};
@@ -100,8 +100,8 @@ TEST_F(CPURegisters8bit, WriteSpecialRegister)
     write_register(REG_PC, val);
     write_register(REG_SP, val | 0x10);
 
-    ASSERT_EQ(cpu.registers.pc, val);
-    ASSERT_EQ(cpu.registers.sp, val | 0x10);
+    ASSERT_EQ(g_cpu.registers.pc, val);
+    ASSERT_EQ(g_cpu.registers.sp, val | 0x10);
 }
 
 // Read native 16-bit registers (PC/SP)
@@ -110,8 +110,8 @@ TEST_F(CPURegisters8bit, ReadSpecialRegister)
 {
     const u8 val = 0x27;
 
-    cpu.registers.pc = val | 0x1000;
-    cpu.registers.sp = val | 0x1010;
+    g_cpu.registers.pc = val | 0x1000;
+    g_cpu.registers.sp = val | 0x1010;
 
     auto pc = read_register(REG_PC);
     auto sp = read_register(REG_SP);
@@ -191,7 +191,7 @@ TEST_P(CPURegisters16bit, Read)
     const u8 lsb = LSB(val);
     const u8 msb = MSB(val);
 
-    cpu.registers = {msb, lsb, msb, lsb, msb, lsb, msb, lsb};
+    g_cpu.registers = {msb, lsb, msb, lsb, msb, lsb, msb, lsb};
 
     ASSERT_REGISTERS_16BIT_EQ(expected);
 }
@@ -201,7 +201,7 @@ TEST_P(CPURegisters16bit, Write)
     SET_16BIT_REG(GetParam());
 
     const auto &val = GetParam();
-    const auto &reg = cpu.registers;
+    const auto &reg = g_cpu.registers;
 
     const auto reg_values = {(reg.a << 8) | reg.f, (reg.b << 8) | reg.c,
                              (reg.d << 8) | reg.e, (reg.h << 8) | reg.l};
@@ -228,8 +228,8 @@ TEST_F(CPURegisters16bit, ReadSpecialRegister)
 {
     const u16 val = 0x0727;
 
-    cpu.registers.pc = val;
-    cpu.registers.sp = val | 0x1000;
+    g_cpu.registers.pc = val;
+    g_cpu.registers.sp = val | 0x1000;
 
     auto pc = read_register_16bit(REG_PC);
     auto sp = read_register_16bit(REG_SP);
@@ -246,8 +246,8 @@ TEST_F(CPURegisters16bit, WriteSpecialRegister)
     write_register_16bit(REG_PC, val);
     write_register_16bit(REG_SP, val | 0x1000);
 
-    ASSERT_EQ(cpu.registers.pc, val);
-    ASSERT_EQ(cpu.registers.sp, val | 0x1000);
+    ASSERT_EQ(g_cpu.registers.pc, val);
+    ASSERT_EQ(g_cpu.registers.sp, val | 0x1000);
 }
 
 // Make sure the registers are initialised correctly
@@ -258,8 +258,8 @@ TEST_F(CPURegisters16bit, InitialRegisterValues)
     reset_cpu();
 
     ASSERT_REGISTERS_16BIT_EQ(expected);
-    ASSERT_EQ(cpu.registers.pc, 0x0100);
-    ASSERT_EQ(cpu.registers.sp, 0xFFFE);
+    ASSERT_EQ(g_cpu.registers.pc, 0x0100);
+    ASSERT_EQ(g_cpu.registers.sp, 0xFFFE);
 }
 
 // Test cases:

@@ -1,23 +1,30 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
+default_stages: [ commit, prepare-commit-msg ]
+
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
+    rev: "v4.3.0"
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-added-large-files
+      - id: check-shebang-scripts-are-executable
+      - id: check-merge-conflict
+        stages: [ merge-commit ]
 
-  - repo: local
+  - repo: "https://github.com/d4ilyrun/pre-commit-hooks"
+    rev: "v1.0.6"
+    hooks:
+      - id: check-clang-format
+      - id: check-clang-tidy
+        types_or: [ 'c' ] # ignore CPP files in test folder
+      - id: shellcheck
+      - id: apply-nixpkgs-fmt
+
+  - repo: "local"
     hooks:
       - id: build
         name: Build project to ensure the changes didn't break it
-        entry: bash scripts/pre-commit-build.sh
-        stages: [ commit ]
         language: system
-
-      - id: clang-format
-        name: Make sure all source files are correctly formatted
-        entry: bash scripts/pre-commit-clang-format.sh
-        stages: [ commit ]
-        language: system
+        entry: nix build .#emu-gb
+        stages: [ push ]
+        pass_filenames: false

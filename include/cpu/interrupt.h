@@ -8,8 +8,7 @@
 // TODO: Comments ! What does all this refer to !?
 
 // Interrupt vectors
-typedef enum interrupt_vector
-{
+typedef enum interrupt_vector {
     IV_NONE = 0x0000,
     IV_VBLANK = 0x0040,
     IV_LCD = 0x0048,

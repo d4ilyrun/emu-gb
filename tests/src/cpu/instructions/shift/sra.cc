@@ -44,7 +44,7 @@ TEST_F(SRA_Relative, RightRotate)
     for (u16 val = 0; val <= 0xFF; ++val) {
         cpu.registers.pc = pc;
         write_memory(address, val);
-        timer.div = 0;
+        g_timer.div = 0;
         execute_instruction();
         ASSERT_EQ(get_flag(FLAG_C), val & 0x1);                    // Flag C
         ASSERT_EQ(read_memory(address) & 0x7F, (val >> 1) & 0x7F); // Core
@@ -68,7 +68,7 @@ TEST_P(SRA_Register, RightRotate)
     for (u16 val = 0; val <= 0xFF; ++val) {
         cpu.registers.pc = pc;
         write_register(reg, val);
-        timer.div = 0;
+        g_timer.div = 0;
         execute_instruction();
         ASSERT_EQ(get_flag(FLAG_C), val & 0x1);                  // Flag C
         ASSERT_EQ(read_register(reg) & 0x7F, (val >> 1) & 0x7F); // Core

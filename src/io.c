@@ -21,7 +21,7 @@ void write_io(u16 address, u8 data)
 
     default:
         // log_err("Unsupported IO write: " HEX, address);
-        cpu.memory[address] = data;
+        g_cpu.memory[address] = data;
     }
 }
 
@@ -37,6 +37,6 @@ u8 read_io(u16 address)
 
     default:
         // log_err("Unsupported IO read: " HEX, address);
-        return cpu.memory[address];
+        return g_cpu.memory[address];
     }
 }

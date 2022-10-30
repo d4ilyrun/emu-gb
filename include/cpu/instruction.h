@@ -11,14 +11,13 @@
  */
 u8 execute_instruction();
 
-static ALWAYS_INLINE u8 fetch_opcode()
+__attribute__((unused)) static ALWAYS_INLINE u8 fetch_opcode()
 {
     timer_tick();
-    return read_memory(cpu.registers.pc++);
+    return read_memory(g_cpu.registers.pc++);
 }
 
-typedef enum instruction_name
-{
+typedef enum instruction_name {
     IN_ADC,
     IN_ADD,
     IN_AND,
@@ -76,8 +75,7 @@ typedef enum instruction_name
  * Prefixes:
  * - REL: relative addressing
  */
-typedef enum operand_type
-{
+typedef enum operand_type {
     ERR_OPERAND,
     NO_OPERAND,
 
@@ -181,8 +179,7 @@ void display_instruction(struct instruction in);
  * opcode starting with CB.
  */
 
-typedef enum
-{
+typedef enum {
     CB_ROT,
     CB_TEST,
     CB_RES,

@@ -2,7 +2,7 @@
 
 ## Unit tests
 
-Unit tests are done through Google's googletest C++ framework.  
+Unit tests are done through Google's googletest C++ framework.
 They are located inside the `tests` folder.
 
 ## Building
@@ -29,5 +29,5 @@ make -j4 ld_test
 
 ## ROMs
 
-I've taken these ROM files from [rokytriton's Game Boy emulator](https://github.com/rockytriton/LLD_gbemu/tree/main/roms).  
+I've taken these ROM files from [rokytriton's Game Boy emulator](https://github.com/rockytriton/LLD_gbemu/tree/main/roms).
 To use them it is necessary to run with `--blargg`. They should display wether the test passed (or run indefinitely ...).

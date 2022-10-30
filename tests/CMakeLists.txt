@@ -1,8 +1,12 @@
+find_package(Threads REQUIRED)
 find_package(GTest REQUIRED)
+
 include(GoogleTest)
 include(CTest)
 
 enable_testing()
+
+include_directories(${GTEST_INCLUDE_DIRS})
 
 function(NewTest)
 
@@ -19,7 +23,7 @@ function(NewTest)
 
     add_executable(${test} ${TEST_SRCS})
     add_custom_command(TARGET ${test} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX})
-    target_link_libraries(${test} PRIVATE ${TEST_DEPS} gtest gtest_main)
+    target_link_libraries(${test} PRIVATE ${TEST_DEPS} ${GTEST_BOTH_LIBRARIES})
     set_target_properties(${test} PROPERTIES OUTPUT_NAME ${TEST_NAME})
     add_test(NAME "${TEST_NAME}" COMMAND ${TEST_NAME})
 

@@ -16,7 +16,7 @@ typedef u8 (*in_handler)(struct instruction);
 
 INSTRUCTION(invalid)
 {
-    fatal_error("\nInvalid instruction: " HEX8, read_memory(in.pc));
+    FATAL_ERROR("\nInvalid instruction: " HEX8, read_memory(in.pc));
     exit(-1);
 }
 
@@ -38,7 +38,7 @@ INSTRUCTION(jp)
 INSTRUCTION(jr)
 {
     if (get_options()->exit_infinite_loop && (i8)in.data == -2) {
-        fatal_error("Infinite JR loop");
+        FATAL_ERROR("Infinite JR loop");
     }
 
     if (!in.condition)
@@ -155,7 +155,7 @@ INSTRUCTION(di)
 INSTRUCTION(ei)
 {
     // Is delayed by 1 cycle
-    cpu.ime_scheduled = true;
+    g_cpu.ime_scheduled = true;
     return in.cycle_count;
 }
 
@@ -224,13 +224,13 @@ INSTRUCTION(pop)
 {
     write_register_16bit(in.reg1, stack_pop_16bit());
     // Don't overwrite F's unused bits
-    cpu.registers.f = cpu.registers.f & 0xF0;
+    g_cpu.registers.f = g_cpu.registers.f & 0xF0;
     return in.cycle_count;
 }
 
 INSTRUCTION(halt)
 {
-    cpu.halt = true;
+    g_cpu.halt = true;
     return in.cycle_count;
 }
 
@@ -496,7 +496,7 @@ INSTRUCTION(rrca)
 INSTRUCTION(stop)
 {
     write_memory(TIMER_DIV, 0); // reset DIV
-    not_implemented(__FUNCTION__);
+    NOT_IMPLEMENTED(__FUNCTION__);
     return in.cycle_count;
 }
 
@@ -510,7 +510,7 @@ static u8 cb(__attribute__((unused)) struct instruction in)
 
 // clang-format off
 
-static in_handler instruction_handlers[] = {
+static in_handler g_instruction_handlers[] = {
     [IN_ERR] = invalid,
     [IN_NOP] = nop,
     [IN_JP] = jp,
@@ -555,5 +555,5 @@ u8 execute_instruction()
     u8 opcode = fetch_opcode();
     struct instruction in = fetch_instruction(opcode);
 
-    return instruction_handlers[in.instruction](in);
+    return g_instruction_handlers[in.instruction](in);
 }

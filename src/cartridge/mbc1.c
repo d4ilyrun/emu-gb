@@ -15,10 +15,10 @@
 
 #include <assert.h>
 
-#include "cpu/cpu.h"
-#include "cpu/memory.h"
 #include "cartridge/cartridge.h"
 #include "cartridge/memory.h"
+#include "cpu/cpu.h"
+#include "cpu/memory.h"
 #include "utils/error.h"
 #include "utils/macro.h"
 
@@ -30,26 +30,26 @@ WRITE_FUNCTION(mbc1)
     // Only update registers values when writing
     if (address < RAM_GATE) {
         // bits 7-4 are ignored during write
-        chip_registers.ram_g = data & 0xF;
-        ram_access = chip_registers.ram_g == 0xA;
+        g_chip_registers.ram_g = data & 0xF;
+        g_ram_access = g_chip_registers.ram_g == 0xA;
     } else if (address < ROM_BANK) {
         // bits 7-5 are ignored during write
-        chip_registers.rom_bank = data & 0x1F;
-        if (!chip_registers.rom_bank) // Value can never be null
-            chip_registers.rom_bank = 1;
+        g_chip_registers.rom_bank = data & 0x1F;
+        if (!g_chip_registers.rom_bank) // Value can never be null
+            g_chip_registers.rom_bank = 1;
     } else if (address < ROM_BANK2) {
         // bits 7-2 are ignored during write
-        chip_registers.ram_bank = data & 0x3;
+        g_chip_registers.ram_bank = data & 0x3;
     } else if (address < ROM_BANK_SWITCHABLE) {
         // bits 7-1 are ignored during write
-        chip_registers.mode = data & 0x1;
+        g_chip_registers.mode = data & 0x1;
     }
 
     // READ/WRITE AREA
-    else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && ram_access) {
+    else if (VIDEO_RAM <= address && address < EXTERNAL_RAM && g_ram_access) {
         const u16 physical_address = compute_physical_address(address);
-        assert(physical_address < cartridge.ram_size);
-        cartridge.ram[physical_address] = data;
+        assert(physical_address < g_cartridge.ram_size);
+        g_cartridge.ram[physical_address] = data;
     }
 }
 
@@ -86,7 +86,7 @@ WRITE_16_FUNCTION(mbc1)
 static unsigned compute_physical_address(u16 address)
 {
     // In case the chip is MBC1M, the BANK1 register is actually 4 bit long
-    u8 bank_size = cartridge.multicart ? 4 : 5;
+    u8 bank_size = g_cartridge.multicart ? 4 : 5;
     u8 bank = 0b0000000;
 
     /* Trying to write into RAM.
@@ -95,25 +95,25 @@ static unsigned compute_physical_address(u16 address)
      * bits of the requested address and BANK2, if mode is set, 0b00 else.
      */
     if (VIDEO_RAM <= address && address < EXTERNAL_RAM) {
-        bank = chip_registers.mode ? chip_registers.ram_bank : 0b00;
+        bank = g_chip_registers.mode ? g_chip_registers.ram_bank : 0b00;
         return (address & 0x1FFF) + (bank << 13);
     }
 
     if (address < 0x4000) {
-        if (chip_registers.mode)
-            bank = chip_registers.ram_bank << bank_size;
+        if (g_chip_registers.mode)
+            bank = g_chip_registers.ram_bank << bank_size;
     } else if (address < 0x8000) {
-        bank = chip_registers.ram_bank << bank_size;
+        bank = g_chip_registers.ram_bank << bank_size;
         // If the ROM banking register is 0, read as if it was set to 1.
-        if (!chip_registers.rom_bank) {
+        if (!g_chip_registers.rom_bank) {
             bank += 1;
         } else {
-            bank += cartridge.multicart
-                      ? chip_registers.rom_bank & 0xF // Only 4 first bits
-                      : chip_registers.rom_bank;
+            bank += g_cartridge.multicart
+                      ? g_chip_registers.rom_bank & 0xF // Only 4 first bits
+                      : g_chip_registers.rom_bank;
         }
     } else {
-        fatal_error("MBC1: Reading an out of bounds address.");
+        FATAL_ERROR("MBC1: Reading an out of bounds address.");
     }
 
     // printf("computed: %X\n", (address & 0x3FFF) + (bank << 14));
@@ -125,19 +125,20 @@ READ_FUNCTION(mbc1)
 {
     const bool is_ram = VIDEO_RAM <= address && address < EXTERNAL_RAM;
 
-    if (is_ram && !ram_access)
+    if (is_ram && !g_ram_access)
         return 0xFF; // Undefined value
 
     unsigned physical_address = compute_physical_address(address);
 
     if (is_ram) {
-        assert_msg(physical_address < cartridge.ram_size,
+        ASSERT_MSG(physical_address < g_cartridge.ram_size,
                    "Reading out of bounds");
-        return cartridge.ram[physical_address];
+        return g_cartridge.ram[physical_address];
     }
 
-    assert_msg(physical_address < cartridge.rom_size, "Reading out of bounds");
-    return cartridge.rom[physical_address];
+    ASSERT_MSG(physical_address < g_cartridge.rom_size,
+               "Reading out of bounds");
+    return g_cartridge.rom[physical_address];
 }
 
 READ_16_FUNCTION(mbc1)
@@ -147,17 +148,17 @@ READ_16_FUNCTION(mbc1)
 
 DUMP_FUNCTION(mbc1)
 {
-    u8 num_banks = 2 << (HEADER(cartridge)->rom_size + 1);
+    u8 num_banks = 2 << (HEADER(g_cartridge)->rom_size + 1);
     u16 bank_start;
 
     // This value is set but never used in the original algorithm.
     // I don't know what purpose it serves but i'll leave it anyway.
-    unsigned buf = 0;
+    __attribute__((unused)) unsigned buf = 0;
 
     write_mbc1(0x6000, 0x01);
     for (u8 bank = 0; bank < num_banks; ++bank) {
         write_mbc1(0x2000, bank);
-        if (cartridge.multicart) {
+        if (g_cartridge.multicart) {
             write_mbc1(0x4000, bank >> 4);
             bank_start = (bank & 0x0F) ? 0x4000 : 0x0000;
         } else {

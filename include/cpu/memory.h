@@ -85,4 +85,4 @@ u16 read_memory_16bit(u16 address);
  *
  * \see write_cartridge write_cartridge_16bit
  */
-extern bool ram_access;
+extern bool g_ram_access;

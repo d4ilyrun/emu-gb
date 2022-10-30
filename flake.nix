@@ -6,7 +6,7 @@
       type = "github";
       owner = "NixOs";
       repo = "nixpkgs";
-      ref = "nixos-22.05";
+      ref = "master";
     };
 
     flake-utils = {
@@ -21,66 +21,63 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        stdenv = pkgs.multiStdenv;
-      in rec {
+
+        inherit (pkgs) stdenv;
+
+        # Build inputs for targets
+        nativeBuildInputs = with pkgs; [ cmake ];
+        preCommitInputs = with pkgs; [ pre-commit shellcheck clang-tools nixpkgs-fmt python39Packages.setuptools ];
+        gtestInputs = with pkgs; [ gtest.dev ];
+        checksInputs = preCommitInputs ++ gtestInputs;
+      in
+      rec {
 
         defaultPackage = packages.emu-gb;
 
-        packages = let
-          nativeBuildInputs = with pkgs; [ gcc cmake ];
-        in {
+        packages = {
           emu-gb = stdenv.mkDerivation {
             pname = "emu-gb";
             version = "0.1.0";
             src = self;
 
             inherit nativeBuildInputs;
+            buildInputs = [ ];
 
-            configurePhase = ''
-              mkdir build && cd build
-              cmake ..
-            '';
-
-            buildPhase = ''
-              make -j12 emu-gb
-            '';
-
-            installPhase = ''
-              mkdir -p $out/bin
-              mv emu-gb $out/bin
-            '';
+            cmakeFlags = [ "-DENABLE_INSTALL=ON" ];
           };
 
           unit-tests = stdenv.mkDerivation {
-            pname = "unit-tests";
+            pname = "emu-gb";
             version = "0.1.0";
             src = self;
 
             inherit nativeBuildInputs;
-            buildInputs = with pkgs; [ gtest ];
+            buildInputs = gtestInputs;
 
-            configurePhase = ''
-              mkdir build && cd build
-              cmake -DBUILD_TESTS=ON ..
-            '';
+            cmakeFlags = [
+              "-DENABLE_INSTALL=ON"
+              "-DENABLE_TESTING=ON"
+            ];
+          };
 
-            buildPhase = ''
-              make -j12
-            '';
-
-            installPhase = ''
-              for test in $(find tests -type f -and -executable); do
-                mkdir -p "$out/$(dirname $test)"
-                mv $test "$out/$test"
-              done
+          pre-commit = pkgs.writeShellApplication {
+            name = "pre-commit";
+            runtimeInputs = preCommitInputs;
+            text = ''
+              ${pkgs.pre-commit}/bin/pre-commit install --install-hooks
+              ${pkgs.pre-commit}/bin/pre-commit run --all-files
             '';
           };
+        };
+
+        checks = {
+          inherit (packages) pre-commit;
         };
 
         devShell = pkgs.mkShell {
           name = "emu-gb";
           inputsFrom = [ packages.emu-gb ];
-          buildInputs = with pkgs; [ doxygen valgrind gtest ];
+          buildInputs = with pkgs; [ doxygen gdb ] ++ nativeBuildInputs ++ checksInputs;
         };
       }
     );

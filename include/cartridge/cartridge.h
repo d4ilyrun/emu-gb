@@ -15,7 +15,7 @@
  * powered on (the ones that appear corrupted if the cartridge is not inserted
  * correctly, for example).
  */
-static u8 nintendo_logo[] = {
+static u8 g_nintendo_logo[] = {
     0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83,
     0x00, 0x0C, 0x00, 0x0D, 0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E,
     0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99, 0xBB, 0xBB, 0x67, 0x63,
@@ -54,7 +54,7 @@ struct cartridge_header {
      */
     u8 start_vector[4];
 
-    u8 nintendo_logo[sizeof(nintendo_logo)];
+    u8 nintendo_logo[sizeof(g_nintendo_logo)];
     struct game_info game_info; ///< \see game_info
 
     /**
@@ -80,6 +80,8 @@ struct cartridge_header {
     u16 global_checksum; ///< Not verified in the Game Boy
 };
 
+#define ROM_MAX_FILENAME_SIZE 1024
+
 /**
  * \struct cartridge
  * \brief Information about the cartridge.
@@ -90,7 +92,7 @@ struct cartridge_header {
  * \see write_memory read_memory
  */
 struct cartridge {
-    char filename[1024]; ///< Path to the rom file.
+    char filename[ROM_MAX_FILENAME_SIZE]; ///< Path to the rom file.
 
     /**
      * Some cartridges include more than one game.\n
@@ -131,8 +133,7 @@ struct cartridge {
  * For example, all rom versions lesser or equal to MBC1 will be considered of
  * type MBC1.
  */
-typedef enum cartridge_type
-{
+typedef enum cartridge_type {
     ROM_ONLY = 0x0,
     MBC1 = 0x03,
     MBC2 = 0x06,
@@ -143,10 +144,12 @@ typedef enum cartridge_type
 } cartridge_type;
 
 /// The game cartridge loaded with the emulator
-extern struct cartridge cartridge;
+extern struct cartridge g_cartridge;
 
 /// Find the cartridge's header and cast to the correct type
-#define HEADER(_cart) ((struct cartridge_header *)((_cart).rom + 0x100))
+#define CARTRIDGE_HEADER_START (0x100)
+#define HEADER(_cart) \
+    ((struct cartridge_header *)((_cart).rom + CARTRIDGE_HEADER_START))
 
 /**
  * \brief load a cartridge in memory.

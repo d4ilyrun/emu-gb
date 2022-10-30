@@ -17,7 +17,7 @@ struct in_type {
 static u8 read_8bit_data()
 {
     timer_tick();
-    return read_memory(cpu.registers.pc++);
+    return read_memory(g_cpu.registers.pc++);
 }
 
 static u16 read_16bit_data()
@@ -45,7 +45,7 @@ static cpu_register_name find_register(uint8_t code)
         return REG_A;
 
     if (code == 0x6)
-        assert_not_reached();
+        ASSERT_NOT_REACHED();
 
     return REG_B + code;
 }
@@ -110,7 +110,7 @@ static bool read_flag(u8 flag_code)
  * For a more detailed list:
  *  - https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
  */
-struct in_type opcodes[] = {
+struct in_type g_opcodes[] = {
     // First row: 0x0
     [0x00] = {IN_NOP, NO_OPERAND, 1},
     [0x01] = {IN_LD, R16_D16, 3},
@@ -396,7 +396,7 @@ struct in_type opcodes[] = {
 struct instruction fetch_instruction(u8 opcode)
 {
     u16 pc = read_register_16bit(REG_PC);
-    struct in_type type = opcodes[opcode];
+    struct in_type type = g_opcodes[opcode];
     struct instruction in = {IN_ERR, ERR_OPERAND, REG_ERR, REG_ERR, 0xdead};
 
     in.instruction = type.name;

@@ -8,7 +8,7 @@
 ALWAYS_INLINE void stack_push(u8 data)
 {
     timer_tick();
-    write_memory(--cpu.registers.sp, data);
+    write_memory(--g_cpu.registers.sp, data);
 }
 
 ALWAYS_INLINE void stack_push_16bit(u16 data)
@@ -20,7 +20,7 @@ ALWAYS_INLINE void stack_push_16bit(u16 data)
 ALWAYS_INLINE u8 stack_pop()
 {
     timer_tick();
-    return read_memory((cpu.registers.sp)++);
+    return read_memory((g_cpu.registers.sp)++);
 }
 
 ALWAYS_INLINE u16 stack_pop_16bit()
