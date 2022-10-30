@@ -18,16 +18,16 @@ function(NewTest)
         ${ARGN}
     )
 
-    set(test "${TEST_NAME}_test")
+    set(TEST "${TEST_NAME}_test")
     set(TEST_NAME "${TEST_PREFIX}/${TEST_NAME}")
 
-    add_executable(${test} ${TEST_SRCS})
-    add_custom_command(TARGET ${test} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX})
-    target_link_libraries(${test} PRIVATE ${TEST_DEPS} ${GTEST_BOTH_LIBRARIES})
-    set_target_properties(${test} PROPERTIES OUTPUT_NAME ${TEST_NAME})
+    add_executable(${TEST} ${TEST_SRCS})
+    add_custom_command(TARGET ${TEST} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX})
+    target_link_libraries(${TEST} PRIVATE ${TEST_DEPS} ${GTEST_BOTH_LIBRARIES})
+    set_target_properties(${TEST} PROPERTIES OUTPUT_NAME ${TEST_NAME})
     add_test(NAME "${TEST_NAME}" COMMAND ${TEST_NAME})
 
-    gtest_discover_tests("${test}")
+    gtest_discover_tests("${TEST}")
 
 endfunction()
 
