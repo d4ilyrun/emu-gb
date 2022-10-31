@@ -15,9 +15,11 @@
       repo = "flake-utils";
       ref = "master";
     };
+
+    nixGL.url = "github:guibou/nixGL";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, nixGL, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -48,6 +50,21 @@
             installPhase = ''
               mkdir -p $out/bin
               mv emu-gb $out/bin
+            '';
+          };
+
+          wrapped =
+          let
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ nixGL.overlay ];
+            };
+          in
+          pkgs.writeShellApplication {
+            name = "emu-gb";
+            runtimeInputs = [ packages.emu-gb ];
+            text = ''
+              ${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel ${packages.emu-gb}/bin/emu-gb "$@"
             '';
           };
 
