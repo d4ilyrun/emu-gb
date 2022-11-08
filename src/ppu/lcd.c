@@ -27,7 +27,7 @@
 #include "utils/macro.h"
 
 /// LCD context static variable
-static struct lcd lcd;
+static struct lcd g_lcd;
 
 typedef shade palette[4];
 
@@ -46,52 +46,52 @@ static union palettes {
     struct {
         // TODO: GBC
     } cgb;
-} palettes;
+} g_palettes;
 
 // Forward definitions
 static void lcd_update_palette(palette_name index, u8 data);
 
 const struct lcd *get_lcd()
 {
-    return &lcd;
+    return &g_lcd;
 }
 
 void init_lcd()
 {
     // registers
-    lcd.lcdc = 0x91;
-    lcd.scx = 0;
-    lcd.scy = 0;
-    lcd.wx = 0;
-    lcd.wy = 0;
-    lcd.ly = 0;
-    lcd.lyc = 0;
+    g_lcd.lcdc = 0x91;
+    g_lcd.scx = 0;
+    g_lcd.scy = 0;
+    g_lcd.wx = 0;
+    g_lcd.wy = 0;
+    g_lcd.ly = 0;
+    g_lcd.lyc = 0;
 
     // palettes
-    lcd.dmg.bgp = 0xFC;
-    lcd.dmg.obp[0] = 0xFF;
-    lcd.dmg.obp[1] = 0xFF;
+    g_lcd.dmg.bgp = 0xFC;
+    g_lcd.dmg.obp[0] = 0xFF;
+    g_lcd.dmg.obp[1] = 0xFF;
 
     // Set default palette values
-    memcpy(palettes.dmg.bg, default_palette, sizeof(palette));
-    memcpy(palettes.dmg.obj[0], default_palette, sizeof(palette));
-    memcpy(palettes.dmg.obj[1], default_palette, sizeof(palette));
+    memcpy(g_palettes.dmg.bg, default_palette, sizeof(palette));
+    memcpy(g_palettes.dmg.obj[0], default_palette, sizeof(palette));
+    memcpy(g_palettes.dmg.obj[1], default_palette, sizeof(palette));
 
     // Stat
-    lcd.stat = 0;
-    lcd.stat |= (1 << 2); // Set LYC
+    g_lcd.stat = 0;
+    g_lcd.stat |= (1 << 2); // Set LYC
 }
 
 void write_lcd(u16 address, u8 value)
 {
-    u8 *lcd_ptr = (u8 *)&lcd;
+    u8 *lcd_ptr = (u8 *)&g_lcd;
 
     switch (address) {
     case 0xFF41:
         // 3 lower bits are read only and bit 7 is always set
-        lcd.stat &= 0x7;
-        lcd.stat |= (value & 0xF8);
-        lcd.stat |= 0x80;
+        g_lcd.stat &= 0x7;
+        g_lcd.stat |= (value & 0xF8);
+        g_lcd.stat |= 0x80;
         return;
 
     case 0xFF44:
@@ -100,7 +100,7 @@ void write_lcd(u16 address, u8 value)
         return;
 
     case 0xFF46:
-        not_implemented("OAM DMA Transfer");
+        NOT_IMPLEMENTED("OAM DMA Transfer");
         return;
 
     case 0xFF47:
@@ -114,7 +114,7 @@ void write_lcd(u16 address, u8 value)
             lcd_ptr[address - 0xFF40] = value;
         } else if (BETWEEN(address, 0xFF68, 0xFF6B)) {
             // CGB 0xFF68-6B
-            u8 *cgb_lcd_ptr = (u8 *)&lcd.cgb_colors;
+            u8 *cgb_lcd_ptr = (u8 *)&g_lcd.cgb_colors;
             cgb_lcd_ptr[address - 0xFF68] = value;
         } else {
             log_warn("LCD: Invalid write address: " HEX ". Skipping.", address);
@@ -123,30 +123,30 @@ void write_lcd(u16 address, u8 value)
 
     // If changed LY or LYC, update LYC flag inside STAT
     if (BETWEEN(address, 0xFF44, 0xFF45)) {
-        if (lcd.ly == lcd.lyc)
-            lcd.stat |= (1 << 2); // Set LYC flag
+        if (g_lcd.ly == g_lcd.lyc)
+            g_lcd.stat |= (1 << 2); // Set LYC flag
         else
-            lcd.stat &= ~(1 << 2); // Clear LYC flag
+            g_lcd.stat &= ~(1 << 2); // Clear LYC flag
     }
 }
 
 u8 read_lcd(u16 address)
 {
-    assert_msg(BETWEEN(address, 0xFF40, 0xFF4A), "Invalid LCD read address: %d",
+    ASSERT_MSG(BETWEEN(address, 0xFF40, 0xFF4A), "Invalid LCD read address: %d",
                address);
 
-    return ((u8 *)&lcd)[address - 0xFF40];
+    return ((u8 *)&g_lcd)[address - 0xFF40];
 }
 
 shade *lcd_get_palette(palette_name index)
 {
-    assert_msg(index < INVALID, "LCD: Invalid palette index %d.", index);
+    ASSERT_MSG(index < INVALID, "LCD: Invalid palette index %d.", index);
 
     // Get palette from index
-    void *palette_at_index = palettes.dmg.bg;
-    palette_at_index += sizeof(palette);
+    void *palette_at_index_ptr = g_palettes.dmg.bg;
+    palette_at_index_ptr += sizeof(palette);
 
-    return palette_at_index;
+    return palette_at_index_ptr;
 }
 
 /**
@@ -183,17 +183,17 @@ shade *lcd_get_palette(palette_name index)
  */
 static void lcd_update_palette(palette_name name, u8 data)
 {
-    shade *palette = lcd_get_palette(name);
+    shade *palette_ptr = lcd_get_palette(name);
 
 #define SHADE(_data, _index) default_palette[((_data) >> (2 * (_index))) & 0b11]
 
-    palette[0] = SHADE(data, 0);
-    palette[1] = SHADE(data, 1);
-    palette[2] = SHADE(data, 2);
+    palette_ptr[0] = SHADE(data, 0);
+    palette_ptr[1] = SHADE(data, 1);
+    palette_ptr[2] = SHADE(data, 2);
 
     // Lower 2 bits ignored when updating OBJS
     if (name == BG_PALETTE)
-        palette[3] = SHADE(data, 3);
+        palette_ptr[3] = SHADE(data, 3);
 
 #undef SHADE
 }
@@ -201,10 +201,10 @@ static void lcd_update_palette(palette_name name, u8 data)
 void lcd_set_mode(lcd_mode mode)
 {
     // Change bits 0-1 of the stat register (mode flag)
-    lcd.stat = (lcd.stat & 0xFC) | (mode & 0x3);
+    g_lcd.stat = (g_lcd.stat & 0xFC) | (mode & 0x3);
 }
 
 lcd_mode lcd_get_mode()
 {
-    return LCD_STAT_MODE_FLAG(lcd);
+    return LCD_STAT_MODE_FLAG(g_lcd);
 }

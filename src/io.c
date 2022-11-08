@@ -22,7 +22,7 @@ void write_io(u16 address, u8 data)
     case 0xFF68:
     case 0xFF69:
         if (lcd_get_mode() != MODE_TRANSFER)
-            not_implemented("CGB Background palette");
+            NOT_IMPLEMENTED("CGB Background palette");
         break;
 
     case IF_ADDRESS:
@@ -46,7 +46,7 @@ u8 read_io(u16 address)
     case 0xFF68:
     case 0xFF69:
         if (lcd_get_mode() != MODE_TRANSFER)
-            not_implemented("CGB Background palette");
+            NOT_IMPLEMENTED("CGB Background palette");
         return 0xFF;
 
     case IF_ADDRESS:
