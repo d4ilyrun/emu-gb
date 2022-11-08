@@ -50,7 +50,7 @@ struct game_info {
 struct cartridge_header {
     /**
      * The cartridge starting protocol. Executed when lauching the game.\n
-     * Usually a \c nop follow by a <tt>jp 150h</tt>.
+     * Usually a \c nop follow by a <tt>jp 0x0150</tt>.
      */
     u8 start_vector[4];
 
@@ -58,7 +58,7 @@ struct cartridge_header {
     struct game_info game_info; ///< \see game_info
 
     /**
-     * Indicates the publisher. 2 character uppercase.
+     * Indicates the publisher. 2 uppercase characters.
      * Only used by games released after the SGB, set to 0x014B by default;
      */
     u16 new_license_code;
@@ -67,7 +67,7 @@ struct cartridge_header {
     u8 type;     ///< The type of the cartridge. \see cartridge_type
     u8 rom_size; ///< ROM size: 32 << \c value
     u8 ram_size; ///< Specifies RAM size if any.
-    u8 dst_code; ///< Set to 0x00 if sold to Japan, else set to 0x01
+    u8 dst_code; ///< Set to 0x00 if sold in Japan, else set to 0x01
 
     /**
      * Indicates the publishing company.

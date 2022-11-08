@@ -75,7 +75,6 @@ bool load_cartridge(char *path)
         FATAL_ERROR("Failed to load cartridge: Invalid file (%s)", path);
     }
 
-    // TODO: check if filename is too long !!!
     strncpy(g_cartridge.filename, path, ROM_MAX_FILENAME_SIZE - 1);
 
     // Get rom_size and allocate enough space to store the cartridge's rom
@@ -119,6 +118,8 @@ bool load_cartridge(char *path)
         g_cartridge.ram_size = 0;
         break;
     }
+
+    g_cartridge.ram = malloc(g_cartridge.ram_size ? g_cartridge.ram_size : 1);
 
     // If is MBC2: 512*4 bit internal RAM, no external RAM
     if (header_ptr->rom_version > MBC1 && header_ptr->rom_version <= MBC2) {
@@ -199,8 +200,20 @@ void cartridge_info()
     log_info("Cartridge information:");
     log_info("\tPath      : %s", g_cartridge.filename);
     log_info("\tTitle     : %s", header_ptr->game_info.game_title);
-    log_info("\tType      : %s", g_rom_types[header_ptr->rom_version]);
-    log_info("\tROM Size  : %X KB", g_cartridge.rom_size);
-    log_info("\tRAM Size  : %2.2X KB", g_cartridge.ram_size);
+    log_info("\tRegion    : %s", header_ptr->dst_code ? "EU/US" : "Japan");
+    log_info("\tType      : %s", g_rom_types[header_ptr->type]);
+    log_info("\tROM Size  : [" HEX8 "] " HEX " KB", header_ptr->rom_size,
+             g_cartridge.rom_size);
+    log_info("\tRAM Size  : [" HEX8 "] " HEX " KB", header_ptr->ram_size,
+             g_cartridge.ram_size);
     log_info("\tMulticart : %s", g_cartridge.multicart ? "YES" : "NO");
+
+#if defined(LITTLE_ENDIAN)
+    log_info("\tChecksum  : global=" HEX ", header=" HEX8,
+             REVERSE16(header_ptr->global_checksum),
+             header_ptr->header_checksum);
+#else
+    log_info("\tChecksum  : global=" HEX ", header=" HEX8,
+             header_ptr->global_checksum, header_ptr->header_checksum);
+#endif
 }
