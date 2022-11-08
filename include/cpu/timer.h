@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/macro.h"
 #include "utils/types.h"
 
 // Initial value inside the DIV register.
@@ -49,7 +50,7 @@ u8 read_timer(u16 address);
 void timer_ticks(u8 ticks);
 
 // Add a single cycle to the timer
-inline void timer_tick()
+ALWAYS_INLINE void timer_tick()
 {
     timer_ticks(1);
 }
