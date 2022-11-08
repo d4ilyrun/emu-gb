@@ -10,3 +10,5 @@ add_library(
     timer.c
     ../io.c
     )
+
+target_link_libraries(cpu PRIVATE ppu)

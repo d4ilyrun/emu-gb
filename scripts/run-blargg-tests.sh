@@ -1,14 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No color
 
+EXECUTABLE="$1"
 TEST_ROM_DIR="./tests/blargg/cpu_instrs/individual"
 OUT_FILE="/tmp/blargg.out"
 
-if [[ ! -f build/emu-gb ]]; then
-    echo -e "$RED<!> Couldn't find executable (build/emu-gb) <!>$NC"
+if [[ -z "$EXECUTABLE" ]]; then
+    echo -e "${RED}USAGE$NC: ./run-blargg-tests.sh <emu-gb>"
     exit 127
 fi
 
@@ -20,34 +21,35 @@ fi
 [[ -d /tmp ]] || mkdir -p /tmp
 
 run_test_rom() {
-    local FILENAME=$(basename "$1")
+    local FILENAME
+
+    FILENAME=$(basename "$1")
 
     printf "%-30s" "${FILENAME}"
 
-    timeout 5 ./build/emu-gb --blargg --exit-infinite-loop "$1" &> "$OUT_FILE"
+    timeout 5 "$EXECUTABLE" --blargg --exit-infinite-loop "$1" &> "$OUT_FILE"
 
     if [ $? == 124 ]; then
-        printf "${RED}Inconclusive${NC}\n"
+        echo -e "${RED}Inconclusive${NC}"
         return 1
     else
-        grep 'Passed' "$OUT_FILE" &> /dev/null
-        if [ $? == 0 ]; then
-            printf "${GREEN}Passed${NC}\n"
+        if grep 'Passed' "$OUT_FILE" &> /dev/null; then
+            echo -e "${GREEN}Passed${NC}"
             return 0
         else
-            printf "${RED}Failed${NC}\n"
+            echo -e "${RED}Failed${NC}"
             return 1
         fi
     fi
 }
 
 main() {
-    local failed_test=0
+    local failed_test
 
-    for test_rom in ${TEST_ROM_DIR}/*.gb; do
-        run_test_rom "$test_rom"
+    failed_test=0
 
-        if [ $? != 0 ]; then
+    for test_rom in "${TEST_ROM_DIR}"/*.gb; do
+        if run_test_rom "$test_rom"; then
             failed_test=1
         fi
     done

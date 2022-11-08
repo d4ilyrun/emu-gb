@@ -1,4 +1,4 @@
-#define _GNU_SOURCE // needed for asprintf
+#define _GNU_SOURCE // NOLINT needed for asprintf
 
 #include <stdio.h>
 #include <stdlib.h>

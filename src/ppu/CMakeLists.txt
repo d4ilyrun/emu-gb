@@ -1,4 +1,4 @@
-add_library(ppu STATIC 
+add_library(ppu STATIC
     ppu.c
     lcd.c
 )

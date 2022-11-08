@@ -1,6 +1,6 @@
 #include "utils/log.h"
 
-#define _GNU_SOURCE // needed for asprintf
+#define _GNU_SOURCE // NOLINT needed for asprintf
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,7 +38,12 @@ void log_print(log_level level, const char *fmt, ...)
     char *log_ptr = NULL;
     asprintf(&log_ptr, "%s| %s%s\n", g_level_colors[level], COLOR_RESET, fmt);
 
-    vfprintf(stream_ptr, log_ptr, args);
+    if (vfprintf(stream_ptr, log_ptr, args) < 0) {
+        log_err("Couldn't write message to stream: (fd: %d)",
+                stream_ptr->_fileno);
+    }
+
+    va_end(args);
     free(log_ptr);
 }
 
@@ -55,6 +60,10 @@ void log_color(const char *color, const char *fmt, ...)
     char *log_ptr = NULL;
     asprintf(&log_ptr, "%s| %s%s\n", color, COLOR_RESET, fmt);
 
-    vfprintf(stdout, log_ptr, args);
+    if (vfprintf(stdout, log_ptr, args) < 0) {
+        log_err("Couldn't write message to stream: (fd: %d)", stdout->_fileno);
+    }
+
+    va_end(args);
     free(log_ptr);
 }

@@ -130,3 +130,9 @@ NewTest(NAME "mbc3" PREFIX "cartridge" SRCS "src/cartridges/mbc3.cc" "${PROJECT_
 NewTest(NAME "lcd"  PREFIX "ppu" SRCS "src/ppu/lcd.cc" DEPS ppu)
 NewTest(NAME "ppu"  PREFIX "ppu" SRCS "src/ppu/ppu.cc" DEPS ppu cpu cartridge)
 
+if (ENABLE_INSTALL)
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/tests/"
+        DESTINATION "tests"
+        USE_SOURCE_PERMISSIONS
+        )
+endif()

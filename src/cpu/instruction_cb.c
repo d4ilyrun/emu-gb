@@ -17,7 +17,7 @@ static struct cb_instruction fetch_cb_instruction()
 {
     u8 opcode = fetch_opcode();
     u8 z = OPCODE_Z(opcode);
-    struct cb_instruction cb;
+    struct cb_instruction cb = {0};
 
     if ((cb.is_address = z == 0x6))
         cb.address = read_register_16bit(REG_HL);

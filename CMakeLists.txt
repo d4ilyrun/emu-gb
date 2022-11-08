@@ -59,10 +59,6 @@ target_link_libraries(emu-gb PRIVATE utils cpu cartridge ppu)
 if (ENABLE_INSTALL)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BUILD_TYPE}")
     install(TARGETS emu-gb)
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/tests/"
-        DESTINATION "tests"
-        USE_SOURCE_PERMISSIONS
-        )
 endif()
 
 # DOCUMENTATION
