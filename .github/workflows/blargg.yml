@@ -2,6 +2,8 @@ name: Blargg
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 jobs:
@@ -32,4 +34,4 @@ jobs:
           git clone https://github.com/retrio/gb-test-roms.git tests/blargg
 
       - name: Run tests
-        run: bash scripts/run-blargg-tests.sh
+        run: bash scripts/run-blargg-tests.sh ./result/bin/emu-gb

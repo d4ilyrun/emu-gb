@@ -8,6 +8,10 @@ EXECUTABLE="$1"
 TEST_ROM_DIR="./tests/blargg/cpu_instrs/individual"
 OUT_FILE="/tmp/blargg.out"
 
+# Boolean
+TRUE=0
+FALSE=1
+
 if [[ -z "$EXECUTABLE" ]]; then
     echo -e "${RED}USAGE$NC: ./run-blargg-tests.sh <emu-gb>"
     exit 127
@@ -31,30 +35,30 @@ run_test_rom() {
 
     if [ $? == 124 ]; then
         echo -e "${RED}Inconclusive${NC}"
-        return 1
+        return $FALSE
     else
         if grep 'Passed' "$OUT_FILE" &> /dev/null; then
             echo -e "${GREEN}Passed${NC}"
-            return 0
+            return $TRUE
         else
             echo -e "${RED}Failed${NC}"
-            return 1
+            return $FALSE
         fi
     fi
 }
 
 main() {
-    local failed_test
+    local success
 
-    failed_test=0
+    success=$TRUE
 
     for test_rom in "${TEST_ROM_DIR}"/*.gb; do
-        if run_test_rom "$test_rom"; then
-            failed_test=1
+        if ! run_test_rom "$test_rom"; then
+            success=$FALSE
         fi
     done
 
-    return $failed_test
+    return $success
 }
 
 main
